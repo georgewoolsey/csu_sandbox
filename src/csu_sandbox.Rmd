@@ -1,0 +1,185 @@
+---
+title: "Sandbox"
+author: "George Woolsey"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+knit: (function(inputFile, encoding){ 
+    out_dir <- '../';
+    rmarkdown::render(inputFile, encoding = encoding, output_file=file.path(dirname(inputFile), out_dir, 'index.html'));
+  })
+---
+
+# Caution
+
+This is a sandbox. Do not trust or re-use anything on here because it is a sandbox.
+
+# Data
+
+The data utilized for this analysis was generated in Google Earth Engine using [this script](https://code.earthengine.google.com/62b842b73336f00cc68e347ac306ca2a?noload=true). This program outputs 1) a data table of features - USDA Forest Service (USFS) managed forests - with user-defined constraints to forest managment and the reduction in treatable forested area based on those constraints, and 2) a shapefile of the spatial arrangement of treatable and constrained forested area within the boundary of each feature.
+
+The data products used in this study include:
+
+1) The [National Land Cover Database (NLCD)](https://www.usgs.gov/centers/eros/science/national-land-cover-database) was used to define forested area based on 2019 classification at 30m.
+2) The [PAD-US](https://www.usgs.gov/programs/gap-analysis-project/science/pad-us-data-overview) product was used to identify protected areas that are dedicated to the preservation of biological diversity and to other natural, recreation and cultural uses, managed for these purposes through legal or other effective means.
+3) The [USGS 3DEP](https://www.usgs.gov/3d-elevation-program/about-3dep-products-services) Seamless National Map (10m) was used to determine slope.
+4) The [USFWS Threatened & Endangered Species Active Critical Habitat Report](https://ecos.fws.gov/ecp/report/table/critical-habitat.html) was used to determin the proposed and final critical habitat for species listed as Threatened and Endangered by the FWS, or that are jointly managed by FWS/NMFS.
+5) The [National Hydrography Dataset (NHD)](https://www.usgs.gov/national-hydrography/national-hydrography-dataset) was used to define the United States water drainage network made up of stream features and waterbody polygons.
+6) Road and Trail networks were determined utilizing:
+    i.  The United States Census Bureau [TIGER dataset](https://www.census.gov/programs-surveys/geography/guidance/tiger-data-products-guide.html) (2016 release)
+    ii. The [USFS FACTS database](https://data.fs.usda.gov/geodata/edw/datasets.php?xmlKeyword) products: [Motor Vehicle Use Map: Roads](https://data.fs.usda.gov/geodata/edw/edw_resources/meta/S_USA.Road_MVUM.xml); [Motor Vehicle Use Map: Trails](https://data.fs.usda.gov/geodata/edw/edw_resources/meta/S_USA.Trail_MVUM.xml); [National Forest System Roads](https://data.fs.usda.gov/geodata/edw/edw_resources/meta/S_USA.RoadCore_FS.xml); [National Forest System Trails](https://data.fs.usda.gov/geodata/edw/edw_resources/meta/S_USA.TrailNFS_Publish.xml)
+
+# Treatable Area Definition
+
+Constraint levels from least flexible to most flexible in interpretation and implementation:
+
+0) Forested - forested area based on NLCD (2019) classification at 30m
+1) Protected - GAP Status 1 and inventoried roadless areas (IRA)
+2) Slope > 35\U00B0 - based on DEM at 10m
+3) Administrative - USFWS sensitive species habitat...*need to add GAP Status 2*
+4) Riparian Buffer - buffer of 100 ft. on streams and waterbodies based on NHD water network
+5) Distance from Road > 2000ft - based on road and trail data layers
+
+# Setup
+
+```{r, include=FALSE, warning=F, message=F}
+# knit options
+knitr::opts_chunk$set(
+  echo = TRUE
+  , warning = FALSE
+  , message = FALSE
+  # , results='hide'
+  , fig.width = 10
+  , fig.height = 7
+)
+```
+
+```{r}
+# bread-and-butter
+library(tidyverse)
+library(lubridate)
+library(viridis)
+library(scales)
+library(latex2exp)
+# visualization
+library(kableExtra)
+library(cowplot)
+library(mapview) #Interactive maps
+library(leafpop) #map html popup
+# spatial analysis
+library(sf)
+# set seed
+set.seed(11)
+```
+
+# Load Data
+
+```{r}
+# data table
+constrained_wide <- sf::read_sf("../data/forestmgmtconstraint_statistics.csv") |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::mutate(
+    forest_shortname = commonname |>  
+      stringr::str_replace_all(c("National Forests"="", "National Forest"="")) |>  
+      trimws()
+    , region = as.numeric(region)
+  ) |> 
+  dplyr::mutate(across(
+    tidyselect::ends_with("_m2")
+    , ~ as.numeric(.x) / 10000
+  )) |> 
+  dplyr::rename_with(
+    ~ gsub("_m2", "_ha", .x)
+    , tidyselect::ends_with("_m2")
+  ) |> 
+  dplyr::mutate(across(
+    tidyselect::starts_with("pct_")
+    , ~ as.numeric(.)
+  )) |> 
+  dplyr::mutate(
+    pct_1 = -1*(1 - pct_rmn1_protected)
+    , pct_2 = -1*(pct_rmn1_protected - pct_rmn2_slope)
+    , pct_3 = -1*(pct_rmn2_slope - pct_rmn3_administrative)
+    , pct_4 = -1*(pct_rmn3_administrative - pct_rmn4_riparian)
+    , pct_5 = -1*(pct_rmn4_riparian - pct_rmn5_roads)
+  )
+# reshape
+
+# spatial
+# constrained_spatial <- sf::read_sf("../data/forestmgmtconstraint_vectors.shp")
+```
+
+## Reduction Treatable Area Table
+
+```{r est-table, results='asis'}
+constrained_wide |> 
+  dplyr::mutate(across(
+    tidyselect::ends_with("_ha")
+    , ~ scales::comma(.x, accuracy = 1)
+  )) |>
+  dplyr::mutate(across(
+    tidyselect::starts_with("pct_")
+    , ~ scales::percent(.x, accuracy = 0.1)
+  )) |> 
+  dplyr::select(
+    region
+    , forest_shortname
+    , covertype_area_ha
+    , pct_1
+    , pct_2
+    , pct_3
+    , pct_4
+    , pct_5
+    , rmn5_roads_area_ha
+    , pct_rmn5_roads
+  ) |> 
+  dplyr::arrange(region,forest_shortname) |> 
+  kableExtra::kable(
+      format = "html" 
+      , caption = "Forested area of each NF<br>percent reduction of different types of constraints on mechanical treatment"
+      , col.names = c(
+        "Region"
+        , "NF"
+        , "Forested (ha)"
+        , "Protected"
+        , "Slope>35\U00B0"
+        , "Administrative"
+        , "Riparian Buffer (100ft)"
+        , "Roads>2000ft"
+        , "Remaining (ha)"
+        , "Remaining (%)"
+      )
+    ) |> 
+    add_header_above(c(" " = 2, "Constraint\nLeast Flexible to Most Flexible" = 6, " " = 2)) |>  
+    kableExtra::kable_styling(font_size = 11) |>  
+    kableExtra::scroll_box(width = "740px")
+  
+```
+
+## Remaining Treatable Forest Plot
+
+```{r}
+ggplot(data = constrained_wide, mapping = aes(x = pct_rmn5_roads, y = reorder(forest_shortname, -pct_rmn5_roads), fill = as.factor(region))) +
+  geom_col(color = NA, width = 0.7) +
+  geom_text(mapping = aes(label = scales::percent(pct_rmn5_roads, accuracy = .1)), size = 3, hjust = 0.2) +
+  scale_fill_viridis_d(alpha = 0.8) +
+  scale_x_continuous(labels = scales::percent_format()) +
+  labs(
+    fill = "Region"
+    , y = ""
+    , x = "Treatable Forested Area (%)"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "bottom"
+    , legend.title = element_text(size=7)
+    , axis.title = element_text(size=7)
+    , axis.text.x = element_text(size=6)
+  )
+```
+
