@@ -74,6 +74,7 @@ library(leafpop) #map html popup
 # spatial analysis
 library(sf)
 library(USAboundaries)
+library(dismo)
 # set seed
 set.seed(11)
 ```
@@ -443,5 +444,66 @@ mapview::mapview( constrained_spatial_temp
 ```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
 remove(list = ls()[grep("_temp",ls())])
 gc()
+```
+
+```{r, eval=FALSE, include=FALSE}
+fire_landscapes <- sf::st_read("../data/Wildfire_Crisis_Strategy_Landscapes/Wildfire_Crisis_Strategy_Landscapes_(Feature_Layer).shp") |> 
+  sf::st_make_valid() |> 
+  dplyr::mutate(area_ha = as.numeric(sf::st_area(geometry))/10000)
+fire_landscapes$area_ha |> summary()
+# map
+mapview::mapview(fire_landscapes, zcol = "NAME", legend = F)
+## split poly
+# https://gis.stackexchange.com/questions/375345/dividing-polygon-into-parts-which-have-equal-area-using-r
+split_poly_fn <- function(sf_poly, n_areas){
+  # create random points
+  points_rnd <- sf::st_sample(sf_poly, size = 10000)
+  #k-means clustering
+  points <- do.call(rbind, sf::st_geometry(points_rnd)) |> 
+    dplyr::as_tibble() |>  
+    setNames(c("lon","lat"))
+  k_means <- kmeans(points, centers = n_areas)
+  # create voronoi polygons
+  voronoi_polys <- dismo::voronoi(k_means$centers, ext = sf_poly |> sf::as_Spatial())
+  # clip to sf_poly
+  crs(voronoi_polys) <- crs(sf_poly)
+  voronoi_sf <- sf::st_as_sf(voronoi_polys)
+  equal_areas <- sf::st_intersection(voronoi_sf, sf_poly)
+  equal_areas$split_area_ha <- as.numeric(sf::st_area(equal_areas))/10000
+  return(equal_areas)
+}
+# map function over all
+fire_landscapes_split <- 1:nrow(fire_landscapes) |> 
+  purrr::map(function(x){
+    sf_temp <- fire_landscapes |> 
+      dplyr::filter(dplyr::row_number()==x) |> 
+      sf::st_geometry()
+    n_areas_temp <- ceiling(
+        (fire_landscapes |> 
+          dplyr::filter(dplyr::row_number()==x) |> 
+          sf::st_drop_geometry() |> 
+          dplyr::pull(area_ha)
+        )/600000
+      )
+    # split
+    split_temp <- split_poly_fn(sf_poly = sf_temp, n_areas = max(2,n_areas_temp)) |> 
+      dplyr::bind_cols(
+        fire_landscapes |> 
+          dplyr::filter(dplyr::row_number()==x) |> 
+          sf::st_drop_geometry()
+      )
+    return(split_temp)
+  }) |> 
+  dplyr::bind_rows()
+mapview::mapview(fire_landscapes_split, zcol = "NAME", legend = F)
+sf::st_write(fire_landscapes_split
+             , "../data/Wildfire_Crisis_Strategy_Landscapes/Wildfire_Crisis_Strategy_Landscapes_split.shp"
+             , append = F
+            )
+sf::st_crs(fire_landscapes_split)
+fire_landscapes_split$split_area_ha |> summary()
+
+
+
 ```
 
