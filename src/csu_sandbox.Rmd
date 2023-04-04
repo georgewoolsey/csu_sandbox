@@ -73,69 +73,76 @@ library(mapview) #Interactive maps
 library(leafpop) #map html popup
 # spatial analysis
 library(sf)
+library(USAboundaries)
 # set seed
 set.seed(11)
 ```
 
 # Load Data
 
-```{r}
+```{r data-read}
 # data table
-constrained_wide <- read.csv("../data/forestmgmtconstraint_statistics.csv") |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::rename_with(make.names) |> 
-  dplyr::rename(feature_id = system.index) |> 
-  dplyr::mutate(
-    forest_shortname = commonname |>  
-      stringr::str_replace_all(c("National Forests"="", "National Forest"="")) |>  
-      trimws()
-    , region = paste0("Region ",as.numeric(region))
-  ) |> 
-  dplyr::mutate(across(
-    tidyselect::ends_with("_m2")
-    , ~ as.numeric(.x) / 10000
-  )) |> 
-  dplyr::rename_with(
-    ~ gsub("_m2", "_ha", .x)
-    , tidyselect::ends_with("_m2")
-  ) |> 
-  dplyr::mutate(across(
-    tidyselect::starts_with("pct_")
-    , ~ as.numeric(.)
-  )) |> 
-  dplyr::mutate(
-    pct_rdctn1_protected = -1*(1 - pct_rmn1_protected)
-    , pct_rdctn2_slope = -1*(pct_rmn1_protected - pct_rmn2_slope)
-    , pct_rdctn3_administrative = -1*(pct_rmn2_slope - pct_rmn3_administrative)
-    , pct_rdctn4_riparian = -1*(pct_rmn3_administrative - pct_rmn4_riparian)
-    , pct_rdctn5_roads = -1*(pct_rmn4_riparian - pct_rmn5_roads)
-    , pct_rdctn_total = -1*(1 - pct_rmn5_roads)
-  )
+# read multiple files
+constrained_wide <- 
+  list.files("../data/")[grep("forestmgmtconstraint_statistics",list.files("../data/"))] |> 
+    purrr::map(function(x){read.csv(paste0("../data/",x))}) |> 
+    dplyr::bind_rows() |> 
+      dplyr::rename_with(tolower) |> 
+      dplyr::rename_with(make.names) |> 
+      dplyr::rename(feature_id = system.index) |> 
+      dplyr::mutate(
+        forest_shortname = commonname |>  
+          stringr::str_replace_all(c("National Forests"="", "National Forest"="")) |>  
+          trimws()
+        , region = paste0("Region ",as.numeric(region))
+      ) |> 
+      dplyr::mutate(across(
+        tidyselect::ends_with("_m2")
+        , ~ as.numeric(.x) / 10000
+      )) |> 
+      dplyr::rename_with(
+        ~ gsub("_m2", "_ha", .x)
+        , tidyselect::ends_with("_m2")
+      ) |> 
+      dplyr::mutate(across(
+        tidyselect::starts_with("pct_")
+        , ~ as.numeric(.)
+      )) |> 
+      dplyr::mutate(
+        pct_rdctn1_protected = -1*(1 - pct_rmn1_protected)
+        , pct_rdctn2_slope = -1*(pct_rmn1_protected - pct_rmn2_slope)
+        , pct_rdctn3_administrative = -1*(pct_rmn2_slope - pct_rmn3_administrative)
+        , pct_rdctn4_riparian = -1*(pct_rmn3_administrative - pct_rmn4_riparian)
+        , pct_rdctn5_roads = -1*(pct_rmn4_riparian - pct_rmn5_roads)
+        , pct_rdctn_total = -1*(1 - pct_rmn5_roads)
+      )
 # spatial
-constrained_spatial <- sf::read_sf("../data/forestmgmtconstraint_vectors.shp") |> 
-  dplyr::left_join(
-    constrained_wide |> dplyr::select(feature_id, forest_shortname, commonname, region)
-    , by = join_by(feature_id)
-  ) |> 
-  dplyr::mutate(
-    IsTreatable = factor(
-      istreatabl
-      , ordered = TRUE
-      , levels = c(0,1)
-      , labels = c("Constrained", "Treatable")
-    )
-  ) |> 
-  dplyr::rename(Forest=commonname)
-  # sf::st_simplify() |> 
-  # sf::st_make_valid() |> 
-  # dplyr::filter(sf::st_is_valid(geometry))
-
+constrained_spatial <- 
+  list.files("../data/",pattern = "\\.shp$")[
+    grep("forestmgmtconstraint_vectors",list.files("../data/",pattern = "\\.shp$"))
+  ] |> 
+    purrr::map(function(x){sf::read_sf(paste0("../data/",x))}) |> 
+    dplyr::bind_rows() |> 
+    dplyr::left_join(
+      constrained_wide |> dplyr::select(feature_id, forest_shortname, commonname, region)
+      , by = join_by(feature_id)
+    ) |> 
+    dplyr::mutate(
+      IsTreatable = factor(
+        istreatabl
+        , ordered = TRUE
+        , levels = c(0,1)
+        , labels = c("Constrained", "Treatable")
+      )
+    ) |> 
+    dplyr::rename(Forest=commonname)
+    
 ```
 
-## Reduction Treatable Area Table
+# Reduction Treatable Area Table
 
 ```{r est-table, results='asis'}
-constrained_wide |> 
+tbl_temp <- constrained_wide |> 
   dplyr::mutate(across(
     tidyselect::ends_with("_ha")
     , ~ scales::comma(.x, accuracy = 1)
@@ -156,58 +163,65 @@ constrained_wide |>
     , rmn5_roads_area_ha
     , pct_rmn5_roads
   ) |> 
-  dplyr::arrange(region,forest_shortname) |> 
-  kableExtra::kable(
-      format = "html" 
-      , caption = "Forested area of each NF<br>percent reduction of different types of constraints on mechanical treatment"
-      , col.names = c(
-        "Region"
-        , "NF"
-        , "Forested (ha)"
-        , "Protected"
-        , "Slope>35%"
-        , "Administrative"
-        , "Riparian Buffer (100ft)"
-        , "Roads>2000ft"
-        , "Remaining (ha)"
-        , "Remaining (%)"
-      )
-    ) |> 
-    add_header_above(c(" " = 2, "Constraint\nLeast Flexible to Most Flexible" = 6, " " = 2)) |>  
-    kableExtra::kable_styling(font_size = 11) |>  
-    kableExtra::scroll_box(width = "740px")
-  
+  dplyr::arrange(region,forest_shortname)
+# make table
+kableExtra::kable(
+    tbl_temp |> dplyr::select(-c(region))
+    , caption = "Forested area of each National Forest<br>percent reduction of different types of constraints on mechanical treatment"
+    , col.names = c(
+      ""
+      , "Forested (ha)"
+      , "Protected"
+      , "Slope>35%"
+      , "Administrative"
+      , "Riparian Buffer (100ft)"
+      , "Roads>2000ft"
+      , "Remaining (ha)"
+      , "Remaining (%)"
+    )
+  ) |>  
+  add_header_above(c(" " = 1, "Constraint\nLeast Flexible to Most Flexible" = 6, " " = 2)) |>
+  kable_classic("striped", full_width=T) |> 
+  pack_rows(index = table(forcats::fct_inorder(tbl_temp$region))) |> 
+  kableExtra::kable_styling(font_size = 11) |>  
+  kableExtra::scroll_box(width = "740px")
 ```
 
-## Remaining Treatable Forest Plot
+```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
+remove(list = ls()[grep("_temp",ls())])
+gc()
+```
 
-```{r}
-ggplot(data = constrained_wide, mapping = aes(x = pct_rmn5_roads, y = reorder(forest_shortname, -pct_rmn5_roads), fill = as.factor(region))) +
+# Remaining Treatable Forest Plot
+
+```{r plt-rmn, fig.height=12}
+ggplot(data = constrained_wide, mapping = aes(x = pct_rmn5_roads, y = reorder(forest_shortname, -pct_rmn5_roads), fill = region)) +
   geom_col(color = NA, width = 0.7) +
   geom_text(
     mapping = aes(label = scales::percent(pct_rmn5_roads, accuracy = 1))
     , color = "black", size = 3
     , hjust = -0.1
   ) +
+  facet_grid(rows = vars(region), scales = "free_y") + 
   scale_fill_viridis_d(alpha = 0.8) +
   scale_x_continuous(expand = expansion(mult = c(0, .1)),labels = scales::percent_format()) +
   labs(
-    fill = "Region"
+    fill = ""
     , y = ""
     , x = "Treatable Forested Area Remaining (%)"
   ) +
   theme_light() +
   theme(
-    legend.position = c(0.9, 0.9)
+    legend.position = "none" # c(0.9, 0.9)
     , legend.title = element_text(size=7)
-    , axis.title = element_text(size=8)
+    , axis.title = element_text(size=9)
     , axis.text.x = element_text(size=7)
   )
 ```
 
-## Constraint Reductions Plot
+# Constraint Reductions Plot
 
-```{r}
+```{r plt-rdctn-cnstrt, fig.height=12}
 # reshape
 constrained_pct_rdctn_long <- constrained_wide |>
   dplyr::select(region, forest_shortname, tidyselect::starts_with("pct_rdctn")) |> 
@@ -259,10 +273,10 @@ ggplot() +
       y = reorder(forest_shortname,-pct_rdctn_total), x = pct_rdctn_total
       , label = scales::percent(pct_rdctn_total, accuracy = 1)
     )
-    
     , color = "black", size = 3
     , hjust = -0.1
   ) +
+  facet_grid(rows = vars(region), scales = "free_y") + 
   scale_fill_viridis_d(option = "plasma", alpha = 0.8) +
   scale_x_reverse(expand = expansion(mult = c(0, .1)),labels = scales::percent_format()) +
   labs(
@@ -275,14 +289,14 @@ ggplot() +
     legend.position = "top"
     , legend.direction  = "horizontal"
     , legend.title = element_text(size=7)
-    , axis.title = element_text(size=8)
+    , axis.title = element_text(size=9)
     , axis.text.x = element_text(size=7)
   )
 ```
 
 # Reduction Treatable Area Plot
 
-```{r, results='hide'}
+```{r plt-rdctn, results='hide'}
 # reshape
 constrained_pct_rmn_long <- constrained_wide |>
   dplyr::mutate(pct_rmn_forested=1) |> 
@@ -325,7 +339,7 @@ plt_lines_fn <- function(rgn) {
   ggplot(data = constrained_pct_rmn_long |> dplyr::filter(region==rgn)
          , mapping = aes(x = constraint, y = pct_rmn, group = forest_shortname)
     ) +
-    geom_line(mapping=aes(color = forest_shortname), size = 1.5) +
+    geom_line(mapping=aes(color = forest_shortname), linewidth = 1.5) +
     geom_label(
       mapping=aes(label = scales::percent(pct_rmn, scale = 100, accuracy = 1))
       , color = "black"
@@ -355,7 +369,6 @@ constrained_pct_rmn_long |> dplyr::pull(region) |> unique() |>
   purrr::map(plt_lines_fn)
 ```
 
-
 ```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
 remove(list = ls()[grep("_temp",ls())])
 gc()
@@ -363,14 +376,51 @@ gc()
 
 # Map of Treatable/Constrained
 
-```{r mapview, eval=FALSE, results='asis'}
+Example for the Bighorn National Forest
+
+```{r mapview, results='asis'}
+# filter shapes
+if(FALSE){
+filter_temp <- constrained_spatial |> 
+  dplyr::filter(
+    region == "Region 2"
+  ) |> 
+  dplyr::mutate(
+    longitude = sf::st_coordinates(sf::st_centroid(geometry))[,1]
+    , latitude = sf::st_coordinates(sf::st_centroid(geometry))[,2]
+  ) |> 
+  sf::st_drop_geometry() |> 
+  dplyr::group_by(region, forest_shortname, feature_id) |> 
+  dplyr::summarise(
+    longitude = mean(longitude, na.rm = T)
+    , latitude = mean(latitude, na.rm = T)
+  ) |> 
+  dplyr::ungroup() |> 
+  sf::st_as_sf(coords = c("longitude", "latitude"), crs = sf::st_crs(constrained_spatial)) |> 
+  sf::st_intersection(
+    USAboundaries::us_states(states = c("CO")) |> 
+      sf::st_transform(crs= sf::st_crs(constrained_spatial))
+  ) |> 
+  sf::st_drop_geometry() |> 
+  dplyr::select(region, forest_shortname, feature_id) |> 
+  dplyr::slice_sample(n = 1)
+}
+# filter
+constrained_spatial_temp <- constrained_spatial |> 
+  dplyr::filter(forest_shortname == "Bighorn") |> 
+  dplyr::group_by(Forest,IsTreatable) |> 
+  dplyr::summarise(
+    geometry = sf::st_union(geometry)
+  ) |> 
+  dplyr::ungroup()
+  # dplyr::inner_join(
+  #   filter_temp
+  #   , by = dplyr::join_by(region, forest_shortname, feature_id)
+  # )
 # basemap option
 mapview::mapviewOptions(homebutton = FALSE, basemaps = c("Esri.WorldImagery"))
-# xxx <- constrained_spatial |> dplyr::filter(
-#   feature_id == dplyr::slice_head(constrained_wide, n = 1) |> dplyr::pull(feature_id)
-# )
 # map
-mapview::mapview( constrained_spatial
+mapview::mapview( constrained_spatial_temp
         , zcol = "IsTreatable"
         , col.regions = viridis::turbo(n=2,direction = -1)
         , alpha.regions = 0.6
@@ -379,7 +429,7 @@ mapview::mapview( constrained_spatial
         , legend = FALSE
         , layer.name = "Treatable-Constrained"
         , popup = leafpop::popupTable(
-            constrained_spatial
+            constrained_spatial_temp
             , zcol = c(
               "Forest"
               , "IsTreatable"
