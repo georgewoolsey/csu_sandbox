@@ -16,7 +16,7 @@ var ex_polygon = ee.FeatureCollection("users/GeorgeWoolsey/unit_bbox");
       // , 'San Juan National Forest'
       // , 'White River National Forest'
       // '06'
-      'Klamath River Basin'
+      'Kootenai Complex'
     ]);
     var my_feature_collection = 
     ///////////////// states
@@ -61,7 +61,7 @@ var ex_polygon = ee.FeatureCollection("users/GeorgeWoolsey/unit_bbox");
   //////////////////////////////////////////////////
   // 4. NAME EXPORT FILES PREFIX
   //////////////////////////////////////////////////
-    var my_export_prefix = 'addroads3';
+    var my_export_prefix = 'addroads';
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // END: USER-DEFINED PARAMETERS AND DATA
@@ -713,73 +713,3 @@ var all_classified_ft_coll = ee.FeatureCollection(
     fileFormat: 'SHP' // 'KML'
   });
   
-/////////////////////////////////////
-// this didn't work :( because the images that were exported were not readable in R or ArcMap
-// ... maybe need to convert each "istreatable" 0/1 to separate band?
-/////////////////////////////////////
-// // EXPORT ALL IMAGES (!!!! IF  condensed_image_fn returns image collection)
-//   var batch = require('users/fitoprincipe/geetools:batch');
-//   // Create a geometry representing an export region.
-//   var roi = ee.Geometry.Rectangle({
-//       coords: [-179, 7, -20, 85],  // North America
-//       geodesic: false
-//     });
-//   var projection = istreatable_img_coll.first().projection().getInfo();
-//   batch.Download.ImageCollection.toDrive(
-//     istreatable_img_coll
-//     , 'GEE_output'
-//     , {
-//       name: my_export_prefix+'_{system:index}'
-//       , crs: projection.crs
-//       , crsTransform: projection.transform
-//       // scale: 30, 
-//       // region: roi, 
-//       // crs: 'EPSG:5070'
-//     }
-//   );
-
-// //////////////////////////////////////////////////
-// //MAPPING
-// //////////////////////////////////////////////////
-// /////////////////////////////////////
-// // try to filter feature collection of vectors
-//   var heyft = my_feature_collection
-//     .filter(ee.Filter.eq('COMMONNAME','Arapaho and Roosevelt National Forests'))
-//     .first()
-//   ;
-//   var heyid = heyft.get('system:index');
-//   var vectors_of_classified = istreatable_ft_coll.filter(ee.Filter.eq('feature_id',heyid));
-//   // print(vectors_of_classified.first(), 'vectors_of_classified');
-// // filter rasterimage collection
-//   var image_of_classified = all_classified_img_coll
-//     .filter(ee.Filter.eq('system:index', heyid))
-//     .select('area_classified')
-//     .toBands()
-//     .rename('istreatable')
-//   ;
-//   print(image_of_classified, 'image_of_classified');
-// // now map.....................................
-// Map.centerObject(heyft, 13);
-// Map.addLayer(heyft.geometry(), null, 'FT',0, 0.5);
-// var treatViz = {min: 0, max: 1, palette: ['B03A2E','4A235A']};
-// Map.addLayer(image_of_classified, treatViz, 'image_of_classified', 1, 0.8);
-// var display = ee.Image(0).updateMask(0).paint(vectors_of_classified,'000000',1);
-// Map.addLayer(display, {palette:'000000'}, 'vectors_of_classified', 0);
-
-
-// // // // Map.addLayer(ex_polygon, null, 'Example Polygon',0, 0.5);
-// // // // Map.addLayer(all_roads_img, {palette: '424949'}, 'All Roads',0);
-// // // // Map.addLayer(nlcd, null, 'Landcover',0,0.7);
-// // // // var forestViz = {min: 0, max: 1, palette: ['000000','228b22']};
-// // // // Map.addLayer(nlcd_forest_nonforest, forestViz, 'Forest vs Non-Forest', 0, 0.5);
-// // // // Map.addLayer(nlcd_treatable, forestViz, 'Forest', 1, 0.5);
-// // // // var slopeViz = {min: 0, max: 1, palette: ['000000','FF5349']};
-// // // // Map.addLayer(slope_over_max, slopeViz, 'slope > 35%', 0, 0.8);
-// // // // var slopeViz2 = {min: 0, max: 1, palette: ['000000','cb4154']};
-// // // // Map.addLayer(slope_gt60, slopeViz2, 'slope > 60%', 1, 0.8);
-// // // // var slopeViz2 = {min: 0, max: 1, palette: ['000000','cb4154']};
-// // // // Map.addLayer(padus_img, {palette: '641E16'}, 'GAP Sts 1 | I.R.A.', 0, 0.8);
-// // // // Map.addLayer(
-// // // //   istreatable
-// // // //   , {palette: '17202A'}, 'Treatable', 0, 0.8
-// // // // );

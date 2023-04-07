@@ -502,8 +502,77 @@ sf::st_write(fire_landscapes_split
             )
 sf::st_crs(fire_landscapes_split)
 fire_landscapes_split$split_area_ha |> summary()
+```
 
 
+```{r, eval=FALSE, include=FALSE}
+xxx1 <- sf::st_read("../data/xxx/xxx_vectors.shp") |> 
+  dplyr::mutate(
+      IsTreatable = factor(
+        istreatabl
+        , ordered = TRUE
+        , levels = c(0,1)
+        , labels = c("Constrained", "Treatable")
+      )
+    ) |> 
+  dplyr::group_by(IsTreatable) |> 
+  dplyr::summarise(
+    geometry = sf::st_union(geometry)
+  ) |> 
+  dplyr::ungroup()
+
+xxx2 <- sf::st_read("../data/xxx/xxxnoclip_vectors.shp") |> 
+  dplyr::mutate(
+      IsTreatable = factor(
+        istreatabl
+        , ordered = TRUE
+        , levels = c(0,1)
+        , labels = c("Constrained", "Treatable")
+      )
+    ) |> 
+  dplyr::group_by(IsTreatable) |> 
+  dplyr::summarise(
+    geometry = sf::st_union(geometry)
+  ) |> 
+  dplyr::ungroup()
+
+  
+# basemap option
+mapview::mapviewOptions(homebutton = FALSE, basemaps = c("Esri.WorldImagery"))
+# map
+mapview::mapview( xxx1
+        , zcol = "IsTreatable"
+        , col.regions = viridis::turbo(n=2,direction = -1)
+        , alpha.regions = 0.6
+        , lwd = 0
+        , label = FALSE
+        , legend = FALSE
+        , layer.name = "xxx1"
+        , popup = leafpop::popupTable(
+            xxx1
+            , zcol = c(
+              "IsTreatable"
+            )
+            , row.numbers = FALSE
+            , feature.id = FALSE
+          )
+  ) + mapview::mapview( xxx2
+        , zcol = "IsTreatable"
+        , col.regions = viridis::turbo(n=2,direction = -1)
+        , alpha.regions = 0.6
+        , lwd = 0
+        , label = FALSE
+        , legend = FALSE
+        , layer.name = "xxx2"
+        , popup = leafpop::popupTable(
+            xxx2
+            , zcol = c(
+              "IsTreatable"
+            )
+            , row.numbers = FALSE
+            , feature.id = FALSE
+          )
+  )
 
 ```
 
