@@ -521,7 +521,7 @@ xxx1 <- sf::st_read("../data/xxx/xxx_vectors.shp") |>
   ) |> 
   dplyr::ungroup()
 
-xxx2 <- sf::st_read("../data/xxx/xxxnoclip_vectors.shp") |> 
+xxx2 <- sf::st_read("../data/xxx/addpadus2_vectors.shp") |> 
   dplyr::mutate(
       IsTreatable = factor(
         istreatabl

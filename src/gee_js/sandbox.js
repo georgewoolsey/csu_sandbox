@@ -16,7 +16,7 @@ var ex_polygon = ee.FeatureCollection("users/GeorgeWoolsey/unit_bbox");
       // , 'San Juan National Forest'
       // , 'White River National Forest'
       // '06'
-      'Klamath River Basin'
+      'Montana'
     ]);
     var my_feature_collection = 
     ///////////////// states
@@ -28,7 +28,7 @@ var ex_polygon = ee.FeatureCollection("users/GeorgeWoolsey/unit_bbox");
       //   .filter(ee.Filter.inList('REGION', ft_list))
     ///////////////// wildfire priority landscapes
       ee.FeatureCollection("projects/forestmgmtconstraint/assets/Wildfire_Crisis_Strategy_Landscapes")
-      .filter(ee.Filter.inList('NAME', ft_list))
+      .filter(ee.Filter.inList('STATE', ft_list))
     ;
     // var my_feature_collection = ex_polygon
       // .map(function(feature){
@@ -347,36 +347,44 @@ var constraint_image_fn = function(my_feature){
       })
     ;
   //////////////////////////////////////////////////
-  //USFWS PROTECTED SPECIES
-  // https://ecos.fws.gov/ecp/report/table/critical-habitat.html
+  // ADMINISTRATIVE BOUNDARIES:
+  //  // 1) USFWS PROTECTED SPECIES (https://ecos.fws.gov/ecp/report/table/critical-habitat.html)
+  //  // 2) GAP STATUS 2 (E.G. National Wildlife Refuges, State Parks, The Nature Conservancy Preserves)
   //////////////////////////////////////////////////
-    var usfws_lines_buff = usfws_lines
-        .filterBounds(
-          my_feature
-          .buffer(200/3.2808, 100) // this is so that habitat lines outside of bounds are considered
-          .geometry()
-        )
-        .map(function(feature){
-          return feature
-            .buffer(100/3.2808, 100)
-          ;
-        })
-        .filterBounds(my_feature.geometry())
-      ;
-    var usfws_habitat = 
+    // var usfws_lines_buff = usfws_lines
+    //     .filterBounds(
+    //       my_feature
+    //       .buffer(200/3.2808, 100) // this is so that habitat lines outside of bounds are considered
+    //       .geometry()
+    //     )
+    //     .map(function(feature){
+    //       return feature
+    //         .buffer(100/3.2808, 100)
+    //       ;
+    //     })
+    //     .filterBounds(my_feature.geometry())
+    //   ;
+    var admin_bounds = 
       ee.FeatureCollection([
         usfws_poly.filterBounds(my_feature.geometry())
         // , usfws_lines_buff
+        // ADD PADUS GAP 2
+        , padus
+          .filterBounds(my_feature.geometry())
+          .map(function(feature){
+            return feature.set('GAP_Sts', ee.Number.parse(feature.get('GAP_Sts')));
+          })
+          .filter(ee.Filter.inList('GAP_Sts', [2]))
       ])
       .flatten()
       .map(function(feature){
           return feature
-            .set('usfws_habitat', ee.Number(1))
+            .set('admin_bounds', ee.Number(1))
           ;
         })
       // convert to image instead of unioning features
       .reduceToImage({
-        properties: ['usfws_habitat'],
+        properties: ['admin_bounds'],
         reducer: ee.Reducer.min()
       })
     ;
@@ -413,7 +421,7 @@ var constraint_image_fn = function(my_feature){
     .updateMask(slope_treatable)
   ;
   var rmn_area_administrative = rmn_area_slope
-    .updateMask(usfws_habitat.unmask().not())
+    .updateMask(admin_bounds.unmask().not())
   ;
   var rmn_area_riparian = rmn_area_administrative
     .updateMask(riparian_buffer.unmask().not())
@@ -426,7 +434,7 @@ var constraint_image_fn = function(my_feature){
   // //   .updateMask(all_roads_img)
   // //   .updateMask(slope_treatable)
   // //   .updateMask(padus_img.unmask().not())
-  // //   .updateMask(usfws_habitat.unmask().not())
+  // //   .updateMask(admin_bounds.unmask().not())
   // //   .updateMask(riparian_buffer.unmask().not())
   // //   .rename(['istreatable'])
   // // ;
