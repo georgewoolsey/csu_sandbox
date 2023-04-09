@@ -15,20 +15,20 @@ var ex_polygon = ee.FeatureCollection("users/GeorgeWoolsey/unit_bbox");
       // , 'Rio Grande National Forest'
       // , 'San Juan National Forest'
       // , 'White River National Forest'
-      // '06'
-      'Montana'
+      '02','03'
+      // 'Montana'
     ]);
     var my_feature_collection = 
     ///////////////// states
       // ee.FeatureCollection("TIGER/2018/States")
       //   .filter(ee.Filter.inList('STUSPS', ft_list))
     ///////////////// usfs forests
-      // ee.FeatureCollection("users/GeorgeWoolsey/L48_USFS_NatlForests")
-      //   // .filter(ee.Filter.inList('COMMONNAME', ft_list))
-      //   .filter(ee.Filter.inList('REGION', ft_list))
+      ee.FeatureCollection("users/GeorgeWoolsey/L48_USFS_NatlForests")
+        // .filter(ee.Filter.inList('COMMONNAME', ft_list))
+        .filter(ee.Filter.inList('REGION', ft_list))
     ///////////////// wildfire priority landscapes
-      ee.FeatureCollection("projects/forestmgmtconstraint/assets/Wildfire_Crisis_Strategy_Landscapes")
-      .filter(ee.Filter.inList('STATE', ft_list))
+      // ee.FeatureCollection("projects/forestmgmtconstraint/assets/Wildfire_Crisis_Strategy_Landscapes")
+      // .filter(ee.Filter.inList('STATE', ft_list))
     ;
     // var my_feature_collection = ex_polygon
       // .map(function(feature){
@@ -37,7 +37,7 @@ var ex_polygon = ee.FeatureCollection("users/GeorgeWoolsey/unit_bbox");
       //   ;
       // })
     // ;
-    print(my_feature_collection.aggregate_array('NAME'), 'FORESTS TO DO' );
+    print(my_feature_collection.aggregate_array('COMMONNAME'), 'FORESTS TO DO' );
   //////////////////////////////////////////////////
   // 2. DEFINE NLCD LANDCOVER CLASSES TO CONSIDE
   // SEE:
@@ -61,7 +61,7 @@ var ex_polygon = ee.FeatureCollection("users/GeorgeWoolsey/unit_bbox");
   //////////////////////////////////////////////////
   // 4. NAME EXPORT FILES PREFIX
   //////////////////////////////////////////////////
-    var my_export_prefix = 'addroads3';
+    var my_export_prefix = 'forestmgmtconstraint';
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // END: USER-DEFINED PARAMETERS AND DATA
@@ -128,7 +128,7 @@ var ex_polygon = ee.FeatureCollection("users/GeorgeWoolsey/unit_bbox");
   //////////////////////////////////////////////////
   // lines are complex and make this real slow....should be buffered in riparian anyway 
   // ...but might as well upload simplified line polys with buffer
-  var usfws_lines = ee.FeatureCollection("projects/forestmgmtconstraint/assets/CRITHAB_LINE");
+  // var usfws_lines = ee.FeatureCollection("projects/forestmgmtconstraint/assets/CRITHAB_LINE");
   var usfws_poly = ee.FeatureCollection("projects/forestmgmtconstraint/assets/CRITHAB_POLY");
   //////////////////////////////////////////////////
   // NATIONAL HYDROGRAPHY DATASET (NHD)
