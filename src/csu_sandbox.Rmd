@@ -45,7 +45,7 @@ Constraint levels from least flexible to most flexible in interpretation and imp
 4) Riparian Buffer - buffer of 100 ft. on streams and waterbodies based on NHD water network
 5) Distance from Road > 2000ft - based on road and trail data layers
 
-# Setup
+## Setup
 
 ```{r, include=FALSE, warning=F, message=F}
 # knit options
@@ -87,7 +87,9 @@ Consider only forests in the western US managed by the United States Department 
 
 **Regions 1, 2, 3, 4, 5, and 6**
 
-![USFS Region Map.](../data/usfs_region_map.png)
+```{r, echo=FALSE, out.width="70%", out.height="70%", fig.align='center', fig.cap="USFS Region Map"}
+knitr::include_graphics("../data/usfs_region_map.png")
+```
 
 ## Load Data
 
@@ -479,9 +481,55 @@ gc()
 
 The USFS recently launched a [Wildfire Crisis Strategy](https://www.fs.usda.gov/managing-land/wildfire-crisis) plan to substantially increase the scale of forest health and risk reduction fuel treatments over the next decade. The plan prioritizes treatments on 21 landscapes in eight states in the western US targeting federal, state, tribal, and private lands where wildfire ignitions will potentially impact communities.
 
-![Wildfire Crisis Strategy Priority Landscapes.](../data/wildfire_crisis_img.jpg){width=10%,height=30%}
 ```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
 remove(list = ls())
+gc()
+```
+
+```{r, echo=FALSE, out.width="40%", out.height="40%", fig.align='center', fig.cap="Wildfire Crisis Strategy Priority Landscapes"}
+knitr::include_graphics("../data/wildfire_crisis_img.jpg")
+```
+
+## Map of Priority Landscapes
+
+```{r, results='asis'}
+# load data
+wf_temp <- sf::read_sf("../data/Wildfire_Crisis_Strategy_Landscapes/Wildfire_Crisis_Strategy_Landscapes_(Feature_Layer).shp") |> 
+  dplyr::rename_with(tolower) |> 
+  sf::st_make_valid()
+wf_temp <- wf_temp |> 
+  dplyr::mutate(
+    hectares = (as.numeric(sf::st_area(geometry))/10000) |> 
+      scales::comma(suffix = " M", scale = 1e-6, accuracy = .01)
+    , acres = (as.numeric(sf::st_area(geometry))/4046.85642) |> 
+      scales::comma(suffix = " M", scale = 1e-6, accuracy = .01)
+  )
+mapview::mapviewOptions(homebutton = FALSE, basemaps = c("Esri.WorldTopoMap"))
+# map
+mapview::mapview( wf_temp
+        , zcol = "state"
+        , col.regions = viridis::viridis(n = wf_temp$state |> unique() |> length())
+        , alpha.regions = 0.6
+        , lwd = 0
+        , label = FALSE
+        , legend = FALSE
+        , layer.name = "WF Priority LS"
+        , popup = leafpop::popupTable(
+            wf_temp
+            , zcol = c(
+              "state"
+              , "name"
+              , "hectares"
+              , "acres"
+            )
+            , row.numbers = FALSE
+            , feature.id = FALSE
+          )
+  )
+```
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
+remove(list = ls()[grep("_temp",ls())])
 gc()
 ```
 
