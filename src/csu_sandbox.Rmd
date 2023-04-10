@@ -237,7 +237,7 @@ ggplot(data = constrained_wide, mapping = aes(x = pct_rmn5_roads, y = reorder(fo
 
 ## Remaining Treatable by Region
 
-```{r}
+```{r rmn-rgn}
 # rmn rgn
 ggplot(constrained_wide
     , aes(
@@ -246,7 +246,7 @@ ggplot(constrained_wide
   ) + 
   geom_violin(aes(fill = region)) + 
   geom_boxplot(width = 0.15) +
-  geom_point(size = 0.7, color = "gray33", alpha = 0.7) + 
+  geom_point(size = 0.8, color = "gray23", alpha = 0.7) + 
   scale_fill_viridis_d() +
   scale_x_continuous(expand = expansion(mult = c(0, .1)),labels = scales::percent_format()) +
   labs(
@@ -258,7 +258,7 @@ ggplot(constrained_wide
   theme(legend.position = "none")
 ```
 
-## Reduction by Constraint
+## Reduction by Constraint by Forest
 
 ```{r plt-rdctn-cnstrt, fig.height=14}
 # reshape
@@ -335,9 +335,51 @@ ggplot() +
   )
 ```
 
+## Reduction by Constraint by Region
+
+*Mean* reduction by constraint at region level
+
+```{r rdctn-rgn}
+rgn_dta_temp <- constrained_pct_rdctn_long |> 
+  dplyr::group_by(region, constraint) |> 
+  dplyr::summarise(pct_rdctn = mean(pct_rdctn, na.rm=T))
+
+ggplot() +
+  geom_col(
+    data = rgn_dta_temp |> dplyr::filter(constraint!="Total")
+    , mapping = aes(y = region, x = pct_rdctn, fill = constraint)
+    , color = NA, width = 0.7
+  ) +
+  geom_text(
+    data = rgn_dta_temp |> dplyr::filter(constraint=="Total")
+    , mapping = aes(
+      y = region, x = pct_rdctn
+      , label = scales::percent(pct_rdctn, accuracy = 1)
+    )
+    , color = "black", size = 3
+    , hjust = -0.1
+  ) +
+  scale_fill_viridis_d(option = "plasma", alpha = 0.8) +
+  scale_x_reverse(expand = expansion(mult = c(0, .1)),labels = scales::percent_format()) +
+  labs(
+    fill = ""
+    , y = ""
+    , x = "Mean Constraint Reduction in Treatable Forested Area (%)"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "top"
+    , legend.direction  = "horizontal"
+    , legend.title = element_text(size=7)
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_text(size=7)
+    
+  )
+```
+
 ## Treatable Area Reduction by Constraint
 
-```{r plt-rdctn, results='hide'}
+```{r plt-rdctn-lines, results='hide'}
 # reshape
 constrained_pct_rmn_long <- constrained_wide |>
   dplyr::mutate(pct_rmn_forested=1) |> 
@@ -439,6 +481,21 @@ ggplot(constrained_wide, aes(y = region, x = pct_rmn5_roads)) +
   ) +
   theme_light() +
   theme(legend.position = "none")
+# avg
+constrained_wide |> 
+  dplyr::group_by(region) |> 
+  dplyr::summarise(
+    dplyr::across(
+      tidyselect::starts_with("pct_rdctn")
+      , list(mean = ~ mean(.x, na.rm=T))
+    )
+  ) |> 
+  dplyr::mutate(across(
+    tidyselect::starts_with("pct_")
+    , ~ scales::percent(.x, accuracy = 0.1)
+  )) |> 
+  kable() |> 
+  kable_classic("striped")
 ```
 
 
@@ -446,7 +503,7 @@ ggplot(constrained_wide, aes(y = region, x = pct_rmn5_roads)) +
 
 Load spatial data
 
-```{r}
+```{r load-spatial}
 flist_temp <- list.files("../data/",pattern = "\\.shp$")[
     grep("forestmgmtconstraint_vectors",list.files("../data/",pattern = "\\.shp$"))
   ]
@@ -542,7 +599,7 @@ knitr::include_graphics("../data/wildfire_crisis_img.jpg")
 
 ## Map of Priority Landscapes
 
-```{r, results='asis'}
+```{r load-wf-temp, results='asis'}
 # load data
 wf_temp <- sf::read_sf("../data/Wildfire_Crisis_Strategy_Landscapes/Wildfire_Crisis_Strategy_Landscapes_(Feature_Layer).shp") |> 
   dplyr::rename_with(tolower) |> 
