@@ -21,7 +21,7 @@ This is a sandbox. Do not trust or re-use anything on here because it is a sandb
 
 # Data Sources
 
-The data utilized for this analysis was generated in Google Earth Engine using [this script](https://code.earthengine.google.com/62b842b73336f00cc68e347ac306ca2a?noload=true). This program outputs 1) a data table of features - USDA Forest Service (USFS) managed forests - with user-defined constraints to forest managment and the reduction in treatable forested area based on those constraints, and 2) a shapefile of the spatial arrangement of treatable and constrained forested area within the boundary of each feature.
+The data utilized for this analysis was generated in Google Earth Engine using [this script](https://code.earthengine.google.com/bc974ce5d2f8a25a2eb75af5766395b9?noload=true). This program outputs 1) a data table of features - USDA Forest Service (USFS) managed forests - with user-defined constraints to forest managment and the reduction in treatable forested area based on those constraints, and 2) a shapefile of the spatial arrangement of treatable and constrained forested area within the boundary of each feature.
 
 The data products used in this study include:
 
@@ -79,6 +79,8 @@ library(dismo)
 set.seed(11)
 ```
 
+---
+
 # USFS National Forests
 
 Consider only forests in the western US managed by the United States Department of Agriculture, Forest Service (USFS).
@@ -94,7 +96,7 @@ Consider only forests in the western US managed by the United States Department 
 # read multiple files
 constrained_wide_byftr <- 
   list.files("../data/")[grep("forestmgmtconstraint_statistics",list.files("../data/"))] |> 
-    purrr::map(function(x){read.csv(paste0("../data/",x))}) |> 
+    purrr::map(function(x){readr::read_csv(paste0("../data/",x))}) |> 
     dplyr::bind_rows() |> 
       dplyr::rename_with(tolower) |> 
       dplyr::rename_with(make.names) |> 
@@ -471,11 +473,13 @@ remove(constrained_spatial)
 gc()
 ```
 
+---
+
 # Wildfire Crisis Strategy Priority Landscapes
 
 The USFS recently launched a [Wildfire Crisis Strategy](https://www.fs.usda.gov/managing-land/wildfire-crisis) plan to substantially increase the scale of forest health and risk reduction fuel treatments over the next decade. The plan prioritizes treatments on 21 landscapes in eight states in the western US targeting federal, state, tribal, and private lands where wildfire ignitions will potentially impact communities.
 
-![Wildfire Crisis Strategy Priority Landscapes.](../data/wildfire_crisis_img.jpg){width=30%,height=50%}
+![Wildfire Crisis Strategy Priority Landscapes.](../data/wildfire_crisis_img.jpg){width=10%,height=30%}
 ```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
 remove(list = ls())
 gc()
@@ -488,11 +492,19 @@ gc()
 # read multiple files
 constrained_wide_byftr <-
   list.files("../data/wildfirepriority/")[grep("wildfirepriority_statistics",list.files("../data/wildfirepriority/"))] |> 
-    purrr::map(function(x){read.csv(paste0("../data/wildfirepriority/",x))}) |> 
+    purrr::map(function(x){
+      readr::read_csv(paste0("../data/wildfirepriority/",x)) |> 
+        dplyr::rename_with(tolower) |> 
+        dplyr::rename_with(make.names) |> 
+        dplyr::rename(feature_id = system.index) |> 
+        dplyr::select(c(
+            feature_id,projectid,region,state,name
+            , tidyselect::ends_with("_m2")
+            , tidyselect::starts_with("pct_")
+          )
+         )
+    }) |> 
     dplyr::bind_rows() |> 
-      dplyr::rename_with(tolower) |> 
-      dplyr::rename_with(make.names) |> 
-      dplyr::rename(feature_id = system.index) |> 
       dplyr::left_join(
         data.frame(state = datasets::state.name, state_abb = datasets::state.abb)
         , by = join_by("state")
