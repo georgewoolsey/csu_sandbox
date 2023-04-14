@@ -45,6 +45,8 @@ Constraint levels from least flexible to most flexible in interpretation and imp
 4) Riparian Buffer - buffer of 100 ft. on streams and waterbodies based on NHD water network
 5) Distance from Road > 2000ft - based on road and trail data layers
 
+[Preliminary example here](https://georgewoolsey.github.io/usfs_sandbox/forest-management-constraints-versus-activity.html#map-of-constraints-and-management)
+
 ## Setup
 
 ```{r, include=FALSE, warning=F, message=F}
@@ -497,7 +499,6 @@ constrained_wide |>
   kable() |> 
   kable_classic("striped")
 ```
-
 
 ## Map of Treatable/Constrained
 
