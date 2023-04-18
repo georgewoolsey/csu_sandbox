@@ -14,23 +14,23 @@
       // , 'Rio Grande National Forest'
       // , 'San Juan National Forest'
       // , 'White River National Forest'
-      '02','03'
-      // 'Colorado','New Mexico','Arizona','Utah'
+      // '02','03'
+      'Montana','Utah','New Mexico','Nevada'
     ]);
     var my_feature_collection = 
       ///////////////// states
         // ee.FeatureCollection("TIGER/2018/States")
         //   .filter(ee.Filter.inList('STUSPS', ft_list))
       ///////////////// usfs forests
-        ee.FeatureCollection("users/GeorgeWoolsey/L48_USFS_NatlForests")
-          // .filter(ee.Filter.inList('COMMONNAME', ft_list))
-          .filter(ee.Filter.inList('REGION', ft_list))
+        // ee.FeatureCollection("users/GeorgeWoolsey/L48_USFS_NatlForests")
+        //   // .filter(ee.Filter.inList('COMMONNAME', ft_list))
+        //   .filter(ee.Filter.inList('REGION', ft_list))
       ///////////////// wildfire priority landscapes
-      //   ee.FeatureCollection("projects/forestmgmtconstraint/assets/Wildfire_Crisis_Strategy_Landscapes")
-      //   .filter(ee.Filter.inList('STATE', ft_list))
+        ee.FeatureCollection("projects/forestmgmtconstraint/assets/Wildfire_Crisis_Strategy_Landscapes")
+        .filter(ee.Filter.inList('STATE', ft_list))
     
     ;
-    print(my_feature_collection.aggregate_array('COMMONNAME'), 'FORESTS TO DO' );
+    print(my_feature_collection.aggregate_array('NAME'), 'FORESTS TO DO' );
   //////////////////////////////////////////////////
   // 2. DEFINE NLCD LANDCOVER CLASSES TO CONSIDER
   // SEE:
@@ -61,7 +61,7 @@
   //////////////////////////////////////////////////
   // 5. NAME EXPORT FILES PREFIX
   //////////////////////////////////////////////////
-    var my_export_prefix = 'forestmgmtconstraint_huc12';
+    var my_export_prefix = 'wfpriority_huc12_mtutnmnv';
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // END: USER-DEFINED PARAMETERS AND DATA
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -513,9 +513,6 @@ var constraint_image_fn = function(my_feature){
     huc12.map(constraint_image_fn)
   );
   print(all_classified_img_coll.count(),'all_classified_img_coll.count');
-  // Create a list of image objects.
-  var imageList = all_classified_img_coll.toList(huc12.size());
-  // print(imageList.length(), 'imageList');
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // STATS CALC FN
@@ -523,15 +520,12 @@ var constraint_image_fn = function(my_feature){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 var constraint_stats_fn = function(my_feature) {
   // get id of feature
-  var ft_id = my_feature.get('system:index')
+  var ft_id = ee.Feature(my_feature).id();
   // filter image collection
   var this_image = ee.Image(
-    imageList
-    .filter(ee.Filter.eq(
-      'system:index', ft_id
-      )
-    )
-    .get(0)
+    all_classified_img_coll
+    .filter(ee.Filter.eq('system:index', ft_id))
+    .first()
   );
   // define vars for area calcs
   var nlcd_mask = this_image.select('nlcd_mask');
@@ -704,7 +698,7 @@ var all_classified_ft_coll = ee.FeatureCollection(
   ;
 
   // Print the result.
-  print(huc12_my_feature_collection_join.first(), 'huc12_my_feature_collection_join');
+  // print(huc12_my_feature_collection_join.first(), 'huc12_my_feature_collection_join');
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //EXPORTS
@@ -766,24 +760,27 @@ var all_classified_ft_coll = ee.FeatureCollection(
 //MAPPING
 //////////////////////////////////////////////////
 /////////////////////////////////////
-// // try to filter feature collection of vectors
-//   var heyft = huc12
+// // get id of feature
+//   var my_feature = huc12.filter(ee.Filter.eq('huc12','140100010303')).first();
+//   print(my_feature, 'my_feature');
+//   var ft_id = ee.Feature(my_feature).id();
+//   print(ft_id,'ft_id');
+
+//   var this_image = ee.Image(
+//     all_classified_img_coll
+//     .filter(ee.Filter.eq('system:index', ft_id))
 //     .first()
-//   ;
-//   var heyid = heyft.get('system:index');
-  
-// // filter rasterimage collection
-//   var image_of_classified = all_classified_img_coll
-//     .filter(ee.Filter.eq('system:index', heyid))
-//     .select('area_classified')
-//     .toBands()
-//     .rename('istreatable')
-//     .clipToCollection(huc12)
-//   ;
-//   print(image_of_classified, 'image_of_classified');
-// // now map.....................................
-// Map.centerObject(heyft, 13);
-// Map.addLayer(heyft.geometry(), null, 'FT',1, 0.5);
+//   );
+//   print(this_image, 'this_image');
+
+
+// Map.centerObject(my_feature, 13);
+// Map.addLayer(my_feature.geometry(), null, 'FT',1, 0.5);
 // var treatViz = {min: 0, max: 1, palette: ['B03A2E','4A235A']};
-// Map.addLayer(image_of_classified, treatViz, 'image_of_classified', 0, 0.8);
-// Map.addLayer(all_roads, {palette: '424949'}, 'All Roads',1);
+// Map.addLayer(this_image.select('area_classified').clip(my_feature.geometry()), treatViz, 'area_classified', 0, 0.8);
+// Map.addLayer(this_image.select('nlcd_mask').clip(my_feature.geometry()), {min:0,max:1,palette: ['white','forestgreen']}, 'nlcd_mask',0);
+// Map.addLayer(this_image.select('rmn_area_protected').clip(my_feature.geometry()),{palette: ['red']}, 'rmn_area_protected',0);
+// Map.addLayer(this_image.select('rmn_area_slope').clip(my_feature.geometry()),{palette: ['orangered']}, 'rmn_area_slope',0);
+// Map.addLayer(this_image.select('rmn_area_administrative').clip(my_feature.geometry()),{palette: ['orange']}, 'rmn_area_administrative',0);
+// Map.addLayer(this_image.select('rmn_area_riparian').clip(my_feature.geometry()),{palette: ['blue']}, 'rmn_area_riparian',0);
+// Map.addLayer(this_image.select('rmn_area_roads').clip(my_feature.geometry()),{palette: ['black']}, 'rmn_area_roads',0);

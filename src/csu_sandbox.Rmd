@@ -71,12 +71,12 @@ library(latex2exp)
 # visualization
 library(kableExtra)
 library(cowplot)
+library(RColorBrewer)
 library(mapview) #Interactive maps
 library(leafpop) #map html popup
 # spatial analysis
 library(sf)
 library(USAboundaries)
-library(dismo)
 # set seed
 set.seed(11)
 ```
@@ -602,6 +602,7 @@ constrained_byftr_huc12_wide <-
       readr::read_csv(
         paste0("../data/subwatersheds/",x)
         , name_repair = "universal"
+        , col_types = cols(.default = "c")
       )
     }) |>
     dplyr::bind_rows() |> 
@@ -614,11 +615,15 @@ constrained_byftr_huc12_wide <-
           stringr::str_replace_all(c("National Forests"="", "National Forest"="")) |>  
           trimws()
         , region = paste0("Region ",as.numeric(region))
+        , dplyr::across(
+            tidyselect::ends_with("_m2")
+            , ~ as.numeric(.x) / 10000
+          )
+        , dplyr::across(
+            tidyselect::starts_with("pct_rmn")
+            , ~ as.numeric(.x)
+          )
       ) |> 
-      dplyr::mutate(across(
-        tidyselect::ends_with("_m2")
-        , ~ as.numeric(.x) / 10000
-      )) |> 
       dplyr::rename_with(
         ~ gsub("_m2", "_ha", .x)
         , tidyselect::ends_with("_m2")
@@ -648,6 +653,34 @@ constrained_byftr_huc12_wide <-
 
 ```
 
+```{r, include=FALSE, eval=FALSE}
+# covertype_area_ha
+constrained_byftr_huc12_wide |> 
+  dplyr::filter(region=="Region 2") |> 
+  nrow()
+# covertype_area_ha
+constrained_byftr_huc12_wide |> 
+  dplyr::filter(region=="Region 2") |> 
+  # dplyr::select(ends_with("_ha")) |> 
+  dplyr::pull(covertype_area_ha) |> 
+  sum()
+# rmn5_roads_area_ha
+constrained_byftr_huc12_wide |> 
+  dplyr::filter(region=="Region 2") |> 
+  dplyr::pull(rmn5_roads_area_ha) |> 
+  sum()
+# usfs
+constrained_wide |> 
+  dplyr::group_by(region) |> 
+  dplyr::summarise(feature_area_ha=sum(feature_area_ha))
+constrained_wide |> 
+  dplyr::filter(region=="Region 2") |> 
+  dplyr::group_by(forest_shortname) |> 
+  dplyr::summarise(feature_area_ha=sum(feature_area_ha))
+
+```
+
+
 ## Distribution of Subwatershed Constraint
 
 Based on model simulations of how much area generally needs to be treated to influence wildfire behavior, we binned the subwatersheds into three classes of mechanical constraint: 
@@ -660,18 +693,17 @@ Based on model simulations of how much area generally needs to be treated to inf
 constrained_byftr_huc12_wide |> 
   dplyr::count(region,forest_shortname,cnstrnt_class) |> 
   dplyr::group_by(region,forest_shortname) |> 
-  dplyr::mutate(pct = n/sum(n)) |> 
+  dplyr::mutate(
+    pct = n/sum(n)
+    , high_pct=max(ifelse(cnstrnt_class=="high constraint",pct,0)) 
+  ) |> 
 ggplot(
-    mapping = aes(x = pct, y = forest_shortname, fill=cnstrnt_class)
+    mapping = aes(x = pct, y = reorder(forest_shortname, high_pct), fill=cnstrnt_class)
   ) +
   geom_col(width = 0.7, alpha=0.8) +
   geom_text(
     mapping = aes(
-      label=  paste0(
-        stringr::word(cnstrnt_class)
-        , ":\n"
-        , scales::percent(pct)
-      )
+      label = scales::percent(pct, accuracy = 1)
     )
     , position = position_stack(vjust = 0.5)
     , color = "black", size = 3
@@ -1106,7 +1138,12 @@ gc()
 fire_landscapes <- sf::st_read("../data/Wildfire_Crisis_Strategy_Landscapes/Wildfire_Crisis_Strategy_Landscapes_(Feature_Layer).shp") |> 
   sf::st_make_valid() |> 
   dplyr::mutate(area_ha = as.numeric(sf::st_area(geometry))/10000)
-fire_landscapes$area_ha |> summary()
+fire_landscapes |> 
+  sf::st_drop_geometry() |> 
+  dplyr::group_by(STATE) |> 
+  dplyr::summarise(area_ha=sum(area_ha)) |> 
+  dplyr::arrange(desc(area_ha))
+
 # map
 mapview::mapview(fire_landscapes, zcol = "NAME", legend = F)
 ## split poly
