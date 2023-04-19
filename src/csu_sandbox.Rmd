@@ -218,7 +218,7 @@ ggplot(data = constrained_wide, mapping = aes(x = pct_rmn5_roads, y = reorder(fo
     , hjust = -0.1
   ) +
   facet_grid(rows = vars(region), scales = "free_y", switch = "y") + 
-  scale_fill_viridis_d(alpha = 0.8) +
+  scale_fill_viridis_d(option = "cividis",alpha = 0.8) +
   scale_x_continuous(expand = expansion(mult = c(0, .1)),labels = scales::percent_format()) +
   labs(
     fill = ""
@@ -249,7 +249,7 @@ ggplot(constrained_wide
   geom_violin(aes(fill = region)) + 
   geom_boxplot(width = 0.15) +
   geom_point(size = 0.8, color = "gray23", alpha = 0.7) + 
-  scale_fill_viridis_d() +
+  scale_fill_viridis_d(option = "cividis") +
   scale_x_continuous(expand = expansion(mult = c(0, .1)),labels = scales::percent_format()) +
   labs(
     fill = ""
@@ -585,189 +585,6 @@ gc()
 
 ---
 
-# USFS National Forests Subwatershed Level
-
-Sixth-level hydrologic units (HUs) enumerated with 12-digit codes, commonly referred to as subwatersheds, were used to characterize the spatial arrangement of constrained land. Subwatershed boundaries have been used to represent meaningful landscape management units and to approximate "firesheds" which are contiguous areas with similar fire history and problem fire characteristics where a coordinated suppression planning occurs.
-
-Subwatersheds that did not have at least *25%* of area within the boundary of the area of interest were excluded from this analysis. This cutoff was implemented under the assumption that with less than 25% of area available, treatment alone would not substantially affect wildfire behavior across the subwatershed.
-
-## Load Data
-
-```{r data-read-sw}
-# data table
-# read multiple files
-constrained_byftr_huc12_wide <- 
-  list.files("../data/subwatersheds/",pattern = "\\.csv$") |> 
-    purrr::map(function(x){
-      readr::read_csv(
-        paste0("../data/subwatersheds/",x)
-        , name_repair = "universal"
-        , col_types = cols(.default = "c")
-      )
-    }) |>
-    dplyr::bind_rows() |> 
-    dplyr::select(-dplyr::starts_with("shape", ignore.case = T)) |> 
-    dplyr::rename_with(tolower) |> 
-      dplyr::rename_with(make.names) |> 
-      dplyr::rename(feature_id = system.index) |> 
-      dplyr::mutate(
-        forest_shortname = commonname |>  
-          stringr::str_replace_all(c("National Forests"="", "National Forest"="")) |>  
-          trimws()
-        , region = paste0("Region ",as.numeric(region))
-        , dplyr::across(
-            tidyselect::ends_with("_m2")
-            , ~ as.numeric(.x) / 10000
-          )
-        , dplyr::across(
-            tidyselect::starts_with("pct_rmn")
-            , ~ as.numeric(.x)
-          )
-      ) |> 
-      dplyr::rename_with(
-        ~ gsub("_m2", "_ha", .x)
-        , tidyselect::ends_with("_m2")
-      ) |> 
-  # calculate pct reduction
-  dplyr::mutate(
-    pct_rdctn1_protected = -1*(1 - pct_rmn1_protected)
-    , pct_rdctn2_slope = -1*(pct_rmn1_protected - pct_rmn2_slope)
-    , pct_rdctn3_administrative = -1*(pct_rmn2_slope - pct_rmn3_administrative)
-    , pct_rdctn4_riparian = -1*(pct_rmn3_administrative - pct_rmn4_riparian)
-    , pct_rdctn5_roads = -1*(pct_rmn4_riparian - pct_rmn5_roads)
-    , pct_rdctn_total = -1*(1 - pct_rmn5_roads)
-    , cnstrnt_class = dplyr::case_when(
-      -pct_rdctn_total >= 0.85 ~ 1
-      , -pct_rdctn_total >= 0.65 ~ 2
-      , -pct_rdctn_total >= 0.0 ~ 3
-    )
-  ) |> 
-  dplyr::mutate(
-    cnstrnt_class = factor(
-      cnstrnt_class 
-      , levels = 1:3
-      , labels = c("high constraint", "med. constraint", "low constraint")
-      , ordered = T
-    ) |> forcats::fct_rev()
-  )
-
-```
-
-```{r, include=FALSE, eval=FALSE}
-# covertype_area_ha
-constrained_byftr_huc12_wide |> 
-  dplyr::filter(region=="Region 2") |> 
-  nrow()
-# covertype_area_ha
-constrained_byftr_huc12_wide |> 
-  dplyr::filter(region=="Region 2") |> 
-  # dplyr::select(ends_with("_ha")) |> 
-  dplyr::pull(covertype_area_ha) |> 
-  sum()
-# rmn5_roads_area_ha
-constrained_byftr_huc12_wide |> 
-  dplyr::filter(region=="Region 2") |> 
-  dplyr::pull(rmn5_roads_area_ha) |> 
-  sum()
-# usfs
-constrained_wide |> 
-  dplyr::group_by(region) |> 
-  dplyr::summarise(feature_area_ha=sum(feature_area_ha))
-constrained_wide |> 
-  dplyr::filter(region=="Region 2") |> 
-  dplyr::group_by(forest_shortname) |> 
-  dplyr::summarise(feature_area_ha=sum(feature_area_ha))
-
-```
-
-
-## Distribution of Subwatershed Constraint
-
-Based on model simulations of how much area generally needs to be treated to influence wildfire behavior, we binned the subwatersheds into three classes of mechanical constraint: 
-
-* **high** (85–100% [i.e., only 0–15% is available for mechanical treatment]): fuels treatment would principally need to rely on fire
-* **medium** (65– 84%): could use a combination of fire and mechanical thinning
-* **low** (65%): could effectively influence wildfire behavior with mechanical treatment alone
-
-```{r plt-cnstrntcl-sw}
-constrained_byftr_huc12_wide |> 
-  dplyr::count(region,forest_shortname,cnstrnt_class) |> 
-  dplyr::group_by(region,forest_shortname) |> 
-  dplyr::mutate(
-    pct = n/sum(n)
-    , high_pct=max(ifelse(cnstrnt_class=="high constraint",pct,0)) 
-  ) |> 
-ggplot(
-    mapping = aes(x = pct, y = reorder(forest_shortname, high_pct), fill=cnstrnt_class)
-  ) +
-  geom_col(width = 0.7, alpha=0.8) +
-  geom_text(
-    mapping = aes(
-      label = scales::percent(pct, accuracy = 1)
-    )
-    , position = position_stack(vjust = 0.5)
-    , color = "black", size = 3
-  ) +
-  scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
-  facet_grid(rows = vars(region), scales = "free_y", switch = "y") + 
-  scale_x_continuous(labels = scales::percent_format()) +
-  labs(
-    fill = "Constraint Class"
-    , y = ""
-    , x = "Percent of Subwatersheds"
-  ) +
-  theme_light() +
-  theme(
-    legend.position = "top" # c(0.9, 0.9)
-    , legend.title = element_text(size=7)
-    , axis.title = element_text(size=9)
-    , axis.text.x = element_text(size=7)
-    # , strip.background = element_blank()
-    , strip.text = element_text(color = "black", face = "bold")
-    , strip.placement = "outside"
-  )
-
-```
-
-
-```{r, include=FALSE,eval=FALSE}
-ggplot(
-  data = constrained_byftr_huc12_wide
-  , mapping = aes(x = pct_rmn5_roads)) +
-  geom_histogram(
-    aes(y = after_stat(density))
-    , bins = 20
-    , fill = "navy"
-    , alpha = 0.8
-    , color = "gray25"
-  ) +
-  geom_density(
-    aes(y = after_stat(density))
-    , linetype = 2
-    , lwd = 1.2
-    , color = "gray10"
-  ) +
-  geom_vline(
-    xintercept = c(0.15, 0.35)
-    , color = "firebrick"
-    , linetype = "dashed"
-    , lwd = 1.1
-  ) +
-  scale_x_continuous(labels = scales::percent) +
-  labs(
-    y = "Density"
-    , x = "Treatable Forested Area Remaining (%)"
-  ) +
-  theme_light() +
-  theme(
-    legend.position = "none"
-  )
-```
-
-
-
----
-
 # Wildfire Crisis Strategy Priority Landscapes
 
 The USFS recently launched a [Wildfire Crisis Strategy](https://www.fs.usda.gov/managing-land/wildfire-crisis) plan to substantially increase the scale of forest health and risk reduction fuel treatments over the next decade. The plan prioritizes treatments on 21 landscapes in eight states in the western US targeting federal, state, tribal, and private lands where wildfire ignitions will potentially impact communities.
@@ -962,7 +779,7 @@ ggplot(data = constrained_wide, mapping = aes(x = pct_rmn5_roads, y = reorder(ar
     , hjust = -0.1
   ) +
   # facet_grid(rows = vars(state), scales = "free_y", switch = "y") + 
-  scale_fill_viridis_d(alpha = 0.8) +
+  scale_fill_viridis_d(option = "viridis", alpha = 0.8) +
   scale_x_continuous(expand = expansion(mult = c(0, .1)),labels = scales::percent_format()) +
   labs(
     fill = ""
@@ -1269,3 +1086,351 @@ mapview::mapview( xxx1
 
 ```
 
+---
+
+# USFS National Forests Subwatershed Level
+
+Sixth-level hydrologic units (HUs) enumerated with 12-digit codes, commonly referred to as subwatersheds, were used to characterize the spatial arrangement of constrained land. Subwatershed boundaries have been used to represent meaningful landscape management units and to approximate "firesheds" which are contiguous areas with similar fire history and problem fire characteristics where a coordinated suppression planning occurs.
+
+Subwatersheds that did not have at least *25%* of area within the boundary of the area of interest were excluded from this analysis. This cutoff was implemented under the assumption that with less than 25% of area available, treatment alone would not substantially affect wildfire behavior across the subwatershed.
+
+## Load Data
+
+```{r data-read-sw}
+# data table
+# read multiple files
+constrained_byftr_huc12_wide <- 
+  list.files("../data/subwatersheds/",pattern = "\\.csv$") |> 
+    purrr::map(function(x){
+      readr::read_csv(
+        paste0("../data/subwatersheds/",x)
+        , name_repair = "universal"
+        , col_types = cols(.default = "c")
+      )
+    }) |>
+    dplyr::bind_rows() |> 
+    dplyr::select(-dplyr::starts_with("shape", ignore.case = T)) |> 
+    dplyr::rename_with(tolower) |> 
+      dplyr::rename_with(make.names) |> 
+      dplyr::rename(feature_id = system.index) |> 
+      dplyr::mutate(
+        forest_shortname = commonname |>  
+          stringr::str_replace_all(c("National Forests"="", "National Forest"="")) |>  
+          trimws()
+        , region = paste0("Region ",as.numeric(region))
+        , dplyr::across(
+            tidyselect::ends_with("_m2")
+            , ~ as.numeric(.x) / 10000
+          )
+        , dplyr::across(
+            tidyselect::starts_with("pct_rmn")
+            , ~ as.numeric(.x)
+          )
+      ) |> 
+      dplyr::rename_with(
+        ~ gsub("_m2", "_ha", .x)
+        , tidyselect::ends_with("_m2")
+      ) |> 
+  # calculate pct reduction
+  dplyr::mutate(
+    pct_rdctn1_protected = -1*(1 - pct_rmn1_protected)
+    , pct_rdctn2_slope = -1*(pct_rmn1_protected - pct_rmn2_slope)
+    , pct_rdctn3_administrative = -1*(pct_rmn2_slope - pct_rmn3_administrative)
+    , pct_rdctn4_riparian = -1*(pct_rmn3_administrative - pct_rmn4_riparian)
+    , pct_rdctn5_roads = -1*(pct_rmn4_riparian - pct_rmn5_roads)
+    , pct_rdctn_total = -1*(1 - pct_rmn5_roads)
+    , cnstrnt_class = dplyr::case_when(
+      -pct_rdctn_total >= 0.85 ~ 1
+      , -pct_rdctn_total >= 0.65 ~ 2
+      , -pct_rdctn_total >= 0.0 ~ 3
+    )
+  ) |> 
+  dplyr::mutate(
+    cnstrnt_class = factor(
+      cnstrnt_class 
+      , levels = 1:3
+      , labels = c("high constraint", "med. constraint", "low constraint")
+      , ordered = T
+    ) |> forcats::fct_rev()
+  )
+
+```
+
+## Distribution of Subwatershed Area
+
+```{r}
+ggplot(
+  data = constrained_byftr_huc12_wide
+  , mapping = aes(x = huc12_area_ha)
+) +
+  geom_vline(xintercept = median(constrained_byftr_huc12_wide$huc12_area_ha), linetype="dashed", color="gray66") +
+  geom_histogram(
+    aes(y = after_stat(density))
+    , bins = 16
+    , fill = "navy"
+    , alpha = 0.8
+    , color = "gray25"
+  ) +
+  geom_density(
+    aes(y = after_stat(density))
+    , linetype = "dashed"
+    , lwd = 1
+    , color = "gray21"
+  ) +
+  scale_x_continuous(labels = scales::comma, breaks = scales::extended_breaks(n=7)) +
+  labs(
+    y = "Density"
+    , x = "Subwatershed Area (ha)"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "none"
+    , axis.title = element_text(size=9)
+    , axis.text = element_text(size=7)
+  )
+```
+
+## Distribution of Subwatershed Constraint
+
+Based on model simulations of how much area generally needs to be treated to influence wildfire behavior, we binned the subwatersheds into three classes of mechanical constraint: 
+
+* **high** (85–100% [i.e., only 0–15% is available for mechanical treatment]): fuels treatment would principally need to rely on fire
+* **medium** (65– 84%): could use a combination of fire and mechanical thinning
+* **low** (65%): could effectively influence wildfire behavior with mechanical treatment alone
+
+```{r plt-cnstrntcl-sw}
+constrained_byftr_huc12_wide |> 
+  dplyr::count(region,forest_shortname,cnstrnt_class) |> 
+  dplyr::group_by(region,forest_shortname) |> 
+  dplyr::mutate(
+    pct = n/sum(n)
+    , high_pct=max(ifelse(cnstrnt_class=="high constraint",pct,0)) 
+  ) |> 
+ggplot(
+    mapping = aes(x = pct, y = reorder(forest_shortname, high_pct), fill=cnstrnt_class)
+  ) +
+  geom_col(width = 0.7, alpha=0.8) +
+  geom_text(
+    mapping = aes(
+      label = scales::percent(pct, accuracy = 1)
+    )
+    , position = position_stack(vjust = 0.5)
+    , color = "black", size = 3
+  ) +
+  scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
+  facet_grid(rows = vars(region), scales = "free_y", switch = "y") + 
+  scale_x_continuous(labels = scales::percent_format()) +
+  labs(
+    fill = "Constraint Class"
+    , y = ""
+    , x = "Percent of Subwatersheds"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "top" # c(0.9, 0.9)
+    , legend.title = element_text(size=7)
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_text(size=7)
+    # , strip.background = element_blank()
+    , strip.text = element_text(color = "black", face = "bold")
+    , strip.placement = "outside"
+  )
+
+```
+
+
+```{r, include=FALSE,eval=FALSE}
+ggplot(
+  data = constrained_byftr_huc12_wide
+  , mapping = aes(x = pct_rmn5_roads)) +
+  geom_histogram(
+    aes(y = after_stat(density))
+    , bins = 20
+    , fill = "navy"
+    , alpha = 0.8
+    , color = "gray25"
+  ) +
+  geom_density(
+    aes(y = after_stat(density))
+    , linetype = 2
+    , lwd = 1.2
+    , color = "gray10"
+  ) +
+  geom_vline(
+    xintercept = c(0.15, 0.35)
+    , color = "firebrick"
+    , linetype = "dashed"
+    , lwd = 1.1
+  ) +
+  scale_x_continuous(labels = scales::percent) +
+  labs(
+    y = "Density"
+    , x = "Treatable Forested Area Remaining (%)"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "none"
+  )
+```
+
+---
+
+# Wildfire Crisis Strategy Priority Landscapes Subwatershed Level
+
+Sixth-level hydrologic units (HUs) enumerated with 12-digit codes, commonly referred to as subwatersheds, were used to characterize the spatial arrangement of constrained land. Subwatershed boundaries have been used to represent meaningful landscape management units and to approximate "firesheds" which are contiguous areas with similar fire history and problem fire characteristics where a coordinated suppression planning occurs.
+
+Subwatersheds that did not have at least *25%* of area within the boundary of the area of interest were excluded from this analysis. This cutoff was implemented under the assumption that with less than 25% of area available, treatment alone would not substantially affect wildfire behavior across the subwatershed.
+
+## Load Data
+
+```{r wf-read-sw}
+# data table
+# read multiple files
+constrained_byftr_huc12_wide <-
+  list.files("../data/wildfirepriority_subwatersheds/",pattern = "\\.csv$") |> 
+    purrr::map(function(x){
+      readr::read_csv(
+        paste0("../data/wildfirepriority_subwatersheds/",x)
+        , name_repair = "universal"
+        , col_types = cols(.default = "c")
+      )
+    }) |>
+    dplyr::bind_rows() |> 
+    dplyr::select(-dplyr::starts_with("shape", ignore.case = T)) |> 
+    dplyr::rename(huc12name = name) |> 
+    dplyr::rename_with(tolower) |> 
+      dplyr::rename_with(make.names) |> 
+      dplyr::rename(feature_id = system.index) |> 
+      dplyr::left_join(
+        data.frame(state = datasets::state.name, state_abb = datasets::state.abb)
+        , by = join_by("state")
+      ) |> 
+      dplyr::mutate(
+        area_name = paste0(
+          ifelse(is.na(state_abb) | state_abb == "", "UNK", state_abb)
+          , ": "
+          , name
+        )
+        , dplyr::across(
+            tidyselect::ends_with("_m2")
+            , ~ as.numeric(.x) / 10000
+          )
+        , dplyr::across(
+            tidyselect::starts_with("pct_rmn")
+            , ~ as.numeric(.x)
+          )
+      ) |> 
+      dplyr::rename_with(
+        ~ gsub("_m2", "_ha", .x)
+        , tidyselect::ends_with("_m2")
+      ) |> 
+  # calculate pct reduction
+  dplyr::mutate(
+    pct_rdctn1_protected = -1*(1 - pct_rmn1_protected)
+    , pct_rdctn2_slope = -1*(pct_rmn1_protected - pct_rmn2_slope)
+    , pct_rdctn3_administrative = -1*(pct_rmn2_slope - pct_rmn3_administrative)
+    , pct_rdctn4_riparian = -1*(pct_rmn3_administrative - pct_rmn4_riparian)
+    , pct_rdctn5_roads = -1*(pct_rmn4_riparian - pct_rmn5_roads)
+    , pct_rdctn_total = -1*(1 - pct_rmn5_roads)
+    , cnstrnt_class = dplyr::case_when(
+      -pct_rdctn_total >= 0.85 ~ 1
+      , -pct_rdctn_total >= 0.65 ~ 2
+      , -pct_rdctn_total >= 0.0 ~ 3
+    )
+  ) |> 
+  dplyr::mutate(
+    cnstrnt_class = factor(
+      cnstrnt_class 
+      , levels = 1:3
+      , labels = c("high constraint", "med. constraint", "low constraint")
+      , ordered = T
+    ) |> forcats::fct_rev()
+  )
+
+```
+
+## Distribution of Subwatershed Area
+
+```{r}
+# plot
+ggplot(data = constrained_byftr_huc12_wide
+         , mapping = aes(x = huc12_area_ha, y = area_name)
+    ) +
+    geom_vline(xintercept = median(constrained_byftr_huc12_wide$huc12_area_ha), linetype="dashed", color="gray66") +
+    geom_violin(aes(fill = state)) + 
+    geom_boxplot(width = 0.15) +
+    geom_point(size = 0.8, color = "gray23", alpha = 0.7) +
+    geom_text(
+      data = constrained_byftr_huc12_wide |> 
+        dplyr::group_by(area_name) |> 
+        dplyr::summarise(n=n(), max_area=max(huc12_area_ha))
+      , mapping = aes(x = -1,y=area_name,label=paste0("n=",scales::comma(n)))
+      , size = 3
+      , color = "black"
+    ) +
+    scale_fill_viridis_d(option = "viridis", alpha = 0.8) +
+    scale_x_continuous(labels = scales::comma, breaks = scales::extended_breaks(n=7)) +
+    labs(
+      fill = ""
+      , y = ""
+      , x = "Subwatershed Area (ha)"
+    ) +
+    theme_light() +
+    theme(
+      legend.position = "none" # c(0.9, 0.9)
+      , axis.title = element_text(size=9)
+      , axis.text.x = element_text(size=7)
+    )
+```
+
+
+## Distribution of Subwatershed Constraint
+
+Based on model simulations of how much area generally needs to be treated to influence wildfire behavior, we binned the subwatersheds into three classes of mechanical constraint: 
+
+* **high** (85–100% [i.e., only 0–15% is available for mechanical treatment]): fuels treatment would principally need to rely on fire
+* **medium** (65– 84%): could use a combination of fire and mechanical thinning
+* **low** (65%): could effectively influence wildfire behavior with mechanical treatment alone
+
+```{r wfplt-cnstrntcl-sw}
+constrained_byftr_huc12_wide |> 
+  dplyr::count(area_name,cnstrnt_class) |> 
+  dplyr::group_by(area_name) |> 
+  dplyr::mutate(
+    pct = n/sum(n)
+    , high_pct=max(ifelse(cnstrnt_class=="high constraint",pct,0)) 
+  ) |> 
+ggplot(
+    mapping = aes(x = pct, y = reorder(area_name, high_pct), fill=cnstrnt_class)
+  ) +
+  geom_col(width = 0.7, alpha=0.8) +
+  geom_text(
+    mapping = aes(
+      label = scales::percent(pct, accuracy = 1)
+    )
+    , position = position_stack(vjust = 0.5)
+    , color = "black", size = 3
+  ) +
+  scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
+  # facet_grid(rows = vars(state), scales = "free_y", switch = "y") + 
+  scale_x_continuous(labels = scales::percent_format()) +
+  labs(
+    fill = "Constraint Class"
+    , y = ""
+    , x = "Percent of Subwatersheds"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "top" # c(0.9, 0.9)
+    , legend.title = element_text(size=7)
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_text(size=7)
+    # , strip.background = element_blank()
+    , strip.text = element_text(color = "black", face = "bold")
+    , strip.placement = "outside"
+  )
+
+```
+
+
+---

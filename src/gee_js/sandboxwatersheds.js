@@ -512,7 +512,7 @@ var constraint_image_fn = function(my_feature){
   var all_classified_img_coll = ee.ImageCollection(
     huc12.map(constraint_image_fn)
   );
-  print(all_classified_img_coll.count(),'all_classified_img_coll.count');
+  // print(all_classified_img_coll.count(),'all_classified_img_coll.count');
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // STATS CALC FN
