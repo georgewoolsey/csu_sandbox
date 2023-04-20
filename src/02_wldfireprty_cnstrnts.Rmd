@@ -455,7 +455,7 @@ constrained_byftr_huc12_wide <-
     , pct_rdctn4_riparian = -1*(pct_rmn3_administrative - pct_rmn4_riparian)
     , pct_rdctn5_roads = -1*(pct_rmn4_riparian - pct_rmn5_roads)
     , pct_rdctn_total = -1*(1 - pct_rmn5_roads)
-    , cnstrnt_class = dplyr::case_when(
+    , cnstrnt_lvl = dplyr::case_when(
       -pct_rdctn_total >= 0.85 ~ 1
       , -pct_rdctn_total >= 0.65 ~ 2
       , -pct_rdctn_total >= 0.0 ~ 3
@@ -463,13 +463,13 @@ constrained_byftr_huc12_wide <-
   ) |> 
   dplyr::mutate(
     cnstrnt_class = factor(
-      cnstrnt_class 
+      cnstrnt_lvl 
       , levels = 1:3
       , labels = c("high constraint", "med. constraint", "low constraint")
       , ordered = T
     ) |> forcats::fct_rev()
     , rmn_cnstrnt_class = factor(
-      cnstrnt_class 
+      cnstrnt_lvl 
       , levels = 1:3
       , labels = c("0–15% treatable", "16–35% treatable", ">35% treatable")
       , ordered = T
@@ -581,10 +581,16 @@ constrained_byftr_huc12_wide_sf <- constrained_byftr_huc12_wide |>
     , by = dplyr::join_by(huc12)
   ) |> 
   sf::st_as_sf() |> 
-  dplyr::mutate(across(
-    tidyselect::starts_with("pct_")
-    , ~ scales::percent(as.numeric(.x), accuracy = 0.1)
-  )) |> 
+  dplyr::mutate(
+    dplyr::across(
+      tidyselect::starts_with("pct_")
+      , ~ scales::percent(as.numeric(.x), accuracy = 0.1)
+    )
+    , dplyr::across(
+      tidyselect::ends_with("_ha")
+      , ~ scales::comma(as.numeric(.x), accuracy = 1)
+    )
+  ) |> 
   dplyr::mutate(
     Priority.Area.Name = area_name
     , Level.of.Constraint = cnstrnt_class
