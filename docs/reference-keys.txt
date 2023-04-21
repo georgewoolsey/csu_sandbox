@@ -2,6 +2,8 @@ fig:unnamed-chunk-3
 tab:est-table
 fig:unnamed-chunk-12
 tab:est-table2
+tab:area-table-wfp
+tab:area-table-tot
 caution
 objective
 data-sources
@@ -23,6 +25,7 @@ wildfire-crisis-strategy-priority-landscapes
 map-of-priority-landscapes
 load-landscape-level-data
 reduction-treatable-area-table-1
+forested-area-plot
 remaining-treatable-forest-plot
 reduction-by-constraint-plot
 reduction-treatable-area-plot
@@ -30,5 +33,8 @@ wildfire-crisis-strategy-priority-landscapes-subwatershed-level
 load-subwatershed-level-data-1
 distribution-of-subwatershed-area-1
 distribution-of-subwatershed-constraint-1
+forested-area-by-level-of-constraint
+constraint-reduction-by-level-of-constraint
+area-available-for-mechanical-treatment
 map-of-subwatersheds-by-level-of-constraint
 example-code-to-split-larger-polygons
