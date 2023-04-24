@@ -144,7 +144,7 @@ kableExtra::kable(
     )
   ) |>  
   add_header_above(c(" " = 1, "Constraint\nLeast Flexible to Most Flexible" = 6, " " = 2)) |>
-  kable_classic("striped", full_width=T) |> 
+  kable_classic(full_width=T) |> 
   pack_rows(index = table(forcats::fct_inorder(tbl_temp$region))) |> 
   kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE) |>  
   kableExtra::scroll_box(width = "740px")
@@ -445,7 +445,7 @@ constrained_wide |>
     , ~ scales::percent(.x, accuracy = 0.1)
   )) |> 
   kable() |> 
-  kable_classic("striped")
+  kable_classic()
 ```
 
 ## Map of Treatable/Constrained
@@ -645,7 +645,7 @@ Based on model simulations of how much area generally needs to be treated to inf
 * **medium** (65– 84%): could use a combination of fire and mechanical thinning
 * **low** (65%): could effectively influence wildfire behavior with mechanical treatment alone
 
-```{r plt-cnstrntcl-sw}
+```{r plt-cnstrntcl-sw, fig.height=14}
 constrained_byftr_huc12_wide |> 
   dplyr::count(region,forest_shortname,cnstrnt_class) |> 
   dplyr::group_by(region,forest_shortname) |> 
@@ -687,15 +687,14 @@ ggplot(
 
 
 ```{r huc12-get-fs, results='hide', include=FALSE,eval=FALSE}
-unique(constrained_byftr_huc12_wide$huc12)[1:10]
-ws_bounds <- nhdplusTools::get_huc(id = unique(constrained_byftr_huc12_wide$huc12), type = 'huc12')
-# ws_bounds <- nhdplusTools::get_huc(id = 
-#     constrained_byftr_huc12_wide |> 
-#       dplyr::filter(name == "4FRI") |> 
-#       dplyr::pull(huc12) |> 
-#       unique()
-#   , type = 'huc12'
-# )
+# ws_bounds <- nhdplusTools::get_huc(id = unique(constrained_byftr_huc12_wide$huc12), type = 'huc12')
+ws_bounds <- nhdplusTools::get_huc(id =
+    constrained_byftr_huc12_wide |>
+      dplyr::filter(forest_shortname == "Grand Mesa, Uncompahgre and Gunnison") |>
+      dplyr::pull(huc12) |>
+      unique()
+  , type = 'huc12'
+)
 # join
 constrained_byftr_huc12_wide_sf <- constrained_byftr_huc12_wide |> 
   dplyr::inner_join(

@@ -784,3 +784,60 @@ var all_classified_ft_coll = ee.FeatureCollection(
 // Map.addLayer(this_image.select('rmn_area_administrative').clip(my_feature.geometry()),{palette: ['orange']}, 'rmn_area_administrative',0);
 // Map.addLayer(this_image.select('rmn_area_riparian').clip(my_feature.geometry()),{palette: ['blue']}, 'rmn_area_riparian',0);
 // Map.addLayer(this_image.select('rmn_area_roads').clip(my_feature.geometry()),{palette: ['black']}, 'rmn_area_roads',0);
+
+
+
+// 1 Columbia River Gorge National Scenic Area         118163.
+// 2 Olympic                                           281427.
+// 3 Ochoco                                            298496.
+// 4 Siuslaw                                           337454.
+// 5 Umpqua                                            418434.
+// 6 Mt. Hood                                          428054.
+// 7 Gifford Pinchot                                   604287.
+// 8 Umatilla                                          604846.
+// 9 Colville                                          707227.
+// 10 Malheur                                           721518.
+// 11 Willamette                                        727488.
+// 12 Rogue River-Siskiyou                              748549.
+// 13 Deschutes                                         755333.
+// 14 Mt. Baker-Snoqualmie                              817318.
+// 15 Wallowa-Whitman                                  1019570.
+// 16 Fremont-Winema                                   1137662.
+// 17 Okanogan-Wenatchee                               1556457.
+
+// usfs_huc12_042
+// 'Payette National Forest'
+// , 'Salmon-Challis National Forest'
+// , 'Sawtooth National Forest'
+
+// usfs_huc12_061
+// 'Columbia River Gorge National Scenic Area'
+// , 'Okanogan-Wenatchee National Forest'
+// , 'Mt. Hood National Forest'
+// , 'Rogue River-Siskiyou National Forests'
+// , 'Willamette National Forest'
+
+
+// usfs_huc12_062
+// 'Olympic National Forest'
+// , 'Fremont-Winema National Forest'
+// , 'Umpqua National Forest'
+// , 'Deschutes National Forest'
+// , 'Gifford Pinchot National Forest'
+// , 'Malheur National Forest'
+
+
+// usfs_huc12_063
+// 'Ochoco National Forest'
+// , 'Wallowa-Whitman National Forest'
+// , 'Siuslaw National Forest'
+// , 'Mt. Baker-Snoqualmie National Forest'
+// , 'Umatilla National Forest'
+// , 'Colville National Forest'
+
+
+//   cnstrnt_class       n avg_pct
+//   <ord>           <int>   <dbl>
+// 1 low constraint    915   0.365
+// 2 med. constraint   607   0.306
+// 3 high constraint   969   0.345

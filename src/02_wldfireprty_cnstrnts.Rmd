@@ -208,7 +208,7 @@ kableExtra::kable(
     )
   ) |>  
   add_header_above(c(" " = 1, "Area of\nPriority Landscape"=2, "Constraint\nLeast Flexible to Most Flexible" = 5, " " = 2)) |>
-  kable_classic("striped", full_width=T) |> 
+  kable_classic(full_width=T) |> 
   pack_rows(index = table(forcats::fct_inorder(tbl_temp$state))) |> 
   kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE) |>  
   kableExtra::scroll_box(width = "740px")
@@ -663,7 +663,7 @@ kableExtra::kable(
     , "Constraint\nLeast Flexible to Most Flexible" = 5
     , " " = 2
   )) |>
-  kable_classic("striped", full_width=T) |> 
+  kable_classic(full_width=T) |> 
   pack_rows(index = table(forcats::fct_inorder(constrained_byftr_cnstrcl_wide$area_name))) |> 
   kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE) |>  
   kableExtra::scroll_box(width = "740px")
@@ -884,10 +884,9 @@ by priority landscape
     )
   ) |>  
   # add_header_above(c(" " = 1, "Hectares"=6)) |>
-  kable_classic("striped", full_width=T) |> 
+  kable_classic(full_width=T) |> 
   pack_rows(index = table(forcats::fct_inorder(area_table_temp$area_name))) |> 
-  kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE) |>  
-  kableExtra::scroll_box(width = "740px")
+  kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE)
 
 ```
 
@@ -930,11 +929,10 @@ total_area_temp <- dplyr::bind_rows(
 
 # table
   kableExtra::kable(
-    total_area_temp |> dplyr::select(-c(area_name))
-    , caption = "Wildfire Crisis Strategy Priority Landscape<br>area potentially available for mechanical treatment"
+    total_area_temp |> dplyr::select(-c(area_name,units))
+    , caption = "21 Wildfire Crisis Strategy Priority Landscapes<br>overall area potentially available for mechanical treatment"
     , col.names = c(
-      " "
-      , "Total Area"
+      "Total Area"
       , "Forested"
       , "Treatable Forest"
       , "Low Constraint HU Area"
@@ -943,10 +941,9 @@ total_area_temp <- dplyr::bind_rows(
     )
   ) |>  
   # add_header_above(c(" " = 1, "Hectares"=6)) |>
-  kable_classic("striped", full_width=T) |> 
-  pack_rows(index = table(forcats::fct_inorder(total_area_temp$area_name))) |> 
-  kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE) |>  
-  kableExtra::scroll_box(width = "740px")
+  kable_classic(full_width=T) |> 
+  # pack_rows(index = table(forcats::fct_inorder(total_area_temp$area_name))) |> 
+  kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE)
 
 ```
 
@@ -959,7 +956,6 @@ gc()
 ### Map of Subwatersheds by Level of Constraint
 
 ```{r huc12-get, results='hide'}
-unique(constrained_byftr_huc12_wide$huc12)[1:10]
 ws_bounds <- nhdplusTools::get_huc(id = unique(constrained_byftr_huc12_wide$huc12), type = 'huc12')
 # ws_bounds <- nhdplusTools::get_huc(id = 
 #     constrained_byftr_huc12_wide |> 
