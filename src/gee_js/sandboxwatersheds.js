@@ -805,35 +805,45 @@ var all_classified_ft_coll = ee.FeatureCollection(
 // 16 Fremont-Winema                                   1137662.
 // 17 Okanogan-Wenatchee                               1556457.
 
-// usfs_huc12_042
-// 'Payette National Forest'
-// , 'Salmon-Challis National Forest'
-// , 'Sawtooth National Forest'
 
 // usfs_huc12_061
 // 'Columbia River Gorge National Scenic Area'
-// , 'Okanogan-Wenatchee National Forest'
-// , 'Mt. Hood National Forest'
+
+// usfs_huc12_067
+// , 'Fremont-Winema National Forest'
+
+// usfs_huc12_068
+// , 'Wallowa-Whitman National Forest'
+
+// usfs_huc12_0611
+// 'Mt. Baker-Snoqualmie National Forest'
+
+// usfs_huc12_0612
+// 'Deschutes National Forest'
+
+// usfs_huc12_062
+// 'Mt. Hood National Forest'
 // , 'Rogue River-Siskiyou National Forests'
 // , 'Willamette National Forest'
 
-
-// usfs_huc12_062
+// usfs_huc12_063
 // 'Olympic National Forest'
-// , 'Fremont-Winema National Forest'
 // , 'Umpqua National Forest'
-// , 'Deschutes National Forest'
+
+// usfs_huc12_064
 // , 'Gifford Pinchot National Forest'
 // , 'Malheur National Forest'
 
-
-// usfs_huc12_063
+// usfs_huc12_065
 // 'Ochoco National Forest'
-// , 'Wallowa-Whitman National Forest'
 // , 'Siuslaw National Forest'
-// , 'Mt. Baker-Snoqualmie National Forest'
+
+// usfs_huc12_066
 // , 'Umatilla National Forest'
 // , 'Colville National Forest'
+
+// usfs_huc12_069
+// , 'Okanogan-Wenatchee National Forest'
 
 
 //   cnstrnt_class       n avg_pct

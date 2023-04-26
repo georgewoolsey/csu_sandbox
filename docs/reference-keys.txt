@@ -26,6 +26,7 @@ map-of-priority-landscapes
 load-landscape-level-data
 reduction-treatable-area-table-1
 forested-area-plot
+landcover-class-area
 remaining-treatable-forest-plot
 reduction-by-constraint-plot
 reduction-treatable-area-plot
@@ -36,5 +37,5 @@ distribution-of-subwatershed-constraint-1
 forested-area-by-level-of-constraint
 constraint-reduction-by-level-of-constraint
 area-available-for-mechanical-treatment
-map-of-subwatersheds-by-level-of-constraint
+wf_read_sw
 example-code-to-split-larger-polygons
