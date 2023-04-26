@@ -805,7 +805,6 @@ var all_classified_ft_coll = ee.FeatureCollection(
 // 16 Fremont-Winema                                   1137662.
 // 17 Okanogan-Wenatchee                               1556457.
 
-
 // usfs_huc12_061
 // 'Columbia River Gorge National Scenic Area'
 
@@ -815,16 +814,12 @@ var all_classified_ft_coll = ee.FeatureCollection(
 // usfs_huc12_068
 // , 'Wallowa-Whitman National Forest'
 
-// usfs_huc12_0611
-// 'Mt. Baker-Snoqualmie National Forest'
-
-// usfs_huc12_0612
-// 'Deschutes National Forest'
+// usfs_huc12_0614
+// 'Willamette National Forest'
 
 // usfs_huc12_062
 // 'Mt. Hood National Forest'
-// , 'Rogue River-Siskiyou National Forests'
-// , 'Willamette National Forest'
+
 
 // usfs_huc12_063
 // 'Olympic National Forest'
@@ -841,9 +836,18 @@ var all_classified_ft_coll = ee.FeatureCollection(
 // usfs_huc12_066
 // , 'Umatilla National Forest'
 // , 'Colville National Forest'
-
+///////////////////////////////////////////////////////////not working
 // usfs_huc12_069
 // , 'Okanogan-Wenatchee National Forest'
+
+// usfs_huc12_0611
+// 'Mt. Baker-Snoqualmie National Forest'
+
+// usfs_huc12_0612
+// 'Deschutes National Forest'
+
+// usfs_huc12_0613
+// 'Rogue River-Siskiyou National Forests'
 
 
 //   cnstrnt_class       n avg_pct

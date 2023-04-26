@@ -6,7 +6,7 @@ knitr::opts_chunk$set(
   echo = TRUE
   , warning = FALSE
   , message = FALSE
-  # , results='hide'
+  , results='hide'
   , fig.width = 10
   , fig.height = 7
 )
@@ -86,7 +86,7 @@ remove(list = ls()[grep("_temp",ls())])
 gc()
 ```
 
-## Load landscape-level data
+## Load landscape-level data{#wflndscp}
 
 Data created via this [Google Earth Engine script](https://code.earthengine.google.com/bc974ce5d2f8a25a2eb75af5766395b9?noload=true)
 
@@ -160,7 +160,15 @@ constrained_wide <- constrained_wide_byftr |>
     , pct_rdctn_total = -1*(1 - pct_rmn5_roads)
     , pct_forested_area = covertype_area_ha/feature_area_ha
   )
-
+# join with spatial data and write out
+constrained_by_wflndscp_wide_sf <- wf_landscapes |> 
+  dplyr::select(state,name,investment,tidyselect::ends_with("res")) |> 
+  dplyr::left_join(
+    constrained_wide
+    , by = dplyr::join_by(state,name)
+  )
+# save for reading later
+sf::st_write(constrained_by_wflndscp_wide_sf, "../data/constrained_by_wflndscp_wide_sf.gpkg", append=F)
 ```
 
 ## Reduction Treatable Area Table

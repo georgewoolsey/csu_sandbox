@@ -6,7 +6,7 @@ knitr::opts_chunk$set(
   echo = TRUE
   , warning = FALSE
   , message = FALSE
-  # , results='hide'
+  , results='hide'
   , fig.width = 10
   , fig.height = 7
 )
@@ -38,27 +38,16 @@ sf::sf_use_s2(FALSE)
 
 ### Read in Constraint and AOI Bounds
 
-This data was created in the [prior section](#wf_read_sw).
+This data was created in this [prior section](#wf_read_sw) and this [prior section](#wflndscp).
 
 ```{r const-rd_dta, results='hide'}
 # constraint by ftr, huc12
 constrained_byftr_huc12_wide_sf <- sf::st_read("../data/constrained_byftr_huc12_wide_sf.gpkg")
 # set crs
 transform_crs <- sf::st_crs(constrained_byftr_huc12_wide_sf)
-# ftr shapes
-wf_landscapes <- sf::read_sf("../data/Wildfire_Crisis_Strategy_Landscapes/Wildfire_Crisis_Strategy_Landscapes_(Feature_Layer).shp") |> 
-  dplyr::rename_with(tolower) |> 
-  sf::st_make_valid()
-wf_landscapes <- wf_landscapes |> 
-  sf::st_transform(transform_crs) |> 
-  dplyr::mutate(
-    hectares = (as.numeric(sf::st_area(geometry))/10000) 
-    , Mil.Hectares = hectares |> 
-      scales::comma(suffix = " M", scale = 1e-6, accuracy = .01)
-    , acres = (as.numeric(sf::st_area(geometry))/4046.85642) 
-    , Mil.Acres = acres |> 
-      scales::comma(suffix = " M", scale = 1e-6, accuracy = .01)
-  )
+# constraint by wf landscape
+constrained_by_wflndscp_wide_sf <- sf::st_read("../data/constrained_by_wflndscp_wide_sf.gpkg") |> 
+  sf::st_transform(transform_crs)
 ```
 
 
@@ -112,9 +101,10 @@ haz_fuel <- sf::st_read(
   # filter
   dplyr::filter(
     tolower(stage_value) == "accomplished"
-    & tolower(cat_nm) == "mechanical"
+    & tolower(cat_nm) %in% c("mechanical", "fire")
+    & !stringr::str_detect("pile burn", tolower(treatment_type))
     & lubridate::year(date_completed) >= lubridate::year(Sys.Date())-16
-    & lubridate::year(date_completed) < lubridate::year(Sys.Date())
+    & lubridate::year(date_completed) <= lubridate::year(Sys.Date())
   )
   #rename sf geom column
   names(haz_fuel)[names(haz_fuel)==tolower(attr(haz_fuel, "sf_column"))] = "geometry"
@@ -123,13 +113,13 @@ haz_fuel <- sf::st_read(
   haz_fuel <- haz_fuel |>  
     sf::st_transform(crs=transform_crs) |>  
     dplyr::filter(sf::st_is_valid(geometry)) |>  
-    dplyr::select(suid, treatment_type, date_completed) |>  
-    sf::st_intersection(
-      sf::st_union(usfs_forests)
-    ) |>  
+    dplyr::rename(treatment_category = cat_nm) |> 
     dplyr::mutate(
       facts_src = "haz_fuel"
-    )
+      , treatment_type = trimws(treatment_type)
+      # , treatment_area_ha = as.numeric(sf::st_area(geometry))/10000
+    ) |> 
+    dplyr::select(suid, facts_src, treatment_category, treatment_type, date_completed)
   gc()
 # timber harvest
 harvests <- sf::st_read(
@@ -145,7 +135,7 @@ harvests <- sf::st_read(
     tolower(stage_desc) == "accomplished"
     & tolower(treatment_type) != "n/a"
     & lubridate::year(date_completed) >= lubridate::year(Sys.Date())-16
-    & lubridate::year(date_completed) < lubridate::year(Sys.Date())
+    & lubridate::year(date_completed) <= lubridate::year(Sys.Date())
   )
   #rename sf geom column
   names(harvests)[names(harvests)==tolower(attr(harvests, "sf_column"))] = "geometry"
@@ -154,15 +144,95 @@ harvests <- sf::st_read(
   harvests <- harvests |>  
     sf::st_transform(crs=transform_crs) |>  
     dplyr::filter(sf::st_is_valid(geometry)) |>  
-    dplyr::select(suid, treatment_type, date_completed) |>  
-    sf::st_intersection(
-      sf::st_union(usfs_forests)
-    ) |>  
     dplyr::mutate(
       facts_src = "harvests"
+      , treatment_category = "mechanical"
       , treatment_type = trimws(treatment_type)
-    )
+      # , treatment_area_ha = as.numeric(sf::st_area(geometry))/10000
+    ) |> 
+    dplyr::select(suid, facts_src, treatment_category, treatment_type, date_completed)
+gc()
 ```
+
+Combine treatment layers with areas of interest
+
+```{r}
+# combine with wfp areas
+treatment_in_landscapes <- rbind(
+  # harvests
+    sf::st_intersection(
+      harvests
+      , constrained_by_wflndscp_wide_sf |> 
+        dplyr::select(
+          area_name
+          , tidyselect::starts_with("pct_")
+          , tidyselect::ends_with("_ha")
+        )
+    )
+  , # haz fuel
+    sf::st_intersection(
+      haz_fuel
+      , constrained_by_wflndscp_wide_sf |> 
+        dplyr::select(
+          area_name
+          , tidyselect::starts_with("pct_")
+          , tidyselect::ends_with("_ha")
+        )
+    )
+) |> 
+  dplyr::group_by(
+      facts_src
+      , treatment_category
+      , area_name
+  ) |> 
+  dplyr::summarise(
+    geometry = sf::st_union(geometry)
+    , dplyr::across(
+      c(tidyselect::starts_with("pct_"), tidyselect::ends_with("_ha"))
+      , ~ mean(.x,na.rm=T)
+    )
+  ) |> 
+  dplyr::mutate(
+    treatment_area_ha = as.numeric(sf::st_area(geometry))/10000
+  )
+
+
+
+# , treatment_area_ha = as.numeric(sf::st_area(geometry))/10000
+treatment_in_huc12 <- rbind(
+  # harvests
+    sf::st_intersection(
+      harvests
+      , constrained_byftr_huc12_wide_sf |> 
+        dplyr::select(
+          area_name
+          , huc12
+          , huc12name
+          , tidyselect::starts_with("pct_")
+          , tidyselect::ends_with("_ha")
+          , cnstrnt_class
+          , rmn_cnstrnt_class
+        )
+    )
+  , # haz fuel
+    sf::st_intersection(
+      haz_fuel
+      , constrained_byftr_huc12_wide_sf |> 
+        dplyr::select(
+          area_name
+          , huc12
+          , huc12name
+          , tidyselect::starts_with("pct_")
+          , tidyselect::ends_with("_ha")
+          , cnstrnt_class
+          , rmn_cnstrnt_class
+        )
+    )
+) |> 
+  aggregate to area, treatment
+  dplyr
+```
+
 
 ```{r, warning=F, message=F, echo=FALSE, include=FALSE}
 remove(list = c("f_nm", "fldr", "zip_path"))
