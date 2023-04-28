@@ -43,13 +43,35 @@ This data was created in this [prior section](#wf_read_sw) and this [prior secti
 
 ```{r const-rd_dta, results='hide'}
 # constraint by ftr, huc12
-constrained_byftr_huc12_wide_sf <- sf::st_read("../data/constrained_byftr_huc12_wide_sf.gpkg")
+constrained_byftr_huc12_wide_sf <- sf::st_read("../data/constrained_byftr_huc12_wide_sf.gpkg") |> 
+  dplyr::mutate(
+      cnstrnt_class = factor(
+        cnstrnt_class 
+        , levels = c("high constraint", "med. constraint", "low constraint")
+        , labels = c("high constraint", "med. constraint", "low constraint")
+        , ordered = T
+      ) |> forcats::fct_rev()
+      , rmn_cnstrnt_class = factor(
+        rmn_cnstrnt_class 
+        , levels = c("0–15% treatable", "16–35% treatable", ">35% treatable")
+        , labels = c("0–15% treatable", "16–35% treatable", ">35% treatable")
+        , ordered = T
+      ) |> forcats::fct_rev()
+    )
+#rename sf geom column
+  names(constrained_byftr_huc12_wide_sf)[names(constrained_byftr_huc12_wide_sf)==tolower(attr(constrained_byftr_huc12_wide_sf, "sf_column"))] = "geometry"
+  sf::st_geometry(constrained_byftr_huc12_wide_sf) = "geometry"
 # set crs
 transform_crs <- sf::st_crs(constrained_byftr_huc12_wide_sf)
 # constraint by wf landscape
 constrained_by_wflndscp_wide_sf <- sf::st_read("../data/constrained_by_wflndscp_wide_sf.gpkg") |> 
   sf::st_transform(transform_crs)
+#rename sf geom column
+  names(constrained_by_wflndscp_wide_sf)[names(constrained_by_wflndscp_wide_sf)==tolower(attr(constrained_by_wflndscp_wide_sf, "sf_column"))] = "geometry"
+  sf::st_geometry(constrained_by_wflndscp_wide_sf) = "geometry"
+
 # treatment targets
+googlesheets4::gs4_auth(email = "geo.woolsey@gmail.com")
 treatment_targets <- googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/1qVtOIcpJuN-7QOWY_rhnSIUGILvbOXeM_ASXxa6a5q8/edit?usp=sharing") |> 
   dplyr::inner_join(
     constrained_by_wflndscp_wide_sf |> 
@@ -79,6 +101,8 @@ The Hazardous Fuel Treatments metadata file is available [here](https://data.fs.
 [This appendix](https://www.fs.usda.gov/Internet/FSE_DOCUMENTS/fseprd539041.pdf) includes a listing of all the active and inactive FACTS activity codes, as well as detailed descriptions of some of the codes.
 
 ```{r facts-load}
+# years back to keep
+years_back <- 10
 # check for data and download
 zip_path <- c(
     "https://data.fs.usda.gov/geodata/edw/edw_resources/fc/S_USA.Activity_HazFuelTrt_PL.gdb.zip"  # haz fuel
@@ -120,9 +144,9 @@ haz_fuel <- sf::st_read(
     tolower(stage_value) == "accomplished"
     & tolower(cat_nm) %in% c("mechanical", "fire")
     & !stringr::str_detect("pile burn", tolower(treatment_type))
-    & fiscal_year_completed >= lubridate::year(Sys.Date())-16
+    & fiscal_year_completed >= lubridate::year(Sys.Date())-years_back+1
     & fiscal_year_completed <= lubridate::year(Sys.Date())
-    # & lubridate::year(date_completed) >= lubridate::year(Sys.Date())-16
+    # & lubridate::year(date_completed) >= lubridate::year(Sys.Date())-years_back+1
     # & lubridate::year(date_completed) <= lubridate::year(Sys.Date())
   )
   #rename sf geom column
@@ -159,9 +183,9 @@ harvests <- sf::st_read(
   dplyr::filter(
     tolower(stage_desc) == "accomplished"
     & tolower(treatment_type) != "n/a"
-    & fiscal_year_completed >= lubridate::year(Sys.Date())-16
+    & fiscal_year_completed >= lubridate::year(Sys.Date())-years_back+1
     & fiscal_year_completed <= lubridate::year(Sys.Date())
-    # & lubridate::year(date_completed) >= lubridate::year(Sys.Date())-16
+    # & lubridate::year(date_completed) >= lubridate::year(Sys.Date())-years_back+1
     # & lubridate::year(date_completed) <= lubridate::year(Sys.Date())
   )
   #rename sf geom column
@@ -206,6 +230,9 @@ treatment_in_landscapes <- rbind(
 ) 
 # aggregate by type, area !!!! because some treatment types might overlap spatially
 treatment_by_type_area <- treatment_in_landscapes |> 
+  sf::st_set_precision(1000000) |> 
+  sf::st_make_valid(geometry) |> 
+  dplyr::filter(sf::st_is_valid(geometry)) |>  
   dplyr::group_by(area_name, treatment_category) |> 
   dplyr::summarise(
     geometry = sf::st_union(geometry)
@@ -216,7 +243,7 @@ treatment_by_type_area <- treatment_in_landscapes |>
   dplyr::ungroup() |> 
   dplyr::mutate(
     treatment_area_ha = as.numeric(sf::st_area(geometry))/10000
-    , pot_min_fiscal_year_completed = lubridate::year(Sys.Date())-16
+    , pot_min_fiscal_year_completed = lubridate::year(Sys.Date())-years_back+1
     , pot_max_fiscal_year_completed = lubridate::year(Sys.Date())
   ) |> 
   sf::st_drop_geometry()
@@ -237,11 +264,12 @@ treatment_by_type_area <- dplyr::cross_join(
     treatment_by_type_area
     , by = dplyr::join_by(area_name, treatment_category)
   ) |> 
+  dplyr::inner_join(constrained_by_wflndscp_wide_sf |> sf::st_drop_geometry(), by = dplyr::join_by(area_name)) |> 
   dplyr::mutate(
     treatment_area_ha = ifelse(is.na(treatment_area_ha), 0, treatment_area_ha)
     , treatment_area_acres = (treatment_area_ha*10000)/4046.85642
-  ) |> 
-  dplyr::inner_join(constrained_by_wflndscp_wide_sf |> sf::st_drop_geometry(), by = dplyr::join_by(area_name))
+    , pct_treated_area = treatment_area_ha/feature_area_ha
+  )
 
 # aggregate by year, area !!!! because some treatment types might overlap spatially
 treatment_by_area_yr <- treatment_in_landscapes |> 
@@ -335,78 +363,67 @@ treatment_in_watersheds <- rbind(
     )
 ) 
 gc()
-# aggregate by year, area !!!! because some treatment types might overlap spatially
-treatment_by_cnstrnt_area_yr <- treatment_in_watersheds |> 
-  dplyr::mutate(treatment_year = lubridate::year(date_completed)) |> 
+# aggregate by trt type, area, constraint class
+treatment_by_cnstrnt_type_area <- treatment_in_watersheds |> 
   dplyr::group_by(
-      fiscal_year_completed
+      treatment_category
       , area_name
       , cnstrnt_class, rmn_cnstrnt_class
   ) |> 
-  dplyr::summarise(geometry = sf::st_union(geometry)) |> 
+  dplyr::summarise(
+    geometry = sf::st_union(geometry)
+    , n_treatments = dplyr::n_distinct(suid)
+    , min_fiscal_year_completed = min(fiscal_year_completed)
+    , max_fiscal_year_completed = max(fiscal_year_completed)
+  ) |> 
   dplyr::ungroup() |> 
   dplyr::mutate(
     treatment_area_ha = as.numeric(sf::st_area(geometry))/10000
+    , pot_min_fiscal_year_completed = lubridate::year(Sys.Date())-years_back+1
+    , pot_max_fiscal_year_completed = lubridate::year(Sys.Date())
   ) |> 
   sf::st_drop_geometry()
 gc()
-
-# aggregate by year, trt type, area
-treatment_by_cnstrnt_type_area_yr <- treatment_in_watersheds |> 
-  dplyr::mutate(treatment_year = lubridate::year(date_completed)) |> 
-  dplyr::group_by(
-      fiscal_year_completed
-      , treatment_category
-      , area_name
-      , cnstrnt_class, rmn_cnstrnt_class
-  ) |> 
-  dplyr::summarise(geometry = sf::st_union(geometry)) |> 
-  dplyr::ungroup() |> 
-  dplyr::mutate(
-    treatment_area_ha = as.numeric(sf::st_area(geometry))/10000
-  ) |> 
-  sf::st_drop_geometry()
-gc()
-
-
-# create full set of data with all possible combinations
-base_join_temp <- constrained_byftr_huc12_wide_sf |> 
-  sf::st_drop_geometry() |> 
-  dplyr::count(area_name, cnstrnt_class, rmn_cnstrnt_class) |> 
-  dplyr::select(-c(n)) |> 
-  # cross with treatment types
-  dplyr::cross_join(
-    treatment_by_cnstrnt_type_area_yr |> 
+# join with full data
+treatment_by_cnstrnt_type_area <- dplyr::cross_join(
+    # unique trt types
+    treatment_in_landscapes |> 
+      sf::st_drop_geometry() |> 
       dplyr::count(treatment_category) |> 
       dplyr::select(-c(n))
+    # unique areas
+    , constrained_by_wflndscp_wide_sf |> 
+      sf::st_drop_geometry() |> 
+      dplyr::count(area_name) |> 
+      dplyr::select(-c(n))
   ) |> 
-  # cross with years
-  dplyr::cross_join(data.frame(fiscal_year_completed = unique(treatment_by_cnstrnt_type_area_yr$fiscal_year_completed)))
-# JOIN WITH aggregated data  
-# treatment_by_type_area_yr
-  treatment_by_cnstrnt_type_area_yr <- base_join_temp |> 
-    dplyr::left_join(treatment_by_cnstrnt_type_area_yr, by = dplyr::join_by(
-      area_name,cnstrnt_class, rmn_cnstrnt_class
-      , fiscal_year_completed,treatment_category
-    )) |> 
-    dplyr::mutate(
-      treatment_area_ha = ifelse(is.na(treatment_area_ha), 0, treatment_area_ha)
-      , treatment_area_acres = (treatment_area_ha*10000)/4046.85642
-    )
-
-# treatment_by_area_yr
-  treatment_by_cnstrnt_area_yr <- base_join_temp |> 
-    dplyr::count(fiscal_year_completed, area_name, cnstrnt_class, rmn_cnstrnt_class) |> 
-    dplyr::select(-c(n)) |> 
-    dplyr::left_join(treatment_by_cnstrnt_area_yr
-      , by = dplyr::join_by(
-        fiscal_year_completed, area_name, cnstrnt_class, rmn_cnstrnt_class
-      )
-    ) |> 
-    dplyr::mutate(
-      treatment_area_ha = ifelse(is.na(treatment_area_ha), 0, treatment_area_ha)
-      , treatment_area_acres = (treatment_area_ha*10000)/4046.85642
-    ) 
+  dplyr::cross_join(
+    constrained_byftr_huc12_wide_sf |> 
+      sf::st_drop_geometry() |> 
+      dplyr::count(cnstrnt_class, rmn_cnstrnt_class) |> 
+      dplyr::select(-c(n))
+  ) |> 
+  dplyr::left_join(
+    treatment_by_cnstrnt_type_area
+    , by = dplyr::join_by(area_name, treatment_category,cnstrnt_class, rmn_cnstrnt_class)
+  ) |> 
+  dplyr::left_join(
+    sf::st_intersection(
+        constrained_byftr_huc12_wide_sf
+        , constrained_by_wflndscp_wide_sf |> 
+          dplyr::select(geometry)
+      ) |> 
+        dplyr::mutate(feature_area_ha = as.numeric(sf::st_area(geometry))/10000) |> 
+        sf::st_drop_geometry() |> 
+        dplyr::group_by(area_name, cnstrnt_class, rmn_cnstrnt_class) |> 
+        dplyr::summarise(feature_area_ha = sum(feature_area_ha))
+    , by = dplyr::join_by(area_name, cnstrnt_class, rmn_cnstrnt_class)
+  ) |> 
+  dplyr::mutate(
+    treatment_area_ha = ifelse(is.na(treatment_area_ha), 0, treatment_area_ha)
+    , treatment_area_acres = (treatment_area_ha*10000)/4046.85642
+    , pct_treated_area = treatment_area_ha/feature_area_ha
+  )
 ```
 
 ```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
@@ -489,6 +506,91 @@ kableExtra::kable(
       , file.info("../data/S_USA.Activity_HazFuelTrt_PL.gdb/")$ctime |> lubridate::as_date()
     )
     , symbol = c("overlapping area counted once")
+  )
+```
+
+## Treatment Area versus Mechanically Available Area
+
+```{r}
+ggplot(
+    data = treatment_by_type_area
+    , mapping = aes(y = pct_treated_area, x = pct_rmn5_roads, color = treatment_category)
+  ) +
+  geom_point(size = 4, alpha = 0.8) + 
+  ggrepel::geom_text_repel(
+    mapping = 
+      aes(label = stringr::str_wrap(
+        ifelse(
+          stringr::str_count(area_name, "\\w+")<4
+          , stringr::word(area_name,1,stringr::str_count(area_name, "\\w+"))
+          , stringr::word(area_name,1,4)
+        )
+        , 7)
+      )
+    , size = 1.5
+    , color = "black"
+    , segment.size = 0.2
+    , segment.alpha = 0.6
+  ) + 
+  facet_grid(cols = vars(stringr::str_to_title(treatment_category))) +
+  scale_color_manual(values = c("firebrick","navy")) +
+  scale_x_continuous(labels = scales::percent_format(), breaks = scales::extended_breaks(n=8)) +
+  scale_y_continuous(labels = scales::percent_format(), breaks = scales::extended_breaks(n=8)) +
+  labs(
+    fill = ""
+    , y = "Landscape Area Treated (%)"
+    , x = "Forested Area Mechanically Available (%)"
+    , title = paste0(
+      "Treatments Completed FY-"
+      , min(treatment_by_type_area$pot_min_fiscal_year_completed)
+      , " to FY-"
+      , max(treatment_by_type_area$pot_max_fiscal_year_completed)
+    )
+    , subtitle = "*only treatments on National Forest System lands included"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "none" # c(0.9, 0.9)
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_text(size=7)
+    , strip.text = element_text(color = "black", face = "bold")
+    , plot.title = element_text(size = 9)
+    , plot.subtitle =  element_text(size = 8)
+  )
+
+```
+
+
+## Treatment in Subwatersheds by Level of Constraint
+
+```{r}
+ggplot(
+  data = treatment_by_cnstrnt_type_area |> dplyr::filter(treatment_category=="mechanical")
+  , mapping = aes(y = cnstrnt_class, pct_treated_area, fill = cnstrnt_class)
+) +
+  geom_col(width = 0.7) +
+  geom_text(
+    mapping = aes(
+      label = scales::percent(pct_treated_area, accuracy = 1)
+    )
+    , color = "black", size = 3
+    , vjust = -0.5
+  ) +
+  scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
+  facet_wrap(
+    facets = vars(area_name)
+    , ncol = 3
+    , labeller = label_wrap_gen(width = 35, multi_line = TRUE)
+  ) +
+  scale_x_continuous(labels = scales::percent_format(), expand = expansion(mult = c(0, .3))) +
+  labs(
+    y = "Level of\nConstraint"
+    , x = "Subwatershed Area\nMechanically Treated (%)"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "none"
+    , axis.text.x = element_text(angle=90,hjust=0.95,vjust=0.2)
   )
 ```
 
