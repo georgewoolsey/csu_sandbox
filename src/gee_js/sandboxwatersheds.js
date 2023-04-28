@@ -814,12 +814,11 @@ var all_classified_ft_coll = ee.FeatureCollection(
 // usfs_huc12_068
 // , 'Wallowa-Whitman National Forest'
 
-// usfs_huc12_0614
-// 'Willamette National Forest'
+// usfs_huc12_0615
+// , 'Malheur National Forest'
 
 // usfs_huc12_062
 // 'Mt. Hood National Forest'
-
 
 // usfs_huc12_063
 // 'Olympic National Forest'
@@ -827,7 +826,6 @@ var all_classified_ft_coll = ee.FeatureCollection(
 
 // usfs_huc12_064
 // , 'Gifford Pinchot National Forest'
-// , 'Malheur National Forest'
 
 // usfs_huc12_065
 // 'Ochoco National Forest'
@@ -848,6 +846,10 @@ var all_classified_ft_coll = ee.FeatureCollection(
 
 // usfs_huc12_0613
 // 'Rogue River-Siskiyou National Forests'
+
+// usfs_huc12_0614
+// 'Willamette National Forest'
+
 
 
 //   cnstrnt_class       n avg_pct

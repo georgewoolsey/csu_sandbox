@@ -26,6 +26,7 @@ library(leafpop) #map html popup
 library(sf)
 library(USAboundaries)
 library(nhdplusTools) # watershed boundaries
+library(googlesheets4) # googlesheets4
 # set seed
 set.seed(11)
 ```
@@ -48,6 +49,17 @@ transform_crs <- sf::st_crs(constrained_byftr_huc12_wide_sf)
 # constraint by wf landscape
 constrained_by_wflndscp_wide_sf <- sf::st_read("../data/constrained_by_wflndscp_wide_sf.gpkg") |> 
   sf::st_transform(transform_crs)
+# treatment targets
+treatment_targets <- googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/1qVtOIcpJuN-7QOWY_rhnSIUGILvbOXeM_ASXxa6a5q8/edit?usp=sharing") |> 
+  dplyr::inner_join(
+    constrained_by_wflndscp_wide_sf |> 
+      sf::st_drop_geometry() |> 
+      dplyr::select(
+        state,name,area_name
+      )
+    , by = dplyr::join_by(state,name)
+  )
+
 ```
 
 
@@ -62,7 +74,7 @@ mapview::mapview(constrained_byftr_huc12_wide_sf, zcol = "cnstrnt_class"
 
 ## Forest Management Activities (FACTS)
 
-The Hazardous Fuel Treatments metadata file is available [here](https://data.fs.usda.gov/geodata/edw/edw_resources/meta/S_USA.Activity_HazFuelTrt_PL.xml). 
+The Hazardous Fuel Treatments metadata file is available [here](https://data.fs.usda.gov/geodata/edw/edw_resources/meta/S_USA.Activity_HazFuelTrt_PL.xml) and the Timber Harvests metadata file is available [here](https://data.fs.usda.gov/geodata/edw/edw_resources/meta/S_USA.Activity_TimberHarvest.xml). 
 
 [This appendix](https://www.fs.usda.gov/Internet/FSE_DOCUMENTS/fseprd539041.pdf) includes a listing of all the active and inactive FACTS activity codes, as well as detailed descriptions of some of the codes.
 
@@ -92,19 +104,26 @@ for (i in 1:length(zip_path)) {
 haz_fuel <- sf::st_read(
     dsn = "../data/S_USA.Activity_HazFuelTrt_PL.gdb/S_USA.Activity_HazFuelTrt_PL.gdb"
     , layer = "Activity_HazFuelTrt_PL"
+    # , query = "SELECT * FROM \"Activity_HazFuelTrt_PL\" 
+    #             WHERE 
+    #               STAGE_VALUE IN ('ACCOMPLISHED')
+    #               AND FISCAL_YEAR_COMPLETED = '2023'
+    #   "
   ) |>  
   rename_with(~ tolower(
     gsub(" ", "_", 
        str_trim(gsub("\\s+", " ", .x))
     )
-  )) |>  
+  )) |>
   # filter
   dplyr::filter(
     tolower(stage_value) == "accomplished"
     & tolower(cat_nm) %in% c("mechanical", "fire")
     & !stringr::str_detect("pile burn", tolower(treatment_type))
-    & lubridate::year(date_completed) >= lubridate::year(Sys.Date())-16
-    & lubridate::year(date_completed) <= lubridate::year(Sys.Date())
+    & fiscal_year_completed >= lubridate::year(Sys.Date())-16
+    & fiscal_year_completed <= lubridate::year(Sys.Date())
+    # & lubridate::year(date_completed) >= lubridate::year(Sys.Date())-16
+    # & lubridate::year(date_completed) <= lubridate::year(Sys.Date())
   )
   #rename sf geom column
   names(haz_fuel)[names(haz_fuel)==tolower(attr(haz_fuel, "sf_column"))] = "geometry"
@@ -113,29 +132,37 @@ haz_fuel <- sf::st_read(
   haz_fuel <- haz_fuel |>  
     sf::st_transform(crs=transform_crs) |>  
     dplyr::filter(sf::st_is_valid(geometry)) |>  
-    dplyr::rename(treatment_category = cat_nm) |> 
     dplyr::mutate(
       facts_src = "haz_fuel"
       , treatment_type = trimws(treatment_type)
+      , treatment_category = tolower(cat_nm)
       # , treatment_area_ha = as.numeric(sf::st_area(geometry))/10000
     ) |> 
-    dplyr::select(suid, facts_src, treatment_category, treatment_type, date_completed)
+    dplyr::select(suid, facts_src, treatment_category, treatment_type, date_completed, fiscal_year_completed)
   gc()
 # timber harvest
 harvests <- sf::st_read(
     dsn = "../data/S_USA.Activity_TimberHarvest.gdb/S_USA.Activity_TimberHarvest.gdb"
     , layer = "Activity_TimberHarvest"
+    # , query = "SELECT * FROM \"Activity_TimberHarvest\"
+    #             WHERE
+    #               STAGE_DESC IN ('ACCOMPLISHED')
+    #               AND FY_COMPLETED = '2023'
+    #   "
   ) |> 
   rename_with(~ tolower(
     gsub(" ", "_",
        str_trim(gsub("\\s+", " ", .x))
     )
   )) |>  
+  dplyr::mutate(fiscal_year_completed = as.numeric(fy_completed)) |> 
   dplyr::filter(
     tolower(stage_desc) == "accomplished"
     & tolower(treatment_type) != "n/a"
-    & lubridate::year(date_completed) >= lubridate::year(Sys.Date())-16
-    & lubridate::year(date_completed) <= lubridate::year(Sys.Date())
+    & fiscal_year_completed >= lubridate::year(Sys.Date())-16
+    & fiscal_year_completed <= lubridate::year(Sys.Date())
+    # & lubridate::year(date_completed) >= lubridate::year(Sys.Date())-16
+    # & lubridate::year(date_completed) <= lubridate::year(Sys.Date())
   )
   #rename sf geom column
   names(harvests)[names(harvests)==tolower(attr(harvests, "sf_column"))] = "geometry"
@@ -150,11 +177,16 @@ harvests <- sf::st_read(
       , treatment_type = trimws(treatment_type)
       # , treatment_area_ha = as.numeric(sf::st_area(geometry))/10000
     ) |> 
-    dplyr::select(suid, facts_src, treatment_category, treatment_type, date_completed)
+    dplyr::select(suid, facts_src, treatment_category, treatment_type, date_completed, fiscal_year_completed)
 gc()
 ```
 
-Combine treatment layers with areas of interest
+```{r, warning=F, message=F, echo=FALSE, include=FALSE}
+remove(list = c("f_nm", "fldr", "zip_path"))
+gc()
+```
+
+Combine treatment layers with landscape areas
 
 ```{r}
 # combine with wfp areas
@@ -163,956 +195,325 @@ treatment_in_landscapes <- rbind(
     sf::st_intersection(
       harvests
       , constrained_by_wflndscp_wide_sf |> 
-        dplyr::select(
-          area_name
-          , tidyselect::starts_with("pct_")
-          , tidyselect::ends_with("_ha")
-        )
+        dplyr::select(area_name)
     )
   , # haz fuel
     sf::st_intersection(
       haz_fuel
       , constrained_by_wflndscp_wide_sf |> 
-        dplyr::select(
-          area_name
-          , tidyselect::starts_with("pct_")
-          , tidyselect::ends_with("_ha")
-        )
+        dplyr::select(area_name)
     )
-) |> 
+) 
+# aggregate by type, area !!!! because some treatment types might overlap spatially
+treatment_by_type_area <- treatment_in_landscapes |> 
+  dplyr::group_by(area_name, treatment_category) |> 
+  dplyr::summarise(
+    geometry = sf::st_union(geometry)
+    , n_treatments = dplyr::n_distinct(suid)
+    , min_fiscal_year_completed = min(fiscal_year_completed)
+    , max_fiscal_year_completed = max(fiscal_year_completed)
+  ) |> 
+  dplyr::ungroup() |> 
+  dplyr::mutate(
+    treatment_area_ha = as.numeric(sf::st_area(geometry))/10000
+    , pot_min_fiscal_year_completed = lubridate::year(Sys.Date())-16
+    , pot_max_fiscal_year_completed = lubridate::year(Sys.Date())
+  ) |> 
+  sf::st_drop_geometry()
+# join with full data
+treatment_by_type_area <- dplyr::cross_join(
+    # unique trt types
+    treatment_in_landscapes |> 
+      sf::st_drop_geometry() |> 
+      dplyr::count(treatment_category) |> 
+      dplyr::select(-c(n))
+    # unique areas
+    , constrained_by_wflndscp_wide_sf |> 
+      sf::st_drop_geometry() |> 
+      dplyr::count(area_name) |> 
+      dplyr::select(-c(n))
+  ) |> 
+  dplyr::left_join(
+    treatment_by_type_area
+    , by = dplyr::join_by(area_name, treatment_category)
+  ) |> 
+  dplyr::mutate(
+    treatment_area_ha = ifelse(is.na(treatment_area_ha), 0, treatment_area_ha)
+    , treatment_area_acres = (treatment_area_ha*10000)/4046.85642
+  ) |> 
+  dplyr::inner_join(constrained_by_wflndscp_wide_sf |> sf::st_drop_geometry(), by = dplyr::join_by(area_name))
+
+# aggregate by year, area !!!! because some treatment types might overlap spatially
+treatment_by_area_yr <- treatment_in_landscapes |> 
+  dplyr::mutate(treatment_year = lubridate::year(date_completed)) |> 
   dplyr::group_by(
-      facts_src
+      fiscal_year_completed
+      , area_name
+  ) |> 
+  dplyr::summarise(geometry = sf::st_union(geometry)) |> 
+  dplyr::ungroup() |> 
+  dplyr::mutate(
+    treatment_area_ha = as.numeric(sf::st_area(geometry))/10000
+  ) |> 
+  sf::st_drop_geometry()
+
+
+# aggregate by year, trt type, area
+treatment_by_type_area_yr <- treatment_in_landscapes |> 
+  dplyr::mutate(treatment_year = lubridate::year(date_completed)) |> 
+  dplyr::group_by(
+      fiscal_year_completed
+      , facts_src
       , treatment_category
       , area_name
   ) |> 
-  dplyr::summarise(
-    geometry = sf::st_union(geometry)
-    , dplyr::across(
-      c(tidyselect::starts_with("pct_"), tidyselect::ends_with("_ha"))
-      , ~ mean(.x,na.rm=T)
-    )
-  ) |> 
+  dplyr::summarise(geometry = sf::st_union(geometry)) |> 
+  dplyr::ungroup() |> 
   dplyr::mutate(
     treatment_area_ha = as.numeric(sf::st_area(geometry))/10000
-  )
+  ) |> 
+  sf::st_drop_geometry()
 
+# create full set of data with all possible combinations
+base_join_temp <- constrained_by_wflndscp_wide_sf |> 
+  sf::st_drop_geometry() |> 
+  dplyr::count(area_name) |> 
+  dplyr::select(-c(n)) |> 
+  # cross with treatment types
+  dplyr::cross_join(
+    treatment_by_type_area_yr |> 
+      dplyr::count(facts_src,treatment_category) |> 
+      dplyr::select(-c(n))
+  ) |> 
+  # cross with years
+  dplyr::cross_join(data.frame(fiscal_year_completed = unique(treatment_by_type_area_yr$fiscal_year_completed)))
+# JOIN WITH aggregated data  
+# treatment_by_type_area_yr
+  treatment_by_type_area_yr <- base_join_temp |> 
+    dplyr::left_join(treatment_by_type_area_yr, by = dplyr::join_by(area_name,fiscal_year_completed,facts_src,treatment_category)) |> 
+    dplyr::mutate(
+      treatment_area_ha = ifelse(is.na(treatment_area_ha), 0, treatment_area_ha)
+      , treatment_label = paste0(facts_src,": ",treatment_category) |> tolower()
+      , treatment_area_acres = (treatment_area_ha*10000)/4046.85642
+    ) |> 
+    dplyr::inner_join(constrained_by_wflndscp_wide_sf |> sf::st_drop_geometry(), by = dplyr::join_by(area_name))
 
+# treatment_by_area_yr
+  treatment_by_area_yr <- base_join_temp |> 
+    dplyr::count(area_name, fiscal_year_completed) |> 
+    dplyr::select(-c(n)) |> 
+    dplyr::left_join(treatment_by_area_yr, by = dplyr::join_by(area_name,fiscal_year_completed)) |> 
+    dplyr::mutate(
+      treatment_area_ha = ifelse(is.na(treatment_area_ha), 0, treatment_area_ha)
+      , treatment_area_acres = (treatment_area_ha*10000)/4046.85642
+    ) |> 
+    dplyr::inner_join(constrained_by_wflndscp_wide_sf |> sf::st_drop_geometry(), by = dplyr::join_by(area_name))
 
-# , treatment_area_ha = as.numeric(sf::st_area(geometry))/10000
-treatment_in_huc12 <- rbind(
+```
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
+remove(list = ls()[grep("_temp",ls())])
+gc()
+```
+
+Combine treatment layers with watersheds
+
+```{r}
+# combine with wfp areas
+treatment_in_watersheds <- rbind(
   # harvests
     sf::st_intersection(
       harvests
       , constrained_byftr_huc12_wide_sf |> 
-        dplyr::select(
-          area_name
-          , huc12
-          , huc12name
-          , tidyselect::starts_with("pct_")
-          , tidyselect::ends_with("_ha")
-          , cnstrnt_class
-          , rmn_cnstrnt_class
-        )
+        dplyr::select(area_name, huc12, cnstrnt_class, rmn_cnstrnt_class)
     )
   , # haz fuel
     sf::st_intersection(
       haz_fuel
       , constrained_byftr_huc12_wide_sf |> 
-        dplyr::select(
-          area_name
-          , huc12
-          , huc12name
-          , tidyselect::starts_with("pct_")
-          , tidyselect::ends_with("_ha")
-          , cnstrnt_class
-          , rmn_cnstrnt_class
-        )
+        dplyr::select(area_name, huc12, cnstrnt_class, rmn_cnstrnt_class)
     )
-) |> 
-  aggregate to area, treatment
-  dplyr
-```
-
-
-```{r, warning=F, message=F, echo=FALSE, include=FALSE}
-remove(list = c("f_nm", "fldr", "zip_path"))
+) 
 gc()
-```
-
-### Hazardous Fuel Treatments
-
-*table shows data only for forests considered in this analysis
-
-```{r, results='asis'}
-# quick counts
-  haz_fuel |> 
-    dplyr::mutate(area_ha = as.numeric(sf::st_area(geometry))/10000) |>  
-    sf::st_set_geometry(NULL) |>  
-    dplyr::group_by(treatment_type) |>  
-    dplyr::summarize(area_ha = sum(area_ha), n = dplyr::n_distinct(suid)) |>  
-    dplyr::arrange(desc(area_ha)) |>  
-    dplyr::mutate(
-      area_ha = scales::comma(area_ha, accuracy = 1) 
-      , n = scales::comma(n, accuracy = 1) 
-    ) |>  
-    kableExtra::kable(
-      format = "html" 
-      , caption = "Hazardous Fuel Treatments (last 15 years)<br>mechanical treatments only"
-      , col.names = c(
-        "Treatment Type"
-        , "Tot. Area (ha)"
-        , "n"
-      )
-    ) |>  
-    kableExtra::kable_styling(font_size = 11)
-  
-```
-
-### Timber Harvest Treatments
-
-*table shows data only for forests considered in this analysis
-
-```{r harvest-cnt, results='asis'}
-# quick counts
-  harvests |> 
-    dplyr::mutate(area_ha = as.numeric(sf::st_area(geometry))/10000) |>  
-    sf::st_set_geometry(NULL) |>  
-    dplyr::group_by(treatment_type) |>  
-    dplyr::summarize(area_ha = sum(area_ha), n = dplyr::n_distinct(suid)) |>  
-    dplyr::arrange(desc(area_ha)) |>  
-    dplyr::mutate(area_ha = scales::comma(area_ha, accuracy = 1) ) |>  
-    kableExtra::kable(
-      format = "html" 
-      , caption = "Timber Harvest Treatments (last 15 years)"
-      , col.names = c(
-        "Treatment Type"
-        , "Tot. Area (ha)"
-        , "n"
-      )
-    ) |>  
-    kableExtra::kable_styling(font_size = 11) |>  
-    kableExtra::scroll_box(height = "300px")
-  
-```
-
-## Compare Constrained with Management Activity
-
-```{r agg-const-mgmt}
-# function to combine constraint with management data
-combine_constraint_mgmt_fn <- function(list_pos) {
-  # separate treatable and not treatable
-    ## treatable+management is going to be = 3
-    treatable <- terra::classify(
-      is_treatable_forest_list[[list_pos]]
-      , rcl = (c(1, 3) |>  matrix(ncol=2, byrow=TRUE)) 
-      , others = as.numeric(NA)
-    ) 
-    ## nottreatable+management is going to be = 2
-    nottreatable <- terra::classify(
-      is_treatable_forest_list[[list_pos]]
-      , rcl = (c(0, 2) |>  matrix(ncol=2, byrow=TRUE)) 
-      , others = as.numeric(NA)
-    ) 
-  # filter management
-    mgmt_temp <- sf::st_union( 
-        haz_fuel |>  
-          sf::st_intersection(
-            usfs_forests |>  dplyr::filter(adminforestid==admin_ids[list_pos])
-          ) |>  
-          sf::st_union() 
-        , harvests |>  
-          sf::st_intersection(
-            usfs_forests |>  dplyr::filter(adminforestid==admin_ids[list_pos])
-          ) |>  
-          sf::st_union()
-      ) |>  
-      terra::vect()
-  # combine with management activity
-  treatable_treated <- treatable |>  
-    terra::mask(mgmt_temp)
-  nottreatable_treated <- nottreatable |>  
-    terra::mask(mgmt_temp)
-  # bring all together
-  constraint_management <- terra::cover(
-    x = treatable_treated
-    , y = is_treatable_forest_list[[list_pos]]
-  )
-  constraint_management <- terra::cover(
-    x = nottreatable_treated
-    , y = constraint_management
-  )
-  return(constraint_management)
-}
-# get constraint management list of rasters
-constraint_management_list <- c(1:length(is_treatable_forest_list)) |>  
-  purrr::map(combine_constraint_mgmt_fn)
-
-# check it
-freq_table_fn <- function(x){
-  return(
-  constraint_management_list[[x]] |>  
-    terra::freq() |>  
-    dplyr::as_tibble() |>  
-    dplyr::mutate(adminforestid=admin_ids[x])
-  )
-}
-summary_table <- c(1:length(is_treatable_forest_list)) |>  
-  purrr::map(freq_table_fn) |>  
-  dplyr::bind_rows() |>  
-  dplyr::inner_join(
-    usfs_forests |>  sf::st_set_geometry(NULL)
-    , by = c("adminforestid"="adminforestid")
-  ) |>  
-  dplyr::group_by(adminforestid) |>  
-  dplyr::mutate(
-    constraint_management = ordered(
-      value
-      , levels = c(0,1,2,3)
-      , labels = c(
-        "Constrained - Not Treated"
-        , "Not Constrained - Not Treated"
-        , "Constrained - Treated"
-        , "Not Constrained - Treated"
-      )
-    )
-    , constraint = ifelse(value %in% c(0,2), "Constrained", "Not Constrained")
-    , management = ifelse(value %in% c(2,3), "Treated", "Not Treated")
-    , pct_total = count/sum(count)
-  ) |>  
-  dplyr::group_by(adminforestid, management) |>  
-  dplyr::mutate(pct_total_management = count/sum(count)) |>  
-  dplyr::ungroup()
-```
-
-### Constrained versus Managment Activity Overall
-
-```{r cnst-mgmt-tab, results='asis'}
-summary_table |>  
-  dplyr::select(adminforestid, forest_shortname, constraint_management, pct_total) |>  
-  dplyr::mutate(across(c("constraint_management"), ~gsub(" ", "", .x)) ) |>  
-  dplyr::mutate(across(c("constraint_management"), ~gsub("-", ".", .x)) ) |>  
-  dplyr::mutate(pct_total = scales::percent(pct_total, accuracy = 0.1)) |>  
-  tidyr::pivot_wider(
-    names_from = constraint_management
-    , values_from = pct_total
-  ) |>  
-  dplyr::select(
-    forest_shortname
-    , NotConstrained.NotTreated
-    , NotConstrained.Treated
-    , Constrained.NotTreated
-    , Constrained.Treated
+# aggregate by year, area !!!! because some treatment types might overlap spatially
+treatment_by_cnstrnt_area_yr <- treatment_in_watersheds |> 
+  dplyr::mutate(treatment_year = lubridate::year(date_completed)) |> 
+  dplyr::group_by(
+      fiscal_year_completed
+      , area_name
+      , cnstrnt_class, rmn_cnstrnt_class
   ) |> 
-  kableExtra::kable(
-      format = "html" 
-      , caption = "Constraint Classification versus Managment Activity"
-      , col.names = c(
-        "Forest"
-        , "Not Treated"
-        , "Treated"
-        , "Not Treated"
-        , "Treated"
-      )
-    ) |>  
-    kableExtra::kable_styling(font_size = 11) |>  
-    add_header_above(c(" " = 1, "Not Constrained" = 2, "Constrained" = 2))
-```
-
-### Constrained versus Managment Activity
-
-```{r cnst-mgmt-plot}
-summary_table |>  
-  dplyr::filter(tolower(management)=="treated") |>  
-
-# plot
-ggplot(
-    mapping = aes(x = pct_total_management, y = forest_shortname, fill = constraint)
-  ) +
-  geom_col(position = "stack", width = 0.7) +
-  geom_text(mapping = aes(label = pct_total_management |>  scales::percent(accuracy=1))
-            , position = position_stack(vjust = .5)
-  ) +
-  geom_text(mapping = aes(label = constraint)
-    , position = position_stack(vjust = .5)
-    , vjust = 2
-    , size = 3
-  ) +
-  scale_fill_manual(values = c("darkorange2","darkseagreen2")) +
-  scale_x_continuous(labels = scales::percent_format()) +
-  labs(
-    x = "% of Area with Management Activity"
-    , y = ""
-    , subtitle = "Forest Constraint Classification for Area with Management (last 15 yrs)"
-  ) +
-  theme_bw() +
-  theme(
-    legend.position = "none"
-    , plot.subtitle = element_text(size = 11)
-  )
-```
-
-*Only area with management shown in figure above.* Orange represents the area that is classified as "constrained" but on which management (hazardous fuels treatment or timber harvest) occurred in the last 15 years. This contrast indicates that the data used above may not be fully capturing the real-world operability. It also may be that the constraint scenario considered is too restrictive for the forests and treatments considered.
-
-## Constraints in Managed Area
-
-Investigate why managed area overlaps with constraints.
-
-### Map of Constraints and Management
-
-Example for `r usfs_forests |>  dplyr::filter(adminforestid==admin_ids[1]) |> dplyr::pull(commonname)`
-
-```{r ex-cnstrnt-load, include=FALSE, eval=TRUE}
-# read in gpkg
-padus_temp <- sf::st_read(
-    "../data/PADUS3_0_State_CO_GeoPackage/PADUS3_0StateCO.gpkg"
-    , layer = "PADUS3_0Combined_StateCO"
-      # read layers available in gpkg
-        # sf::st_layers("../data/PADUS3_0_State_CO_GeoPackage/PADUS3_0StateCO.gpkg")
-  ) |>  
-  dplyr::filter(GAP_Sts %in% c("1", "2", "3")) |> 
-  sf::st_transform(crs=transform_crs) |>  
+  dplyr::summarise(geometry = sf::st_union(geometry)) |> 
+  dplyr::ungroup() |> 
   dplyr::mutate(
-    gap_status = paste0("GAP Status: ", GAP_Sts)
-  )
-#rename sf geom column
-  names(padus_temp)[names(padus_temp)==tolower(attr(padus_temp, "sf_column"))] = "geometry"
-  sf::st_geometry(padus_temp) = "geometry"
-# merge with designation type description
-  padus_destp_temp <- read.csv("../data/padus_designation_type.csv")
-  padus_temp <- padus_temp |>  
-    dplyr::left_join(padus_destp_temp, by = c("Des_Tp" = "Designation.Type"))
-###################################################################
-###################################################################
-# pull in constraints for 1
-###################################################################
-###################################################################
-# filter data
-padus_gap1_temp <- padus_temp |>  
-  dplyr::filter(GAP_Sts == "1") |> 
-  sf::st_intersection(
-            usfs_forests |>  dplyr::filter(adminforestid==admin_ids[1])
-          )
-padus_gap3_temp <- padus_temp |>  dplyr::filter((GAP_Sts=="3" & Des_Tp == "IRA")) |> 
-  sf::st_intersection(
-            usfs_forests |>  dplyr::filter(adminforestid==admin_ids[1])
-          )
-forests_temp <- usfs_forests |>  dplyr::filter(adminforestid==admin_ids[1])
-mgmt_temp <- sf::st_union( 
-        haz_fuel |>  
-          sf::st_intersection(
-            usfs_forests |>  dplyr::filter(adminforestid==admin_ids[1])
-          ) |>  
-          sf::st_union() 
-        , harvests |>  
-          sf::st_intersection(
-            usfs_forests |>  dplyr::filter(adminforestid==admin_ids[1])
-          ) |>  
-          sf::st_union()
+    treatment_area_ha = as.numeric(sf::st_area(geometry))/10000
+  ) |> 
+  sf::st_drop_geometry()
+gc()
+
+# aggregate by year, trt type, area
+treatment_by_cnstrnt_type_area_yr <- treatment_in_watersheds |> 
+  dplyr::mutate(treatment_year = lubridate::year(date_completed)) |> 
+  dplyr::group_by(
+      fiscal_year_completed
+      , treatment_category
+      , area_name
+      , cnstrnt_class, rmn_cnstrnt_class
+  ) |> 
+  dplyr::summarise(geometry = sf::st_union(geometry)) |> 
+  dplyr::ungroup() |> 
+  dplyr::mutate(
+    treatment_area_ha = as.numeric(sf::st_area(geometry))/10000
+  ) |> 
+  sf::st_drop_geometry()
+gc()
+
+
+# create full set of data with all possible combinations
+base_join_temp <- constrained_byftr_huc12_wide_sf |> 
+  sf::st_drop_geometry() |> 
+  dplyr::count(area_name, cnstrnt_class, rmn_cnstrnt_class) |> 
+  dplyr::select(-c(n)) |> 
+  # cross with treatment types
+  dplyr::cross_join(
+    treatment_by_cnstrnt_type_area_yr |> 
+      dplyr::count(treatment_category) |> 
+      dplyr::select(-c(n))
+  ) |> 
+  # cross with years
+  dplyr::cross_join(data.frame(fiscal_year_completed = unique(treatment_by_cnstrnt_type_area_yr$fiscal_year_completed)))
+# JOIN WITH aggregated data  
+# treatment_by_type_area_yr
+  treatment_by_cnstrnt_type_area_yr <- base_join_temp |> 
+    dplyr::left_join(treatment_by_cnstrnt_type_area_yr, by = dplyr::join_by(
+      area_name,cnstrnt_class, rmn_cnstrnt_class
+      , fiscal_year_completed,treatment_category
+    )) |> 
+    dplyr::mutate(
+      treatment_area_ha = ifelse(is.na(treatment_area_ha), 0, treatment_area_ha)
+      , treatment_area_acres = (treatment_area_ha*10000)/4046.85642
+    )
+
+# treatment_by_area_yr
+  treatment_by_cnstrnt_area_yr <- base_join_temp |> 
+    dplyr::count(fiscal_year_completed, area_name, cnstrnt_class, rmn_cnstrnt_class) |> 
+    dplyr::select(-c(n)) |> 
+    dplyr::left_join(treatment_by_cnstrnt_area_yr
+      , by = dplyr::join_by(
+        fiscal_year_completed, area_name, cnstrnt_class, rmn_cnstrnt_class
       )
-# roadless
-is_roads_gt2000ft_temp <- terra::rast(paste0("../data/output/",admin_ids[1],"/is_roads_gt2000ft.tif")) |>
-    terra::aggregate(fact=10, fun="modal") |> 
-    stars::st_as_stars()
-# is_administrative
-is_administrative_temp <- terra::rast(paste0("../data/output/",admin_ids[1],"/is_administrative.tif")) |>
-    terra::aggregate(fact=10, fun="modal") |> 
-    stars::st_as_stars()
-# is_riparian_buffer
-is_riparian_buffer_temp <- terra::rast(paste0("../data/output/",admin_ids[1],"/is_riparian_buffer.tif")) |>
-    terra::aggregate(fact=10, fun="modal") |> 
-    stars::st_as_stars()
-
-# is_slope_gt35
-is_slope_gt35_temp <- terra::rast(paste0("../data/output/",admin_ids[1],"/is_slope_gt35.tif")) |>
-    terra::aggregate(fact=10, fun="modal") |> 
-    stars::st_as_stars()
-```
-
-
-```{r, results='asis'}
-# basemap option
-mapview::mapviewOptions(homebutton = FALSE, basemaps = c("Esri.WorldImagery"))
-# mapview::mapviewOptions(homebutton = FALSE, basemaps = c("USGS.USImagery"))
-# map
-mapview::mapview(forests_temp
-        , color = "black"
-        , lwd = 2
-        , alpha.regions = 0
-        , label = FALSE
-        , legend = FALSE
-        , layer.name = "USFS Forests"
-  ) +
-mapview::mapview( padus_gap1_temp
-        # , zcol = "GAP_Sts"
-        # , col.regions = mako(n=1, direction = -1)
-        , col.regions = "firebrick"
-        , alpha.regions = 0.6
-        , label = FALSE
-        , legend = FALSE
-        , layer.name = "PADUS - GAP 1"
-        , popup = leafpop::popupTable(
-            padus_gap1_temp
-            , zcol = c(
-              "Unit_Nm"
-              , "Des_Tp"
-              , "Mang_Type"
-            )
-            , row.numbers = FALSE
-            , feature.id = FALSE
-          )
-  ) +
-mapview::mapview( padus_gap3_temp
-        # , zcol = "GAP_Sts"
-        # , col.regions = mako(n=1, direction = -1)
-        , col.regions = "orangered"
-        , alpha.regions = 0.6
-        , label = FALSE
-        , legend = FALSE
-        , layer.name = "IRA"
-        , popup = leafpop::popupTable(
-            padus_gap3_temp
-            , zcol = c(
-              "Unit_Nm"
-              , "Des_Tp"
-              , "Mang_Type"
-            )
-            , row.numbers = FALSE
-            , feature.id = FALSE
-          )
-  ) +
-  mapview::mapview( is_administrative_temp
-        # , zcol = "GAP_Sts"
-        # , col.regions = mako(n=1, direction = -1)
-        , col.regions = "tan4"
-        , alpha.regions = 0.7
-        , na.color="transparent"
-        , label = FALSE
-        , legend = FALSE
-        , layer.name = "Administrative Bound."
-  ) +
-  mapview::mapview( is_riparian_buffer_temp
-        # , zcol = "GAP_Sts"
-        # , col.regions = mako(n=1, direction = -1)
-        , col.regions = "tan3"
-        , alpha.regions = 0.7
-        , na.color="transparent"
-        , label = FALSE
-        , legend = FALSE
-        , layer.name = "Riparian Buff."
-  ) +
-mapview::mapview( is_slope_gt35_temp
-        # , zcol = "GAP_Sts"
-        # , col.regions = mako(n=1, direction = -1)
-        , col.regions = "tan2"
-        , alpha.regions = 0.7
-        , na.color="transparent"
-        , label = FALSE
-        , legend = FALSE
-        , layer.name = "Slope>35"
-  ) +
-mapview::mapview( is_roads_gt2000ft_temp
-        # , zcol = "GAP_Sts"
-        # , col.regions = mako(n=1, direction = -1)
-        , col.regions = "tan"
-        , alpha.regions = 0.7
-        , na.color="transparent"
-        , label = FALSE
-        , legend = FALSE
-        , layer.name = "Roads>2000ft"
-  ) +
-mapview::mapview( mgmt_temp
-        # , zcol = "GAP_Sts"
-        # , col.regions = mako(n=1, direction = -1)
-        , col.regions = "blue"
-        , alpha.regions = 0.6
-        , label = FALSE
-        , legend = FALSE
-        , layer.name = "Forest Mgmt"
-  ) 
-
+    ) |> 
+    dplyr::mutate(
+      treatment_area_ha = ifelse(is.na(treatment_area_ha), 0, treatment_area_ha)
+      , treatment_area_acres = (treatment_area_ha*10000)/4046.85642
+    ) 
 ```
 
 ```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
 remove(list = ls()[grep("_temp",ls())])
+remove(harvests,haz_fuel)
 gc()
 ```
 
-### Calculate Constraints in Managed Area
+## Treatment acres by year table
 
-```{r const-mgmt-corr}
-# which constraints have the highest correlation with management actions?
-# constraints in management area function
-constraints_in_managed_fn <- function(list_pos, constraint_list){
-  # filter management to forest area
-    mgmt_temp <- sf::st_union( 
-        haz_fuel |>  
-          sf::st_intersection(
-            usfs_forests |>  dplyr::filter(adminforestid==admin_ids[list_pos])
-          ) |>  
-          sf::st_union() 
-        , harvests |>  
-          sf::st_intersection(
-            usfs_forests |>  dplyr::filter(adminforestid==admin_ids[list_pos])
-          ) |>  
-          sf::st_union()
-      )
-  # base data to bind
-  # generate total management area
-  return_dta <- data.frame(
-    adminforestid = admin_ids[list_pos]
-    , total_treated = is_treatable_forest_list[[list_pos]] |> 
-        terra::mask(
-          mgmt_temp |> terra::vect()
-        ) |> 
-        terra::freq() |> 
-        dplyr::pull(count) |> 
-        sum()
-  )
-  # calculate count of cells in each constraint
-  # combine with management activity
-  cnstrnt_dta <- c(1:length(constraint_list)) |>
-    purrr::map(function(x){
-        terra::rast(paste0("../data/output/",admin_ids[list_pos],"/",constraint_list[x],".tif")) |> 
-          terra::mask(
-            mgmt_temp |> terra::vect()
-          ) |> 
-          terra::freq() |> 
-          dplyr::pull(count) |> 
-          sum()    
-      }
-    ) |> 
-    dplyr::bind_cols()
-  names(cnstrnt_dta) <- constraint_list
-  return(
-    dplyr::bind_cols(
-      return_dta
-      , cnstrnt_dta
-    ) |> 
-    dplyr::mutate(
-      dplyr::across(3:(length(constraint_list)+2), ~ .x / total_treated)
-    ) |> 
-    dplyr::rename_with(
-      .fn = function(x){paste0("pct_",x)}
-      , .cols = 3:(length(constraint_list)+2)
-    ) |> 
-    dplyr::select(-total_treated)
-  )
-}
-# define individual constraints (.tif file names)
-  constraint_list <- c(
-    "is_protected"
-    , "is_slope_gt60"
-    , "is_administrative"
-    , "is_riparian_buffer"
-    , "is_slope_gt35"
-    , "is_roads_gt2000ft"
-  )
-# call fn
-constraints_in_managed <- c(1:length(admin_ids)) |> 
-  purrr::map(constraints_in_managed_fn, constraint_list=constraint_list) |> 
-  dplyr::bind_rows() |> 
+```{r}
+treatment_table_temp <- treatment_by_type_area_yr |> 
+  dplyr::filter(fiscal_year_completed>=2022) |> 
+  dplyr::mutate(nm = paste(facts_src,treatment_category,sep = "_")) |> 
+  dplyr::select(area_name,fiscal_year_completed,nm,tidyselect::starts_with("treatment_area")) |> 
+  tidyr::pivot_wider(
+    names_from = nm
+    , values_from = tidyselect::starts_with("treatment_area")
+    , names_glue = "{nm}_{.value}"
+    , values_fill = 0
+  ) |> 
+  # join with targets
   dplyr::left_join(
-    usfs_forests |> sf::st_set_geometry(NULL)
-    , by = c("adminforestid"="adminforestid")
+    treatment_targets |> 
+      dplyr::select(area_name, tidyselect::starts_with("target_acres_20")) |> 
+      tidyr::pivot_longer(
+        cols = tidyselect::starts_with("target_acres_20")
+        , names_to = "fiscal_year_completed"
+        , values_to = "target_area_acres"
+        , names_prefix = "target_acres_"
+        , values_drop_na = F
+      ) |> 
+      dplyr::mutate(dplyr::across(
+        c(fiscal_year_completed,target_area_acres)
+        , ~ as.numeric(.x)
+      ))
+    , by = dplyr::join_by(area_name,fiscal_year_completed)
+  ) |> 
+  dplyr::inner_join(
+    treatment_by_area_yr |> 
+      dplyr::select(area_name, fiscal_year_completed, tidyselect::starts_with("treatment_area")) |> 
+      dplyr::rename_with(
+        ~ paste0("total_", .x)
+        , tidyselect::starts_with("treatment_area")
+      )
+    , by = dplyr::join_by(area_name, fiscal_year_completed)
+  ) |> 
+  # mutates
+  dplyr::mutate(
+    pct_to_target = scales::percent(total_treatment_area_acres/target_area_acres,accuracy=0.1)
+    , dplyr::across(tidyselect::contains("_area_"), ~ scales::comma(.x,accuracy = 1))
+  )
+# make a table
+kableExtra::kable(
+    treatment_table_temp |> dplyr::select(
+      fiscal_year_completed
+      , tidyselect::ends_with("treatment_area_acres")
+      , target_area_acres
+      , pct_to_target
+    )
+    , caption = "Treatments in 21 Wildfire Crisis Strategy Priority Landscapes<br>*only treatments on National Forest System lands shown"
+    , col.names = c(
+      " "
+      , "Timber Harvest: mechanical"
+      , "Hazardous Fuel Treatment: fire"
+      , "Hazardous Fuel Treatment: mechanical"
+      , "Total Treated*"
+      , "Target Treated"
+      , "% to Target"
+    )
+  ) |>  
+  kableExtra::add_header_above(c(" " = 1, "Acres"=5," "=1)) |>
+  kableExtra::kable_classic(full_width=T) |> 
+  kableExtra::pack_rows(index = table(forcats::fct_inorder(treatment_table_temp$area_name))) |>
+  kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE) |> 
+  kableExtra::footnote(
+    general = paste0(
+      "treatment by fiscal year completed"
+      , " | last updated: "
+      , file.info("../data/S_USA.Activity_HazFuelTrt_PL.gdb/")$ctime |> lubridate::as_date()
+    )
+    , symbol = c("overlapping area counted once")
   )
 ```
 
-### Percent of Managed Area by Constraint table
+## Treatment acres by type plot
 
-```{r pct-mgmt-const-tab, results='asis'}
-constraints_in_managed |> 
-  dplyr::select(
-    forest_shortname
-    , pct_is_protected
-    , pct_is_slope_gt60
-    , pct_is_administrative
-    , pct_is_riparian_buffer
-    , pct_is_slope_gt35
-    , pct_is_roads_gt2000ft
-  ) |> 
-  dplyr::mutate(dplyr::across(.cols = tidyselect::starts_with("pct"), ~ scales::percent(.x,accuracy = 0.1))) |> 
-  kableExtra::kable(
-      format = "html" 
-      , caption = "% of Managed Area (last 15 yrs) with Constraint"
-      , col.names = c(
-        "Forest"
-        , "Protected"
-        , "Slope>60\U00B0"
-        , "Administrative"
-        , "Riparian Buffer (100ft)"
-        , "Slope>35\U00B0"
-        , "Roads>2000ft"
-      )
-    ) |>  
-    kableExtra::kable_styling(font_size = 11) |>  
-    add_header_above(c(" " = 1, "% of Managed Area" = 6))
+```{r}
+treatment_by_type_area_yr |> 
+  dplyr::filter(fiscal_year_completed>=2022)
 ```
 
-### Percent of Managed Area by Constraint plot
 
-```{r pct-mgmt-const-plt}
-constraints_in_managed |>
-  dplyr::select(forest_shortname, tidyselect::starts_with("pct_")) |> 
-  tidyr::pivot_longer(
-    cols = tidyselect::starts_with("pct_")
-    , names_to = "constraint"
-    , values_to = "pct_area"
-  ) |> 
-  dplyr::mutate(
-    constraint_orig = constraint %>% 
-      stringr::str_replace("pct_is_", "")
-    , constraint = factor(
-        constraint_orig
-        , ordered = TRUE
-        , levels = c(
-          "protected"
-          , "slope_gt60"
-          , "administrative"
-          , "riparian_buffer"
-          , "slope_gt35"
-          , "roads_gt2000ft"
-        )
-        , labels = c(
-          "Protected"
-          , "Slope>60\U00B0"
-          , "Administrative"
-          , "Riparian Buffer (100ft)"
-          , "Slope>35\U00B0"
-          , "Roads>2000ft"
-        )
-      )
-  ) |> 
+
+```{r}
+# "Hazardous Fuel Treatment"
+
 ggplot(
-    mapping = aes(y = reorder(constraint, desc(constraint)), x = pct_area)
-  ) +
-  geom_point(aes(color = forest_shortname), size = 2.5) +
-  geom_boxplot(width = 0.3, fill = NA) +
-  scale_color_viridis_d(option = "viridis", alpha = 0.8) +
-  scale_x_continuous(labels = scales::percent_format(), breaks = scales::extended_breaks(n=6)) +
-  labs(
-    x = "% of Managed Area"
-    , y = ""
-  ) +
-  theme_bw() +
+  data = treatment_by_type_area_yr
+  , mapping = aes(x = treatment_year, y = treatment_area_ha, color = treatment_label)
+) +
+  geom_line() + 
+  facet_wrap(facets = vars(area_name), ncol = 3, scales = "free_y") +
+  scale_color_brewer(type = "qual", palette = "Dark2") +
+  theme_light() + 
   theme(
     legend.position = "top"
-    , legend.title = element_blank()
-  ) +
-  guides(
-    color = guide_legend(nrow=2,byrow=TRUE,override.aes=list(size = 5))
   )
 ```
 
-```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
-remove(list = ls()[grep("_temp",ls())])
-gc()
-```
-
-## Distribution of Managment Activity Distance from Roads
-
-USFS motor vehicle use maps (MVUM)
-
-```{r mvum-read2}
-# load in roads data
-mvum_roads <- sf::st_read(
-    dsn = "../data/S_USA.Road_MVUM.gdb/S_USA.Road_MVUM.gdb"
-    , layer = "Road_MVUM"
-  ) %>% 
-  rename_with(~ tolower(
-    gsub(" ", "_", 
-       str_trim(gsub("\\s+", " ", .x))
-    )
-  )) 
-  #rename sf geom column
-  names(mvum_roads)[names(mvum_roads)==tolower(attr(mvum_roads, "sf_column"))] = "geometry"
-  sf::st_geometry(mvum_roads) = "geometry"
-  # transform and clip
-  mvum_roads <- mvum_roads %>% 
-    dplyr::filter(sf::st_is_valid(.)) %>% 
-    sf::st_transform(crs=transform_crs) %>% 
-    dplyr::mutate(data_src = "mvum_roads") %>% 
-    sf::st_intersection(.,
-          USAboundaries::us_states(states = c("CO")) %>% 
-            sf::st_transform(crs=transform_crs) %>% 
-            sf::st_buffer(5000/3.281)
-        ) %>% 
-    dplyr::select(data_src, geometry)
-# load in trails data
-mvum_trails <- sf::st_read(
-    dsn = "../data/S_USA.Trail_MVUM.gdb/S_USA.Trail_MVUM.gdb"
-    , layer = "Trail_MVUM"
-  ) %>% 
-  rename_with(~ tolower(
-    gsub(" ", "_", 
-       str_trim(gsub("\\s+", " ", .x))
-    )
-  ))
-  #rename sf geom column
-  names(mvum_trails)[names(mvum_trails)==tolower(attr(mvum_trails, "sf_column"))] = "geometry"
-  sf::st_geometry(mvum_trails) = "geometry"
-  # transform
-  mvum_trails <- mvum_trails %>% 
-    dplyr::filter(sf::st_is_valid(.)) %>% 
-    sf::st_transform(crs=transform_crs) %>% 
-    dplyr::mutate(data_src = "mvum_trails") %>% 
-    sf::st_intersection(.,
-          USAboundaries::us_states(states = c("CO")) %>% 
-            sf::st_transform(crs=transform_crs) %>% 
-            sf::st_buffer(5000/3.281)
-        ) %>% 
-    dplyr::select(data_src, geometry)
-```
-
-Load open street map roads, combine with MVUM roads, function to return the area outside of a defined buffer from all roads
-
-```{r get-all-roads}
-# get osm data function to pass to error handling in primary function
-get_big_streets_fn <- function(my_bb){
-  return(
-    my_bb %>%
-    osmdata::opq(timeout = 25*3) %>%
-    # osmdata::opq(timeout = 25*3, memsize = 1e+8) %>%
-    osmdata::add_osm_feature(key = "highway", 
-                    value = c("motorway", "primary", "motorway_link", "primary_link")) %>%
-    osmdata::osmdata_sf()
-  )
-}
-get_med_streets_fn <- function(my_bb){
-  return(
-    my_bb %>%
-    osmdata::opq(timeout = 25*3) %>%
-    # osmdata::opq(timeout = 25*3, memsize = 1e+8) %>%
-    osmdata::add_osm_feature(key = "highway", 
-                    value = c("secondary", "tertiary", "secondary_link", "tertiary_link")) %>%
-    osmdata::osmdata_sf()
-  )
-}
-get_small_streets_fn <- function(my_bb){
-  return(
-    my_bb %>%
-    osmdata::opq(timeout = 25*3) %>%
-    # osmdata::opq(timeout = 25*3, memsize = 1e+8) %>%
-    osmdata::add_osm_feature(key = "highway", 
-                    value = c("residential", "living_street",
-                              "unclassified",
-                              "service", "footway"
-                    )) %>%
-    osmdata::osmdata_sf()
-  )
-}
-# full function to return area of polygon without roads
-get_roads_fn <- function(data_row_num = 1, my_sf_data = usfs_forests) {
-  my_data <- my_sf_data %>% dplyr::filter(dplyr::row_number()==data_row_num)
-  my_buffer <- my_data %>% sf::st_buffer((5000)/3.281) # 5000 ft buffer
-  my_bb <- my_buffer %>% sf::st_transform(crs = 4326) %>% sf::st_bbox()
-  if(file.exists(
-    paste0("../data/output/"
-      , my_sf_data |> 
-        dplyr::filter(dplyr::row_number()==data_row_num) |> 
-        dplyr::pull(adminforestid)
-      ,"/all_roads.gpkg"
-    )  
-  )==T){
-    return_data <- sf::st_read(paste0("../data/output/"
-        , my_sf_data |> 
-          dplyr::filter(dplyr::row_number()==data_row_num) |> 
-          dplyr::pull(adminforestid)
-        ,"/all_roads.gpkg"
-      ))
-  }else{
-    # GET OSM STREETS
-    big_streets <- list(my_bb) %>% 
-      purrr::map(
-        purrr::possibly(
-          .f = get_big_streets_fn
-          , otherwise = list(osm_lines=data.frame())
-        )
-      )
-    med_streets <- list(my_bb) %>% 
-      purrr::map(
-        purrr::possibly(
-          .f = get_med_streets_fn
-          , otherwise = list(osm_lines=data.frame())
-        )
-      )
-    small_streets <- list(my_bb) %>% 
-      purrr::map(
-        purrr::possibly(
-          .f = get_small_streets_fn
-          , otherwise = list(osm_lines=data.frame())
-        )
-      )
-    # combine all roads
-    # combine all roads
-    return_data <- sf::st_union(
-        big_streets[[1]]$osm_lines |> 
-          dplyr::select(geometry) |> 
-          sf::st_transform(crs = transform_crs) |> 
-          sf::st_union() |> 
-          sf::st_as_sf() |> 
-          dplyr::mutate(src = "big_streets")
-        , med_streets[[1]]$osm_lines |> 
-            dplyr::select(geometry) |> 
-            sf::st_transform(crs = transform_crs) |> 
-            sf::st_union() |> 
-            sf::st_as_sf() |> 
-          dplyr::mutate(src = "med_streets")
-      ) |> 
-      sf::st_union(
-        small_streets[[1]]$osm_lines |> 
-          dplyr::select(geometry) |> 
-          sf::st_transform(crs = transform_crs) |> 
-          sf::st_union() |> 
-          sf::st_as_sf() |> 
-          dplyr::mutate(src = "small_streets")
-      ) |> 
-      sf::st_union(
-        mvum_trails |> 
-          sf::st_intersection(my_buffer) |> 
-          dplyr::select(geometry) |> 
-          sf::st_union() |> 
-          sf::st_as_sf() |> 
-          dplyr::mutate(src = "mvum_trails")
-      ) |> 
-      sf::st_union(
-        mvum_roads |> 
-          sf::st_intersection(my_buffer) |> 
-          dplyr::select(geometry) |> 
-          sf::st_union() |> 
-          sf::st_as_sf() |> 
-          dplyr::mutate(src = "mvum_roads")
-      )
-    #rename sf geom column
-      names(return_data)[names(return_data)==tolower(attr(return_data, "sf_column"))] = "geometry"
-      sf::st_geometry(return_data) = "geometry"
-      return_data <- return_data |> 
-        dplyr::select(geometry) |> 
-        dplyr::mutate(
-          adminforestid = my_sf_data |> 
-            dplyr::filter(dplyr::row_number()==data_row_num) |> 
-            dplyr::pull(adminforestid)
-        )
-    # write
-      sf::st_write(return_data, 
-                   paste0("../data/output/"
-                          ,my_sf_data |> 
-                            dplyr::filter(dplyr::row_number()==data_row_num) |> 
-                            dplyr::pull(adminforestid)
-                          ,"/all_roads.gpkg")
-                   , append = F)
-  }
-  return(return_data)
-}
-# get roads now
-all_roads <- c(1:nrow(usfs_forests)) |>
-  purrr::map(get_roads_fn, my_sf_data = usfs_forests)
-```
-
-```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
-remove(list = ls()[grep("_temp",ls())])
-gc()
-```
-
-Calculate distance from treatment unit centroid to nearest road
-
-```{r dist-to-road-calc}
-# compute distance from individual treatment centroids to nearest road
-dist_to_road_fn <- function(list_pos) {
-  # get unique treatment centriods
-  mgmt_pts <- rbind( 
-    haz_fuel |>  
-      sf::st_intersection(
-        usfs_forests |>  dplyr::filter(dplyr::row_number()==list_pos)
-      ) |>  
-      dplyr::group_by(suid) |> 
-      dplyr::summarize(
-        geometry = sf::st_union(geometry)
-      ) |> 
-      sf::st_centroid()
-    , harvests |>  
-        sf::st_intersection(
-          usfs_forests |>  dplyr::filter(dplyr::row_number()==list_pos)
-        ) |>  
-        dplyr::group_by(suid) |> 
-        dplyr::summarize(
-          geometry = sf::st_union(geometry)
-        ) |> 
-        sf::st_centroid()
-  )
-  # roads 
-  roads <- all_roads[[list_pos]]
-  # calculate distance
-  if(TRUE){
-    # THIS WORKS BECAUSE THE ROAD LAYER IS UNIONED TOGETHER SO THAT THERE IS ONLY "1" ROAD
-    pljoin <- mgmt_pts |> 
-      dplyr::mutate(
-        dist_to_road_m = sf::st_distance(mgmt_pts, roads) |> as.numeric()
-        , dist_to_road_ft =  dist_to_road_m*3.281
-        , adminforestid = roads$adminforestid[1]
-      )
-  }else{
-    nearest <- sf::st_nearest_feature(mgmt_pts, roads)
-    # use st_distance to get the element-wise distances 
-      # between each element of p and the corresponding element of l
-    dist <- sf::st_distance(mgmt_pts, roads[nearest,], by_element=TRUE)
-    # use the nearest index to do the join
-    pljoin <- cbind(mgmt_pts, sf::st_drop_geometry(roads)[nearest,]) |> 
-      dplyr::select(suid, geometry) |> 
-      dplyr::mutate(
-        dist_to_road_m = as.numeric(dist)
-        , dist_to_road_ft =  dist_to_road_m*3.281
-        , adminforestid = roads$adminforestid[1]
-      )
-  }
-  return(pljoin)
-}
-# get roads now
-dist_to_road <- c(1:nrow(usfs_forests)) |>
-  purrr::map(dist_to_road_fn) |> 
-  dplyr::bind_rows() |> 
-  dplyr::left_join(
-    usfs_forests |> sf::st_drop_geometry()
-    , by = "adminforestid"
-  )
-```
-
-### Treatment Distance to Road by Forest
-
-```{r dist-to-road-plt}
-get_box_stats <- function(y, upper_limit = max(dist_to_road$dist_to_road_ft) * 1.15) {
-  return(data.frame(
-    y = 0.95 * upper_limit,
-    label = paste(
-      "Count =", length(y) |> scales::comma(), "\n",
-      "Mean =", mean(y) |> scales::comma(accuracy = 1), "ft\n",
-      "Median =", median(y) |> scales::comma(accuracy = 1), "ft\n"
-    )
-  ))
-}
-
-
-ggplot(
-  data=dist_to_road
-  , mapping = aes(x = forest_shortname, y = dist_to_road_ft, fill = forest_shortname)
-) +
-  geom_boxplot(width = 0.6, outlier.alpha = 0.1) +
-  stat_summary(fun.data = get_box_stats, geom = "text", hjust = 0.5, vjust = 0.9, size=2.5) +
-  scale_fill_viridis_d(option = "viridis", alpha = 0.8) +
-  scale_x_discrete(labels = scales::label_wrap(15)) +
-  scale_y_continuous(labels = scales::comma_format(), breaks = scales::extended_breaks(n=15)) +
-  labs(
-    y = "Distance to Nearest Road (ft)"
-    , x = ""
-  ) +
-  theme_bw() +
-  theme(
-    legend.position = "none"
-    , axis.text.y = element_text(size=7)
-    , axis.title.y = element_text(size=7)
-  ) +
-  guides(
-    fill = guide_legend(nrow=2,byrow=TRUE,override.aes=list(size = 5))
-  )
-```
-
-The plot above displays the distribution of the distance to the nearest road from the center of each mechanical treatment polygon (hazardous fuels treatment and timber harvest).
