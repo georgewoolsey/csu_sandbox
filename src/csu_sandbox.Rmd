@@ -1,3 +1,84 @@
+--- 
+title: "Sandbox"
+author: "George Woolsey"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+output: 
+  bookdown::gitbook:
+    includes:
+      in_header: header.html
+documentclass: book
+book_filename: "csu_sandbox"
+output_dir: "../docs"
+language:
+  ui:
+    chapter_name: "Section "
+delete_merged_file: true
+bibliography: [packages.bib]
+biblio-style: apalike
+csl: https://raw.githubusercontent.com/citation-style-language/styles/master/research-institute-for-nature-and-forest.csl
+suppress-bibliography: false
+lang: en-US
+zotero: true
+link-citations: true
+description: "Using the bookdown package to write a book of data exploration. The output format for this example is bookdown::gitbook."
+---
+
+# Caution
+
+Placeholder
+
+
+
+<!--chapter:end:index.Rmd-->
+
+
+# USFS National Forests
+
+Placeholder
+
+
+## Load forest-level data
+## Reduction Treatable Area Table
+## Remaining Treatable by Forest
+## Remaining Treatable by Region
+## Reduction by Constraint by Forest
+## Reduction by Constraint by Region
+## Treatable Area Reduction by Constraint
+## Map of Treatable/Constrained
+## USFS National Forests Subwatershed Level
+### Load subwatershed-level data
+### Distribution of Subwatershed Area
+### Distribution of Subwatershed Constraint
+
+<!--chapter:end:01_usfs_cnstrnts.Rmd-->
+
+
+# Wildfire Crisis Strategy Priority Landscapes
+
+Placeholder
+
+
+## Map of Priority Landscapes
+## Load landscape-level data{#wflndscp}
+## Reduction Treatable Area Table
+## Forested Area Plot
+## Landcover Class Area
+## Remaining Treatable Forest Plot
+## Reduction by Constraint Plot
+## Reduction Treatable Area Plot
+## Wildfire Crisis Strategy Priority Landscapes Subwatershed Level
+### Load subwatershed-level data
+### Distribution of Subwatershed Area
+### Distribution of Subwatershed Constraint
+### Forested Area by Level of Constraint
+### Constraint Reduction by Level of Constraint
+### Area Available for Mechanical Treatment
+### Map of Subwatersheds by Level of Constraint{#wf_read_sw}
+## Example code to split larger polygons
+
+<!--chapter:end:02_wldfireprty_cnstrnts.Rmd-->
+
 # Constrained Area vs. Treated Area
 
 ```{r, include=FALSE, warning=F, message=F}
@@ -37,7 +118,7 @@ set.seed(11)
 sf::sf_use_s2(FALSE)
 ```
 
-### Read in Constraint and AOI Bounds
+## Read in Constraint and AOI Bounds
 
 This data was created in this [prior section](#wf_read_sw) and this [prior section](#wflndscp).
 
@@ -92,6 +173,8 @@ mapview::mapview(constrained_byftr_huc12_wide_sf, zcol = "cnstrnt_class"
   , lwd = 0.2
   , label = FALSE
   , legend = FALSE)
+xxx <- sf::st_read("../data/treatment_in_landscapes.shp")
+
 ```
 
 ## Forest Management Activities (FACTS)
@@ -246,7 +329,11 @@ treatment_by_type_area <- treatment_in_landscapes |>
     , pot_min_fiscal_year_completed = lubridate::year(Sys.Date())-years_back+1
     , pot_max_fiscal_year_completed = lubridate::year(Sys.Date())
   ) |> 
+  # !!!! write out for upload to GEE analysis of treatments by nlcd cov type
+  # sf::st_write(sf::st_collection_extract(treatment_by_type_area)
+  #            , "../data/treatment_in_landscapes.shp",append=F)
   sf::st_drop_geometry()
+
 # join with full data
 treatment_by_type_area <- dplyr::cross_join(
     # unique trt types
@@ -509,7 +596,7 @@ kableExtra::kable(
   )
 ```
 
-## Treatment Area versus Mechanically Available Area
+## Treatment area versus Mechanically Available Area
 
 ```{r}
 ggplot(
@@ -593,4 +680,114 @@ ggplot(
     , axis.text.x = element_text(size=7)
   )
 ```
+
+## Treatment by Cover Type
+
+What is the forest versus shrubland classification of the area treated? This [GEE script](https://code.earthengine.google.com/15afaf7d703102e82f82d482552b2356?noload=true) was used to calculate the area within treatment boundaries by NLCD landcover class.
+
+```{r}
+# treatment_by_type_area |> 
+#   dplyr::select(area_name,treatment_category,treatment_area_ha) |> 
+#   write.csv("../data/treatment_by_type_area.csv", row.names = F)
+
+# xxx_treatment_by_type_area <- readr::read_csv("../data/treatment_by_type_area.csv")
+# ggplot(xxx_treatment_by_type_area,aes(x=treatment_category,y=treatment_area_ha,fill=treatment_category)) +
+#   geom_col() +
+#   facet_wrap(facets = vars(area_name),ncol=3,scales = "free_y") +
+#   theme_light() +
+#   theme(legend.position = "none")
+# 
+
+treatment_in_landscapes_statistics <- readr::read_csv("../data/treatment_in_landscapes_statistics.csv") |> 
+  dplyr::rename_with(
+    ~ gsub("^\\_|\\_$", "", .x)
+    , everything()
+  ) |> 
+  dplyr::select(area_nm,tidyselect::ends_with("_m2"),tidyselect::ends_with("_fs_"),trtmnt) |> 
+  dplyr::rename(area_name = area_nm,treatment_category=trtmnt
+                ,pot_min_fiscal_year_completed=mn_fs_
+                ,pot_max_fiscal_year_completed=mx_fs_
+  ) |> 
+  dplyr::mutate(dplyr::across(
+      tidyselect::ends_with("_m2")
+      , ~ .x/10000
+    )
+  ) |> 
+  dplyr::rename_with(
+    ~ gsub("_m2", "_ha", .x)
+    , tidyselect::ends_with("_m2")
+  ) |> 
+  dplyr::group_by(area_name,treatment_category
+                  ,pot_min_fiscal_year_completed,pot_max_fiscal_year_completed
+  ) |> 
+  dplyr::summarise(
+    dplyr::across(
+      tidyselect::ends_with("_ha")
+      , ~ sum(.x,na.rm = T)
+    )
+  ) |> 
+  dplyr::ungroup()
+# plot
+treatment_in_landscapes_statistics |> 
+  dplyr::mutate(
+    dplyr::across(
+      c(forest_area_ha,shrubland_area_ha)
+      , ~ .x/feature_area_ha
+      , .names = "pct_{.col}"
+    )
+  ) |>
+  dplyr::mutate(
+    pct_other_area_ha = 1-(pct_forest_area_ha+pct_shrubland_area_ha)
+  ) |> 
+  tidyr::pivot_longer(
+      cols = tidyselect::starts_with("pct_")
+      , names_to = "class"
+      , values_to = "pct_treatment_area"
+      , names_prefix = "pct_"
+      , values_drop_na = F
+    ) |>
+  dplyr::mutate(
+    class = stringr::str_remove_all(class,"_area_ha") |> stringr::str_to_title()
+    , treatment_category = stringr::str_to_title(treatment_category)
+  ) |> 
+ggplot(
+    mapping = aes(x = pct_treatment_area, y = reorder(area_name,desc(area_name)), fill=class)
+  ) +
+  geom_col(width = 0.7, alpha=0.8) +
+  geom_text(
+    mapping = aes(
+      label = scales::percent(ifelse(pct_treatment_area>.03,pct_treatment_area,NA), accuracy = 1)
+    )
+    , position = position_stack(vjust = 0.5)
+    , color = "black", size = 3
+  ) +
+  facet_grid(cols = vars( treatment_category))+
+  scale_fill_manual(values = c("Forest"="forestgreen","Shrubland"="tan2","Other"="gray77")) +
+  scale_x_continuous(labels = scales::percent_format()) +
+  labs(
+    fill = "NLCD\nCover\nType"
+    , y = ""
+    , x = "Percent of Area Treated"
+    , title = paste0(
+      "Treatments Completed FY-"
+      , min(treatment_in_landscapes_statistics$pot_min_fiscal_year_completed)
+      , " to FY-"
+      , max(treatment_in_landscapes_statistics$pot_max_fiscal_year_completed)
+    )
+    , subtitle = "*only treatments on National Forest System lands included"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "top" # c(0.9, 0.9)
+    , legend.title = element_text(size=9)
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_text(size=7)
+    , strip.text = element_text(color = "black", face = "bold")
+    , plot.title = element_text(size = 9)
+    , plot.subtitle =  element_text(size = 8)
+  )
+```
+
+
+<!--chapter:end:03_forest_managment_constraints_facts.Rmd-->
 

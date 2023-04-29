@@ -259,7 +259,7 @@ ggplot(data = constrained_wide, mapping = aes(x = pct_forested_area, y = reorder
 
 Note, some of these areas have a very low percentage of forested area. For example, only **`r constrained_wide |> dplyr::arrange(pct_forested_area) |> dplyr::filter(dplyr::row_number()==1) |>  dplyr::pull(pct_forested_area) |> scales::percent(accuracy=1)`** of the **`r constrained_wide |> dplyr::arrange(pct_forested_area) |> dplyr::filter(dplyr::row_number()==1) |>  dplyr::pull(area_name)`** landscape is forested (NLCD class 41-43).
 
-What is the landcover classification of the remaining area? This [GEE script]() was used to calculate the area by NLCD landcover class.
+What is the landcover classification of the remaining area? This [GEE script](https://code.earthengine.google.com/69cee569d87fa6ce27723fcf579fbb32?noload=true) was used to calculate the area by NLCD landcover class.
 
 ```{r}
 # nlcd class groups
