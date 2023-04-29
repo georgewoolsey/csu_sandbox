@@ -1,9 +1,5 @@
-fig:unnamed-chunk-3
 tab:est-table
-fig:unnamed-chunk-12
 tab:est-table2
-tab:area-table-wfp
-tab:area-table-tot
 caution
 objective
 data-sources
@@ -23,7 +19,7 @@ distribution-of-subwatershed-area
 distribution-of-subwatershed-constraint
 wildfire-crisis-strategy-priority-landscapes
 map-of-priority-landscapes
-load-landscape-level-data
+wflndscp
 reduction-treatable-area-table-1
 forested-area-plot
 landcover-class-area
@@ -39,3 +35,10 @@ constraint-reduction-by-level-of-constraint
 area-available-for-mechanical-treatment
 wf_read_sw
 example-code-to-split-larger-polygons
+constrained-area-vs.-treated-area
+read-in-constraint-and-aoi-bounds
+forest-management-activities-facts
+treatment-acres-by-year-table
+treatment-area-versus-mechanically-available-area
+treatment-in-subwatersheds-by-level-of-constraint
+treatment-by-cover-type

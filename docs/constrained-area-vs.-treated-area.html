@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en-US" xml:lang="en-US">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Section 7 Constrained Area vs. Treated Area | Sandbox</title>
+  <meta name="description" content="Using the bookdown package to write a book of data exploration. The output format for this example is bookdown::gitbook." />
+  <meta name="generator" content="bookdown 0.32 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Section 7 Constrained Area vs. Treated Area | Sandbox" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="Using the bookdown package to write a book of data exploration. The output format for this example is bookdown::gitbook." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Section 7 Constrained Area vs. Treated Area | Sandbox" />
+  
+  <meta name="twitter:description" content="Using the bookdown package to write a book of data exploration. The output format for this example is bookdown::gitbook." />
+  
+
+<meta name="author" content="George Woolsey" />
+
+
+<meta name="date" content="2023-04-29" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="wildfire-crisis-strategy-priority-landscapes.html"/>
+
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<script src="libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+<script src="libs/htmlwidgets-1.6.1/htmlwidgets.js"></script>
+<link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-1.3.1/leaflet.js"></script>
+<link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
+<script src="libs/proj4-2.6.2/proj4.min.js"></script>
+<script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+<link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-binding-2.1.1/leaflet.js"></script>
+<script src="libs/leaflet-providers-1.9.0/leaflet-providers_1.9.0.js"></script>
+<script src="libs/leaflet-providers-plugin-2.1.1/leaflet-providers-plugin.js"></script>
+<script src="libs/clipboard-0.0.1/setClipboardText.js"></script>
+<link href="libs/mapviewCSS-0.0.1/mapview-popup.css" rel="stylesheet" />
+<link href="libs/mapviewCSS-0.0.1/mapview.css" rel="stylesheet" />
+<script type="text/javascript">
+
+// toggle visibility of R source blocks in R Markdown output
+function toggle_R() {
+  var x = document.getElementsByClassName('r');
+  if (x.length == 0) return;
+  function toggle_vis(o) {
+    var d = o.style.display;
+    o.style.display = (d == 'block' || d == '') ? 'none':'block';
+  }
+
+  for (i = 0; i < x.length; i++) {
+    var y = x[i];
+    if (y.tagName.toLowerCase() === 'pre') toggle_vis(y);
+  }
+
+    var elem = document.getElementById("myButton1");
+    if (elem.value === "Hide Code") elem.value = "Show Code";
+    else elem.value = "Hide Code";
+}
+
+document.write('<input onclick="toggle_R();" type="button" value="Hide Code" id="myButton1" style="position: absolute; top: 10%; right: 2%; z-index: 200"></input>')
+
+</script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Caution</a></li>
+<li class="chapter" data-level="2" data-path="objective.html"><a href="objective.html"><i class="fa fa-check"></i><b>2</b> Objective</a></li>
+<li class="chapter" data-level="3" data-path="data-sources.html"><a href="data-sources.html"><i class="fa fa-check"></i><b>3</b> Data Sources</a></li>
+<li class="chapter" data-level="4" data-path="treatable-area-scenario.html"><a href="treatable-area-scenario.html"><i class="fa fa-check"></i><b>4</b> Treatable Area Scenario</a></li>
+<li class="chapter" data-level="5" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html"><i class="fa fa-check"></i><b>5</b> USFS National Forests</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#load-forest-level-data"><i class="fa fa-check"></i><b>5.1</b> Load forest-level data</a></li>
+<li class="chapter" data-level="5.2" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#reduction-treatable-area-table"><i class="fa fa-check"></i><b>5.2</b> Reduction Treatable Area Table</a></li>
+<li class="chapter" data-level="5.3" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#remaining-treatable-by-forest"><i class="fa fa-check"></i><b>5.3</b> Remaining Treatable by Forest</a></li>
+<li class="chapter" data-level="5.4" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#remaining-treatable-by-region"><i class="fa fa-check"></i><b>5.4</b> Remaining Treatable by Region</a></li>
+<li class="chapter" data-level="5.5" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#reduction-by-constraint-by-forest"><i class="fa fa-check"></i><b>5.5</b> Reduction by Constraint by Forest</a></li>
+<li class="chapter" data-level="5.6" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#reduction-by-constraint-by-region"><i class="fa fa-check"></i><b>5.6</b> Reduction by Constraint by Region</a></li>
+<li class="chapter" data-level="5.7" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#treatable-area-reduction-by-constraint"><i class="fa fa-check"></i><b>5.7</b> Treatable Area Reduction by Constraint</a></li>
+<li class="chapter" data-level="5.8" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#map-of-treatableconstrained"><i class="fa fa-check"></i><b>5.8</b> Map of Treatable/Constrained</a></li>
+<li class="chapter" data-level="5.9" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#usfs-national-forests-subwatershed-level"><i class="fa fa-check"></i><b>5.9</b> USFS National Forests Subwatershed Level</a>
+<ul>
+<li class="chapter" data-level="5.9.1" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#load-subwatershed-level-data"><i class="fa fa-check"></i><b>5.9.1</b> Load subwatershed-level data</a></li>
+<li class="chapter" data-level="5.9.2" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#distribution-of-subwatershed-area"><i class="fa fa-check"></i><b>5.9.2</b> Distribution of Subwatershed Area</a></li>
+<li class="chapter" data-level="5.9.3" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#distribution-of-subwatershed-constraint"><i class="fa fa-check"></i><b>5.9.3</b> Distribution of Subwatershed Constraint</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="wildfire-crisis-strategy-priority-landscapes.html"><a href="wildfire-crisis-strategy-priority-landscapes.html"><i class="fa fa-check"></i><b>6</b> Wildfire Crisis Strategy Priority Landscapes</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="wildfire-crisis-strategy-priority-landscapes.html"><a href="wildfire-crisis-strategy-priority-landscapes.html#map-of-priority-landscapes"><i class="fa fa-check"></i><b>6.1</b> Map of Priority Landscapes</a></li>
+<li class="chapter" data-level="6.2" data-path="wildfire-crisis-strategy-priority-landscapes.html"><a href="wildfire-crisis-strategy-priority-landscapes.html#wflndscp"><i class="fa fa-check"></i><b>6.2</b> Load landscape-level data</a></li>
+<li class="chapter" data-level="6.3" data-path="wildfire-crisis-strategy-priority-landscapes.html"><a href="wildfire-crisis-strategy-priority-landscapes.html#reduction-treatable-area-table-1"><i class="fa fa-check"></i><b>6.3</b> Reduction Treatable Area Table</a></li>
+<li class="chapter" data-level="6.4" data-path="wildfire-crisis-strategy-priority-landscapes.html"><a href="wildfire-crisis-strategy-priority-landscapes.html#forested-area-plot"><i class="fa fa-check"></i><b>6.4</b> Forested Area Plot</a></li>
+<li class="chapter" data-level="6.5" data-path="wildfire-crisis-strategy-priority-landscapes.html"><a href="wildfire-crisis-strategy-priority-landscapes.html#landcover-class-area"><i class="fa fa-check"></i><b>6.5</b> Landcover Class Area</a></li>
+<li class="chapter" data-level="6.6" data-path="wildfire-crisis-strategy-priority-landscapes.html"><a href="wildfire-crisis-strategy-priority-landscapes.html#remaining-treatable-forest-plot"><i class="fa fa-check"></i><b>6.6</b> Remaining Treatable Forest Plot</a></li>
+<li class="chapter" data-level="6.7" data-path="wildfire-crisis-strategy-priority-landscapes.html"><a href="wildfire-crisis-strategy-priority-landscapes.html#reduction-by-constraint-plot"><i class="fa fa-check"></i><b>6.7</b> Reduction by Constraint Plot</a></li>
+<li class="chapter" data-level="6.8" data-path="wildfire-crisis-strategy-priority-landscapes.html"><a href="wildfire-crisis-strategy-priority-landscapes.html#reduction-treatable-area-plot"><i class="fa fa-check"></i><b>6.8</b> Reduction Treatable Area Plot</a></li>
+<li class="chapter" data-level="6.9" data-path="wildfire-crisis-strategy-priority-landscapes.html"><a href="wildfire-crisis-strategy-priority-landscapes.html#wildfire-crisis-strategy-priority-landscapes-subwatershed-level"><i class="fa fa-check"></i><b>6.9</b> Wildfire Crisis Strategy Priority Landscapes Subwatershed Level</a>
+<ul>
+<li class="chapter" data-level="6.9.1" data-path="wildfire-crisis-strategy-priority-landscapes.html"><a href="wildfire-crisis-strategy-priority-landscapes.html#load-subwatershed-level-data-1"><i class="fa fa-check"></i><b>6.9.1</b> Load subwatershed-level data</a></li>
+<li class="chapter" data-level="6.9.2" data-path="wildfire-crisis-strategy-priority-landscapes.html"><a href="wildfire-crisis-strategy-priority-landscapes.html#distribution-of-subwatershed-area-1"><i class="fa fa-check"></i><b>6.9.2</b> Distribution of Subwatershed Area</a></li>
+<li class="chapter" data-level="6.9.3" data-path="wildfire-crisis-strategy-priority-landscapes.html"><a href="wildfire-crisis-strategy-priority-landscapes.html#distribution-of-subwatershed-constraint-1"><i class="fa fa-check"></i><b>6.9.3</b> Distribution of Subwatershed Constraint</a></li>
+<li class="chapter" data-level="6.9.4" data-path="wildfire-crisis-strategy-priority-landscapes.html"><a href="wildfire-crisis-strategy-priority-landscapes.html#forested-area-by-level-of-constraint"><i class="fa fa-check"></i><b>6.9.4</b> Forested Area by Level of Constraint</a></li>
+<li class="chapter" data-level="6.9.5" data-path="wildfire-crisis-strategy-priority-landscapes.html"><a href="wildfire-crisis-strategy-priority-landscapes.html#constraint-reduction-by-level-of-constraint"><i class="fa fa-check"></i><b>6.9.5</b> Constraint Reduction by Level of Constraint</a></li>
+<li class="chapter" data-level="6.9.6" data-path="wildfire-crisis-strategy-priority-landscapes.html"><a href="wildfire-crisis-strategy-priority-landscapes.html#area-available-for-mechanical-treatment"><i class="fa fa-check"></i><b>6.9.6</b> Area Available for Mechanical Treatment</a></li>
+<li class="chapter" data-level="6.9.7" data-path="wildfire-crisis-strategy-priority-landscapes.html"><a href="wildfire-crisis-strategy-priority-landscapes.html#wf_read_sw"><i class="fa fa-check"></i><b>6.9.7</b> Map of Subwatersheds by Level of Constraint</a></li>
+</ul></li>
+<li class="chapter" data-level="6.10" data-path="wildfire-crisis-strategy-priority-landscapes.html"><a href="wildfire-crisis-strategy-priority-landscapes.html#example-code-to-split-larger-polygons"><i class="fa fa-check"></i><b>6.10</b> Example code to split larger polygons</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html"><i class="fa fa-check"></i><b>7</b> Constrained Area vs. Treated Area</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html#read-in-constraint-and-aoi-bounds"><i class="fa fa-check"></i><b>7.1</b> Read in Constraint and AOI Bounds</a></li>
+<li class="chapter" data-level="7.2" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html#forest-management-activities-facts"><i class="fa fa-check"></i><b>7.2</b> Forest Management Activities (FACTS)</a></li>
+<li class="chapter" data-level="7.3" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html#treatment-acres-by-year-table"><i class="fa fa-check"></i><b>7.3</b> Treatment acres by year table</a></li>
+<li class="chapter" data-level="7.4" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html#treatment-area-versus-mechanically-available-area"><i class="fa fa-check"></i><b>7.4</b> Treatment area versus Mechanically Available Area</a></li>
+<li class="chapter" data-level="7.5" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html#treatment-in-subwatersheds-by-level-of-constraint"><i class="fa fa-check"></i><b>7.5</b> Treatment in Subwatersheds by Level of Constraint</a></li>
+<li class="chapter" data-level="7.6" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html#treatment-by-cover-type"><i class="fa fa-check"></i><b>7.6</b> Treatment by Cover Type</a></li>
+</ul></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Sandbox</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="constrained-area-vs.-treated-area" class="section level1 hasAnchor" number="7">
+<h1><span class="header-section-number">Section 7</span> Constrained Area vs. Treated Area<a href="constrained-area-vs.-treated-area.html#constrained-area-vs.-treated-area" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="constrained-area-vs.-treated-area.html#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># turn off the s2 processing </span></span>
+<span id="cb33-2"><a href="constrained-area-vs.-treated-area.html#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="do">## https://stackoverflow.com/questions/68478179/how-to-resolve-spherical-geometry-failures-when-joining-spatial-data</span></span>
+<span id="cb33-3"><a href="constrained-area-vs.-treated-area.html#cb33-3" aria-hidden="true" tabindex="-1"></a>sf<span class="sc">::</span><span class="fu">sf_use_s2</span>(<span class="cn">FALSE</span>)</span></code></pre></div>
+<div id="read-in-constraint-and-aoi-bounds" class="section level2 hasAnchor" number="7.1">
+<h2><span class="header-section-number">7.1</span> Read in Constraint and AOI Bounds<a href="constrained-area-vs.-treated-area.html#read-in-constraint-and-aoi-bounds" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>This data was created in this <a href="wildfire-crisis-strategy-priority-landscapes.html#wf_read_sw">prior section</a> and this <a href="wildfire-crisis-strategy-priority-landscapes.html#wflndscp">prior section</a>.</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="constrained-area-vs.-treated-area.html#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># constraint by ftr, huc12</span></span>
+<span id="cb34-2"><a href="constrained-area-vs.-treated-area.html#cb34-2" aria-hidden="true" tabindex="-1"></a>constrained_byftr_huc12_wide_sf <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_read</span>(<span class="st">&quot;../data/constrained_byftr_huc12_wide_sf.gpkg&quot;</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb34-3"><a href="constrained-area-vs.-treated-area.html#cb34-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb34-4"><a href="constrained-area-vs.-treated-area.html#cb34-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">cnstrnt_class =</span> <span class="fu">factor</span>(</span>
+<span id="cb34-5"><a href="constrained-area-vs.-treated-area.html#cb34-5" aria-hidden="true" tabindex="-1"></a>        cnstrnt_class </span>
+<span id="cb34-6"><a href="constrained-area-vs.-treated-area.html#cb34-6" aria-hidden="true" tabindex="-1"></a>        , <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;high constraint&quot;</span>, <span class="st">&quot;med. constraint&quot;</span>, <span class="st">&quot;low constraint&quot;</span>)</span>
+<span id="cb34-7"><a href="constrained-area-vs.-treated-area.html#cb34-7" aria-hidden="true" tabindex="-1"></a>        , <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;high constraint&quot;</span>, <span class="st">&quot;med. constraint&quot;</span>, <span class="st">&quot;low constraint&quot;</span>)</span>
+<span id="cb34-8"><a href="constrained-area-vs.-treated-area.html#cb34-8" aria-hidden="true" tabindex="-1"></a>        , <span class="at">ordered =</span> T</span>
+<span id="cb34-9"><a href="constrained-area-vs.-treated-area.html#cb34-9" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">|&gt;</span> forcats<span class="sc">::</span><span class="fu">fct_rev</span>()</span>
+<span id="cb34-10"><a href="constrained-area-vs.-treated-area.html#cb34-10" aria-hidden="true" tabindex="-1"></a>      , <span class="at">rmn_cnstrnt_class =</span> <span class="fu">factor</span>(</span>
+<span id="cb34-11"><a href="constrained-area-vs.-treated-area.html#cb34-11" aria-hidden="true" tabindex="-1"></a>        rmn_cnstrnt_class </span>
+<span id="cb34-12"><a href="constrained-area-vs.-treated-area.html#cb34-12" aria-hidden="true" tabindex="-1"></a>        , <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;0–15% treatable&quot;</span>, <span class="st">&quot;16–35% treatable&quot;</span>, <span class="st">&quot;&gt;35% treatable&quot;</span>)</span>
+<span id="cb34-13"><a href="constrained-area-vs.-treated-area.html#cb34-13" aria-hidden="true" tabindex="-1"></a>        , <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;0–15% treatable&quot;</span>, <span class="st">&quot;16–35% treatable&quot;</span>, <span class="st">&quot;&gt;35% treatable&quot;</span>)</span>
+<span id="cb34-14"><a href="constrained-area-vs.-treated-area.html#cb34-14" aria-hidden="true" tabindex="-1"></a>        , <span class="at">ordered =</span> T</span>
+<span id="cb34-15"><a href="constrained-area-vs.-treated-area.html#cb34-15" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">|&gt;</span> forcats<span class="sc">::</span><span class="fu">fct_rev</span>()</span>
+<span id="cb34-16"><a href="constrained-area-vs.-treated-area.html#cb34-16" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb34-17"><a href="constrained-area-vs.-treated-area.html#cb34-17" aria-hidden="true" tabindex="-1"></a><span class="co">#rename sf geom column</span></span>
+<span id="cb34-18"><a href="constrained-area-vs.-treated-area.html#cb34-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(constrained_byftr_huc12_wide_sf)[<span class="fu">names</span>(constrained_byftr_huc12_wide_sf)<span class="sc">==</span><span class="fu">tolower</span>(<span class="fu">attr</span>(constrained_byftr_huc12_wide_sf, <span class="st">&quot;sf_column&quot;</span>))] <span class="ot">=</span> <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb34-19"><a href="constrained-area-vs.-treated-area.html#cb34-19" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_geometry</span>(constrained_byftr_huc12_wide_sf) <span class="ot">=</span> <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb34-20"><a href="constrained-area-vs.-treated-area.html#cb34-20" aria-hidden="true" tabindex="-1"></a><span class="co"># set crs</span></span>
+<span id="cb34-21"><a href="constrained-area-vs.-treated-area.html#cb34-21" aria-hidden="true" tabindex="-1"></a>transform_crs <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_crs</span>(constrained_byftr_huc12_wide_sf)</span>
+<span id="cb34-22"><a href="constrained-area-vs.-treated-area.html#cb34-22" aria-hidden="true" tabindex="-1"></a><span class="co"># constraint by wf landscape</span></span>
+<span id="cb34-23"><a href="constrained-area-vs.-treated-area.html#cb34-23" aria-hidden="true" tabindex="-1"></a>constrained_by_wflndscp_wide_sf <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_read</span>(<span class="st">&quot;../data/constrained_by_wflndscp_wide_sf.gpkg&quot;</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb34-24"><a href="constrained-area-vs.-treated-area.html#cb34-24" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_transform</span>(transform_crs)</span>
+<span id="cb34-25"><a href="constrained-area-vs.-treated-area.html#cb34-25" aria-hidden="true" tabindex="-1"></a><span class="co">#rename sf geom column</span></span>
+<span id="cb34-26"><a href="constrained-area-vs.-treated-area.html#cb34-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(constrained_by_wflndscp_wide_sf)[<span class="fu">names</span>(constrained_by_wflndscp_wide_sf)<span class="sc">==</span><span class="fu">tolower</span>(<span class="fu">attr</span>(constrained_by_wflndscp_wide_sf, <span class="st">&quot;sf_column&quot;</span>))] <span class="ot">=</span> <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb34-27"><a href="constrained-area-vs.-treated-area.html#cb34-27" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_geometry</span>(constrained_by_wflndscp_wide_sf) <span class="ot">=</span> <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb34-28"><a href="constrained-area-vs.-treated-area.html#cb34-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-29"><a href="constrained-area-vs.-treated-area.html#cb34-29" aria-hidden="true" tabindex="-1"></a><span class="co"># treatment targets</span></span>
+<span id="cb34-30"><a href="constrained-area-vs.-treated-area.html#cb34-30" aria-hidden="true" tabindex="-1"></a>googlesheets4<span class="sc">::</span><span class="fu">gs4_auth</span>(<span class="at">email =</span> <span class="st">&quot;geo.woolsey@gmail.com&quot;</span>)</span>
+<span id="cb34-31"><a href="constrained-area-vs.-treated-area.html#cb34-31" aria-hidden="true" tabindex="-1"></a>treatment_targets <span class="ot">&lt;-</span> googlesheets4<span class="sc">::</span><span class="fu">read_sheet</span>(<span class="st">&quot;https://docs.google.com/spreadsheets/d/1qVtOIcpJuN-7QOWY_rhnSIUGILvbOXeM_ASXxa6a5q8/edit?usp=sharing&quot;</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb34-32"><a href="constrained-area-vs.-treated-area.html#cb34-32" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
+<span id="cb34-33"><a href="constrained-area-vs.-treated-area.html#cb34-33" aria-hidden="true" tabindex="-1"></a>    constrained_by_wflndscp_wide_sf <span class="sc">|&gt;</span> </span>
+<span id="cb34-34"><a href="constrained-area-vs.-treated-area.html#cb34-34" aria-hidden="true" tabindex="-1"></a>      sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb34-35"><a href="constrained-area-vs.-treated-area.html#cb34-35" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="cb34-36"><a href="constrained-area-vs.-treated-area.html#cb34-36" aria-hidden="true" tabindex="-1"></a>        state,name,area_name</span>
+<span id="cb34-37"><a href="constrained-area-vs.-treated-area.html#cb34-37" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb34-38"><a href="constrained-area-vs.-treated-area.html#cb34-38" aria-hidden="true" tabindex="-1"></a>    , <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(state,name)</span>
+<span id="cb34-39"><a href="constrained-area-vs.-treated-area.html#cb34-39" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+</div>
+<div id="forest-management-activities-facts" class="section level2 hasAnchor" number="7.2">
+<h2><span class="header-section-number">7.2</span> Forest Management Activities (FACTS)<a href="constrained-area-vs.-treated-area.html#forest-management-activities-facts" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The Hazardous Fuel Treatments metadata file is available <a href="https://data.fs.usda.gov/geodata/edw/edw_resources/meta/S_USA.Activity_HazFuelTrt_PL.xml">here</a> and the Timber Harvests metadata file is available <a href="https://data.fs.usda.gov/geodata/edw/edw_resources/meta/S_USA.Activity_TimberHarvest.xml">here</a>.</p>
+<p><a href="https://www.fs.usda.gov/Internet/FSE_DOCUMENTS/fseprd539041.pdf">This appendix</a> includes a listing of all the active and inactive FACTS activity codes, as well as detailed descriptions of some of the codes.</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="constrained-area-vs.-treated-area.html#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># years back to keep</span></span>
+<span id="cb35-2"><a href="constrained-area-vs.-treated-area.html#cb35-2" aria-hidden="true" tabindex="-1"></a>years_back <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb35-3"><a href="constrained-area-vs.-treated-area.html#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="co"># check for data and download</span></span>
+<span id="cb35-4"><a href="constrained-area-vs.-treated-area.html#cb35-4" aria-hidden="true" tabindex="-1"></a>zip_path <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb35-5"><a href="constrained-area-vs.-treated-area.html#cb35-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;https://data.fs.usda.gov/geodata/edw/edw_resources/fc/S_USA.Activity_HazFuelTrt_PL.gdb.zip&quot;</span>  <span class="co"># haz fuel</span></span>
+<span id="cb35-6"><a href="constrained-area-vs.-treated-area.html#cb35-6" aria-hidden="true" tabindex="-1"></a>    , <span class="st">&quot;https://data.fs.usda.gov/geodata/edw/edw_resources/fc/S_USA.Activity_TimberHarvest.gdb.zip&quot;</span> <span class="co"># timber harv</span></span>
+<span id="cb35-7"><a href="constrained-area-vs.-treated-area.html#cb35-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb35-8"><a href="constrained-area-vs.-treated-area.html#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(zip_path)) {</span>
+<span id="cb35-9"><a href="constrained-area-vs.-treated-area.html#cb35-9" aria-hidden="true" tabindex="-1"></a>  f_nm <span class="ot">&lt;-</span> <span class="fu">paste0</span>( <span class="st">&quot;../data/&quot;</span></span>
+<span id="cb35-10"><a href="constrained-area-vs.-treated-area.html#cb35-10" aria-hidden="true" tabindex="-1"></a>    , <span class="fu">str_split</span>(zip_path[i], <span class="st">&quot;/&quot;</span>, <span class="at">simplify =</span> <span class="cn">TRUE</span>)[<span class="fu">length</span>(<span class="fu">str_split</span>(zip_path[i], <span class="st">&quot;/&quot;</span>, <span class="at">simplify =</span> <span class="cn">TRUE</span>))]</span>
+<span id="cb35-11"><a href="constrained-area-vs.-treated-area.html#cb35-11" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb35-12"><a href="constrained-area-vs.-treated-area.html#cb35-12" aria-hidden="true" tabindex="-1"></a>  fldr <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="fu">gsub</span>(<span class="st">&quot;.zip&quot;</span>, <span class="st">&quot;&quot;</span>, f_nm))</span>
+<span id="cb35-13"><a href="constrained-area-vs.-treated-area.html#cb35-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">options</span>(<span class="at">timeout =</span> <span class="dv">60</span> <span class="sc">*</span> <span class="dv">15</span>)</span>
+<span id="cb35-14"><a href="constrained-area-vs.-treated-area.html#cb35-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">file.exists</span>(fldr) <span class="sc">==</span> <span class="cn">FALSE</span>){</span>
+<span id="cb35-15"><a href="constrained-area-vs.-treated-area.html#cb35-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># download data</span></span>
+<span id="cb35-16"><a href="constrained-area-vs.-treated-area.html#cb35-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">file.exists</span>(f_nm) <span class="sc">==</span> <span class="cn">FALSE</span>){</span>
+<span id="cb35-17"><a href="constrained-area-vs.-treated-area.html#cb35-17" aria-hidden="true" tabindex="-1"></a>      <span class="fu">download.file</span>(zip_path[i], <span class="at">destfile =</span> f_nm)</span>
+<span id="cb35-18"><a href="constrained-area-vs.-treated-area.html#cb35-18" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span>{<span class="fu">print</span>(<span class="st">&quot;file already exists&quot;</span>)}</span>
+<span id="cb35-19"><a href="constrained-area-vs.-treated-area.html#cb35-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># unzip</span></span>
+<span id="cb35-20"><a href="constrained-area-vs.-treated-area.html#cb35-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unzip</span>(f_nm, <span class="at">overwrite=</span><span class="cn">TRUE</span>, <span class="at">exdir =</span> fldr)</span>
+<span id="cb35-21"><a href="constrained-area-vs.-treated-area.html#cb35-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">file.remove</span>(f_nm)</span>
+<span id="cb35-22"><a href="constrained-area-vs.-treated-area.html#cb35-22" aria-hidden="true" tabindex="-1"></a>  }<span class="cf">else</span>{<span class="fu">print</span>(<span class="st">&quot;unzip already exists&quot;</span>)}</span>
+<span id="cb35-23"><a href="constrained-area-vs.-treated-area.html#cb35-23" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb35-24"><a href="constrained-area-vs.-treated-area.html#cb35-24" aria-hidden="true" tabindex="-1"></a><span class="co"># haz_fuel</span></span>
+<span id="cb35-25"><a href="constrained-area-vs.-treated-area.html#cb35-25" aria-hidden="true" tabindex="-1"></a>haz_fuel <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_read</span>(</span>
+<span id="cb35-26"><a href="constrained-area-vs.-treated-area.html#cb35-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">dsn =</span> <span class="st">&quot;../data/S_USA.Activity_HazFuelTrt_PL.gdb/S_USA.Activity_HazFuelTrt_PL.gdb&quot;</span></span>
+<span id="cb35-27"><a href="constrained-area-vs.-treated-area.html#cb35-27" aria-hidden="true" tabindex="-1"></a>    , <span class="at">layer =</span> <span class="st">&quot;Activity_HazFuelTrt_PL&quot;</span></span>
+<span id="cb35-28"><a href="constrained-area-vs.-treated-area.html#cb35-28" aria-hidden="true" tabindex="-1"></a>    <span class="co"># , query = &quot;SELECT * FROM \&quot;Activity_HazFuelTrt_PL\&quot; </span></span>
+<span id="cb35-29"><a href="constrained-area-vs.-treated-area.html#cb35-29" aria-hidden="true" tabindex="-1"></a>    <span class="co">#             WHERE </span></span>
+<span id="cb35-30"><a href="constrained-area-vs.-treated-area.html#cb35-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">#               STAGE_VALUE IN (&#39;ACCOMPLISHED&#39;)</span></span>
+<span id="cb35-31"><a href="constrained-area-vs.-treated-area.html#cb35-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">#               AND FISCAL_YEAR_COMPLETED = &#39;2023&#39;</span></span>
+<span id="cb35-32"><a href="constrained-area-vs.-treated-area.html#cb35-32" aria-hidden="true" tabindex="-1"></a>    <span class="co">#   &quot;</span></span>
+<span id="cb35-33"><a href="constrained-area-vs.-treated-area.html#cb35-33" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span>  </span>
+<span id="cb35-34"><a href="constrained-area-vs.-treated-area.html#cb35-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename_with</span>(<span class="sc">~</span> <span class="fu">tolower</span>(</span>
+<span id="cb35-35"><a href="constrained-area-vs.-treated-area.html#cb35-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">gsub</span>(<span class="st">&quot; &quot;</span>, <span class="st">&quot;_&quot;</span>, </span>
+<span id="cb35-36"><a href="constrained-area-vs.-treated-area.html#cb35-36" aria-hidden="true" tabindex="-1"></a>       <span class="fu">str_trim</span>(<span class="fu">gsub</span>(<span class="st">&quot;</span><span class="sc">\\</span><span class="st">s+&quot;</span>, <span class="st">&quot; &quot;</span>, .x))</span>
+<span id="cb35-37"><a href="constrained-area-vs.-treated-area.html#cb35-37" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb35-38"><a href="constrained-area-vs.-treated-area.html#cb35-38" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">|&gt;</span></span>
+<span id="cb35-39"><a href="constrained-area-vs.-treated-area.html#cb35-39" aria-hidden="true" tabindex="-1"></a>  <span class="co"># filter</span></span>
+<span id="cb35-40"><a href="constrained-area-vs.-treated-area.html#cb35-40" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb35-41"><a href="constrained-area-vs.-treated-area.html#cb35-41" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tolower</span>(stage_value) <span class="sc">==</span> <span class="st">&quot;accomplished&quot;</span></span>
+<span id="cb35-42"><a href="constrained-area-vs.-treated-area.html#cb35-42" aria-hidden="true" tabindex="-1"></a>    <span class="sc">&amp;</span> <span class="fu">tolower</span>(cat_nm) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;mechanical&quot;</span>, <span class="st">&quot;fire&quot;</span>)</span>
+<span id="cb35-43"><a href="constrained-area-vs.-treated-area.html#cb35-43" aria-hidden="true" tabindex="-1"></a>    <span class="sc">&amp;</span> <span class="sc">!</span>stringr<span class="sc">::</span><span class="fu">str_detect</span>(<span class="st">&quot;pile burn&quot;</span>, <span class="fu">tolower</span>(treatment_type))</span>
+<span id="cb35-44"><a href="constrained-area-vs.-treated-area.html#cb35-44" aria-hidden="true" tabindex="-1"></a>    <span class="sc">&amp;</span> fiscal_year_completed <span class="sc">&gt;=</span> lubridate<span class="sc">::</span><span class="fu">year</span>(<span class="fu">Sys.Date</span>())<span class="sc">-</span>years_back<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb35-45"><a href="constrained-area-vs.-treated-area.html#cb35-45" aria-hidden="true" tabindex="-1"></a>    <span class="sc">&amp;</span> fiscal_year_completed <span class="sc">&lt;=</span> lubridate<span class="sc">::</span><span class="fu">year</span>(<span class="fu">Sys.Date</span>())</span>
+<span id="cb35-46"><a href="constrained-area-vs.-treated-area.html#cb35-46" aria-hidden="true" tabindex="-1"></a>    <span class="co"># &amp; lubridate::year(date_completed) &gt;= lubridate::year(Sys.Date())-years_back+1</span></span>
+<span id="cb35-47"><a href="constrained-area-vs.-treated-area.html#cb35-47" aria-hidden="true" tabindex="-1"></a>    <span class="co"># &amp; lubridate::year(date_completed) &lt;= lubridate::year(Sys.Date())</span></span>
+<span id="cb35-48"><a href="constrained-area-vs.-treated-area.html#cb35-48" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb35-49"><a href="constrained-area-vs.-treated-area.html#cb35-49" aria-hidden="true" tabindex="-1"></a>  <span class="co">#rename sf geom column</span></span>
+<span id="cb35-50"><a href="constrained-area-vs.-treated-area.html#cb35-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(haz_fuel)[<span class="fu">names</span>(haz_fuel)<span class="sc">==</span><span class="fu">tolower</span>(<span class="fu">attr</span>(haz_fuel, <span class="st">&quot;sf_column&quot;</span>))] <span class="ot">=</span> <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb35-51"><a href="constrained-area-vs.-treated-area.html#cb35-51" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_geometry</span>(haz_fuel) <span class="ot">=</span> <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb35-52"><a href="constrained-area-vs.-treated-area.html#cb35-52" aria-hidden="true" tabindex="-1"></a>  <span class="co"># transform</span></span>
+<span id="cb35-53"><a href="constrained-area-vs.-treated-area.html#cb35-53" aria-hidden="true" tabindex="-1"></a>  haz_fuel <span class="ot">&lt;-</span> haz_fuel <span class="sc">|&gt;</span>  </span>
+<span id="cb35-54"><a href="constrained-area-vs.-treated-area.html#cb35-54" aria-hidden="true" tabindex="-1"></a>    sf<span class="sc">::</span><span class="fu">st_transform</span>(<span class="at">crs=</span>transform_crs) <span class="sc">|&gt;</span>  </span>
+<span id="cb35-55"><a href="constrained-area-vs.-treated-area.html#cb35-55" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(sf<span class="sc">::</span><span class="fu">st_is_valid</span>(geometry)) <span class="sc">|&gt;</span>  </span>
+<span id="cb35-56"><a href="constrained-area-vs.-treated-area.html#cb35-56" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb35-57"><a href="constrained-area-vs.-treated-area.html#cb35-57" aria-hidden="true" tabindex="-1"></a>      <span class="at">facts_src =</span> <span class="st">&quot;haz_fuel&quot;</span></span>
+<span id="cb35-58"><a href="constrained-area-vs.-treated-area.html#cb35-58" aria-hidden="true" tabindex="-1"></a>      , <span class="at">treatment_type =</span> <span class="fu">trimws</span>(treatment_type)</span>
+<span id="cb35-59"><a href="constrained-area-vs.-treated-area.html#cb35-59" aria-hidden="true" tabindex="-1"></a>      , <span class="at">treatment_category =</span> <span class="fu">tolower</span>(cat_nm)</span>
+<span id="cb35-60"><a href="constrained-area-vs.-treated-area.html#cb35-60" aria-hidden="true" tabindex="-1"></a>      <span class="co"># , treatment_area_ha = as.numeric(sf::st_area(geometry))/10000</span></span>
+<span id="cb35-61"><a href="constrained-area-vs.-treated-area.html#cb35-61" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb35-62"><a href="constrained-area-vs.-treated-area.html#cb35-62" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(suid, facts_src, treatment_category, treatment_type, date_completed, fiscal_year_completed)</span>
+<span id="cb35-63"><a href="constrained-area-vs.-treated-area.html#cb35-63" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gc</span>()</span>
+<span id="cb35-64"><a href="constrained-area-vs.-treated-area.html#cb35-64" aria-hidden="true" tabindex="-1"></a><span class="co"># timber harvest</span></span>
+<span id="cb35-65"><a href="constrained-area-vs.-treated-area.html#cb35-65" aria-hidden="true" tabindex="-1"></a>harvests <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_read</span>(</span>
+<span id="cb35-66"><a href="constrained-area-vs.-treated-area.html#cb35-66" aria-hidden="true" tabindex="-1"></a>    <span class="at">dsn =</span> <span class="st">&quot;../data/S_USA.Activity_TimberHarvest.gdb/S_USA.Activity_TimberHarvest.gdb&quot;</span></span>
+<span id="cb35-67"><a href="constrained-area-vs.-treated-area.html#cb35-67" aria-hidden="true" tabindex="-1"></a>    , <span class="at">layer =</span> <span class="st">&quot;Activity_TimberHarvest&quot;</span></span>
+<span id="cb35-68"><a href="constrained-area-vs.-treated-area.html#cb35-68" aria-hidden="true" tabindex="-1"></a>    <span class="co"># , query = &quot;SELECT * FROM \&quot;Activity_TimberHarvest\&quot;</span></span>
+<span id="cb35-69"><a href="constrained-area-vs.-treated-area.html#cb35-69" aria-hidden="true" tabindex="-1"></a>    <span class="co">#             WHERE</span></span>
+<span id="cb35-70"><a href="constrained-area-vs.-treated-area.html#cb35-70" aria-hidden="true" tabindex="-1"></a>    <span class="co">#               STAGE_DESC IN (&#39;ACCOMPLISHED&#39;)</span></span>
+<span id="cb35-71"><a href="constrained-area-vs.-treated-area.html#cb35-71" aria-hidden="true" tabindex="-1"></a>    <span class="co">#               AND FY_COMPLETED = &#39;2023&#39;</span></span>
+<span id="cb35-72"><a href="constrained-area-vs.-treated-area.html#cb35-72" aria-hidden="true" tabindex="-1"></a>    <span class="co">#   &quot;</span></span>
+<span id="cb35-73"><a href="constrained-area-vs.-treated-area.html#cb35-73" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb35-74"><a href="constrained-area-vs.-treated-area.html#cb35-74" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename_with</span>(<span class="sc">~</span> <span class="fu">tolower</span>(</span>
+<span id="cb35-75"><a href="constrained-area-vs.-treated-area.html#cb35-75" aria-hidden="true" tabindex="-1"></a>    <span class="fu">gsub</span>(<span class="st">&quot; &quot;</span>, <span class="st">&quot;_&quot;</span>,</span>
+<span id="cb35-76"><a href="constrained-area-vs.-treated-area.html#cb35-76" aria-hidden="true" tabindex="-1"></a>       <span class="fu">str_trim</span>(<span class="fu">gsub</span>(<span class="st">&quot;</span><span class="sc">\\</span><span class="st">s+&quot;</span>, <span class="st">&quot; &quot;</span>, .x))</span>
+<span id="cb35-77"><a href="constrained-area-vs.-treated-area.html#cb35-77" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb35-78"><a href="constrained-area-vs.-treated-area.html#cb35-78" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">|&gt;</span>  </span>
+<span id="cb35-79"><a href="constrained-area-vs.-treated-area.html#cb35-79" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">fiscal_year_completed =</span> <span class="fu">as.numeric</span>(fy_completed)) <span class="sc">|&gt;</span> </span>
+<span id="cb35-80"><a href="constrained-area-vs.-treated-area.html#cb35-80" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb35-81"><a href="constrained-area-vs.-treated-area.html#cb35-81" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tolower</span>(stage_desc) <span class="sc">==</span> <span class="st">&quot;accomplished&quot;</span></span>
+<span id="cb35-82"><a href="constrained-area-vs.-treated-area.html#cb35-82" aria-hidden="true" tabindex="-1"></a>    <span class="sc">&amp;</span> <span class="fu">tolower</span>(treatment_type) <span class="sc">!=</span> <span class="st">&quot;n/a&quot;</span></span>
+<span id="cb35-83"><a href="constrained-area-vs.-treated-area.html#cb35-83" aria-hidden="true" tabindex="-1"></a>    <span class="sc">&amp;</span> fiscal_year_completed <span class="sc">&gt;=</span> lubridate<span class="sc">::</span><span class="fu">year</span>(<span class="fu">Sys.Date</span>())<span class="sc">-</span>years_back<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb35-84"><a href="constrained-area-vs.-treated-area.html#cb35-84" aria-hidden="true" tabindex="-1"></a>    <span class="sc">&amp;</span> fiscal_year_completed <span class="sc">&lt;=</span> lubridate<span class="sc">::</span><span class="fu">year</span>(<span class="fu">Sys.Date</span>())</span>
+<span id="cb35-85"><a href="constrained-area-vs.-treated-area.html#cb35-85" aria-hidden="true" tabindex="-1"></a>    <span class="co"># &amp; lubridate::year(date_completed) &gt;= lubridate::year(Sys.Date())-years_back+1</span></span>
+<span id="cb35-86"><a href="constrained-area-vs.-treated-area.html#cb35-86" aria-hidden="true" tabindex="-1"></a>    <span class="co"># &amp; lubridate::year(date_completed) &lt;= lubridate::year(Sys.Date())</span></span>
+<span id="cb35-87"><a href="constrained-area-vs.-treated-area.html#cb35-87" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb35-88"><a href="constrained-area-vs.-treated-area.html#cb35-88" aria-hidden="true" tabindex="-1"></a>  <span class="co">#rename sf geom column</span></span>
+<span id="cb35-89"><a href="constrained-area-vs.-treated-area.html#cb35-89" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(harvests)[<span class="fu">names</span>(harvests)<span class="sc">==</span><span class="fu">tolower</span>(<span class="fu">attr</span>(harvests, <span class="st">&quot;sf_column&quot;</span>))] <span class="ot">=</span> <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb35-90"><a href="constrained-area-vs.-treated-area.html#cb35-90" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_geometry</span>(harvests) <span class="ot">=</span> <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb35-91"><a href="constrained-area-vs.-treated-area.html#cb35-91" aria-hidden="true" tabindex="-1"></a>  <span class="co"># transform</span></span>
+<span id="cb35-92"><a href="constrained-area-vs.-treated-area.html#cb35-92" aria-hidden="true" tabindex="-1"></a>  harvests <span class="ot">&lt;-</span> harvests <span class="sc">|&gt;</span>  </span>
+<span id="cb35-93"><a href="constrained-area-vs.-treated-area.html#cb35-93" aria-hidden="true" tabindex="-1"></a>    sf<span class="sc">::</span><span class="fu">st_transform</span>(<span class="at">crs=</span>transform_crs) <span class="sc">|&gt;</span>  </span>
+<span id="cb35-94"><a href="constrained-area-vs.-treated-area.html#cb35-94" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(sf<span class="sc">::</span><span class="fu">st_is_valid</span>(geometry)) <span class="sc">|&gt;</span>  </span>
+<span id="cb35-95"><a href="constrained-area-vs.-treated-area.html#cb35-95" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb35-96"><a href="constrained-area-vs.-treated-area.html#cb35-96" aria-hidden="true" tabindex="-1"></a>      <span class="at">facts_src =</span> <span class="st">&quot;harvests&quot;</span></span>
+<span id="cb35-97"><a href="constrained-area-vs.-treated-area.html#cb35-97" aria-hidden="true" tabindex="-1"></a>      , <span class="at">treatment_category =</span> <span class="st">&quot;mechanical&quot;</span></span>
+<span id="cb35-98"><a href="constrained-area-vs.-treated-area.html#cb35-98" aria-hidden="true" tabindex="-1"></a>      , <span class="at">treatment_type =</span> <span class="fu">trimws</span>(treatment_type)</span>
+<span id="cb35-99"><a href="constrained-area-vs.-treated-area.html#cb35-99" aria-hidden="true" tabindex="-1"></a>      <span class="co"># , treatment_area_ha = as.numeric(sf::st_area(geometry))/10000</span></span>
+<span id="cb35-100"><a href="constrained-area-vs.-treated-area.html#cb35-100" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb35-101"><a href="constrained-area-vs.-treated-area.html#cb35-101" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(suid, facts_src, treatment_category, treatment_type, date_completed, fiscal_year_completed)</span>
+<span id="cb35-102"><a href="constrained-area-vs.-treated-area.html#cb35-102" aria-hidden="true" tabindex="-1"></a><span class="fu">gc</span>()</span></code></pre></div>
+<p>Combine treatment layers with landscape areas</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="constrained-area-vs.-treated-area.html#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># combine with wfp areas</span></span>
+<span id="cb36-2"><a href="constrained-area-vs.-treated-area.html#cb36-2" aria-hidden="true" tabindex="-1"></a>treatment_in_landscapes <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb36-3"><a href="constrained-area-vs.-treated-area.html#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># harvests</span></span>
+<span id="cb36-4"><a href="constrained-area-vs.-treated-area.html#cb36-4" aria-hidden="true" tabindex="-1"></a>    sf<span class="sc">::</span><span class="fu">st_intersection</span>(</span>
+<span id="cb36-5"><a href="constrained-area-vs.-treated-area.html#cb36-5" aria-hidden="true" tabindex="-1"></a>      harvests</span>
+<span id="cb36-6"><a href="constrained-area-vs.-treated-area.html#cb36-6" aria-hidden="true" tabindex="-1"></a>      , constrained_by_wflndscp_wide_sf <span class="sc">|&gt;</span> </span>
+<span id="cb36-7"><a href="constrained-area-vs.-treated-area.html#cb36-7" aria-hidden="true" tabindex="-1"></a>        dplyr<span class="sc">::</span><span class="fu">select</span>(area_name)</span>
+<span id="cb36-8"><a href="constrained-area-vs.-treated-area.html#cb36-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb36-9"><a href="constrained-area-vs.-treated-area.html#cb36-9" aria-hidden="true" tabindex="-1"></a>  , <span class="co"># haz fuel</span></span>
+<span id="cb36-10"><a href="constrained-area-vs.-treated-area.html#cb36-10" aria-hidden="true" tabindex="-1"></a>    sf<span class="sc">::</span><span class="fu">st_intersection</span>(</span>
+<span id="cb36-11"><a href="constrained-area-vs.-treated-area.html#cb36-11" aria-hidden="true" tabindex="-1"></a>      haz_fuel</span>
+<span id="cb36-12"><a href="constrained-area-vs.-treated-area.html#cb36-12" aria-hidden="true" tabindex="-1"></a>      , constrained_by_wflndscp_wide_sf <span class="sc">|&gt;</span> </span>
+<span id="cb36-13"><a href="constrained-area-vs.-treated-area.html#cb36-13" aria-hidden="true" tabindex="-1"></a>        dplyr<span class="sc">::</span><span class="fu">select</span>(area_name)</span>
+<span id="cb36-14"><a href="constrained-area-vs.-treated-area.html#cb36-14" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb36-15"><a href="constrained-area-vs.-treated-area.html#cb36-15" aria-hidden="true" tabindex="-1"></a>) </span>
+<span id="cb36-16"><a href="constrained-area-vs.-treated-area.html#cb36-16" aria-hidden="true" tabindex="-1"></a><span class="co"># aggregate by type, area !!!! because some treatment types might overlap spatially</span></span>
+<span id="cb36-17"><a href="constrained-area-vs.-treated-area.html#cb36-17" aria-hidden="true" tabindex="-1"></a>treatment_by_type_area <span class="ot">&lt;-</span> treatment_in_landscapes <span class="sc">|&gt;</span> </span>
+<span id="cb36-18"><a href="constrained-area-vs.-treated-area.html#cb36-18" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_set_precision</span>(<span class="dv">1000000</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb36-19"><a href="constrained-area-vs.-treated-area.html#cb36-19" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_make_valid</span>(geometry) <span class="sc">|&gt;</span> </span>
+<span id="cb36-20"><a href="constrained-area-vs.-treated-area.html#cb36-20" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(sf<span class="sc">::</span><span class="fu">st_is_valid</span>(geometry)) <span class="sc">|&gt;</span>  </span>
+<span id="cb36-21"><a href="constrained-area-vs.-treated-area.html#cb36-21" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(area_name, treatment_category) <span class="sc">|&gt;</span> </span>
+<span id="cb36-22"><a href="constrained-area-vs.-treated-area.html#cb36-22" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
+<span id="cb36-23"><a href="constrained-area-vs.-treated-area.html#cb36-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">geometry =</span> sf<span class="sc">::</span><span class="fu">st_union</span>(geometry)</span>
+<span id="cb36-24"><a href="constrained-area-vs.-treated-area.html#cb36-24" aria-hidden="true" tabindex="-1"></a>    , <span class="at">n_treatments =</span> dplyr<span class="sc">::</span><span class="fu">n_distinct</span>(suid)</span>
+<span id="cb36-25"><a href="constrained-area-vs.-treated-area.html#cb36-25" aria-hidden="true" tabindex="-1"></a>    , <span class="at">min_fiscal_year_completed =</span> <span class="fu">min</span>(fiscal_year_completed)</span>
+<span id="cb36-26"><a href="constrained-area-vs.-treated-area.html#cb36-26" aria-hidden="true" tabindex="-1"></a>    , <span class="at">max_fiscal_year_completed =</span> <span class="fu">max</span>(fiscal_year_completed)</span>
+<span id="cb36-27"><a href="constrained-area-vs.-treated-area.html#cb36-27" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb36-28"><a href="constrained-area-vs.-treated-area.html#cb36-28" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb36-29"><a href="constrained-area-vs.-treated-area.html#cb36-29" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb36-30"><a href="constrained-area-vs.-treated-area.html#cb36-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">treatment_area_ha =</span> <span class="fu">as.numeric</span>(sf<span class="sc">::</span><span class="fu">st_area</span>(geometry))<span class="sc">/</span><span class="dv">10000</span></span>
+<span id="cb36-31"><a href="constrained-area-vs.-treated-area.html#cb36-31" aria-hidden="true" tabindex="-1"></a>    , <span class="at">pot_min_fiscal_year_completed =</span> lubridate<span class="sc">::</span><span class="fu">year</span>(<span class="fu">Sys.Date</span>())<span class="sc">-</span>years_back<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb36-32"><a href="constrained-area-vs.-treated-area.html#cb36-32" aria-hidden="true" tabindex="-1"></a>    , <span class="at">pot_max_fiscal_year_completed =</span> lubridate<span class="sc">::</span><span class="fu">year</span>(<span class="fu">Sys.Date</span>())</span>
+<span id="cb36-33"><a href="constrained-area-vs.-treated-area.html#cb36-33" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb36-34"><a href="constrained-area-vs.-treated-area.html#cb36-34" aria-hidden="true" tabindex="-1"></a>  <span class="co"># !!!! write out for upload to GEE analysis of treatments by nlcd cov type</span></span>
+<span id="cb36-35"><a href="constrained-area-vs.-treated-area.html#cb36-35" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sf::st_write(sf::st_collection_extract(treatment_by_type_area)</span></span>
+<span id="cb36-36"><a href="constrained-area-vs.-treated-area.html#cb36-36" aria-hidden="true" tabindex="-1"></a>  <span class="co">#            , &quot;../data/treatment_in_landscapes.shp&quot;,append=F)</span></span>
+<span id="cb36-37"><a href="constrained-area-vs.-treated-area.html#cb36-37" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>()</span>
+<span id="cb36-38"><a href="constrained-area-vs.-treated-area.html#cb36-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-39"><a href="constrained-area-vs.-treated-area.html#cb36-39" aria-hidden="true" tabindex="-1"></a><span class="co"># join with full data</span></span>
+<span id="cb36-40"><a href="constrained-area-vs.-treated-area.html#cb36-40" aria-hidden="true" tabindex="-1"></a>treatment_by_type_area <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">cross_join</span>(</span>
+<span id="cb36-41"><a href="constrained-area-vs.-treated-area.html#cb36-41" aria-hidden="true" tabindex="-1"></a>    <span class="co"># unique trt types</span></span>
+<span id="cb36-42"><a href="constrained-area-vs.-treated-area.html#cb36-42" aria-hidden="true" tabindex="-1"></a>    treatment_in_landscapes <span class="sc">|&gt;</span> </span>
+<span id="cb36-43"><a href="constrained-area-vs.-treated-area.html#cb36-43" aria-hidden="true" tabindex="-1"></a>      sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb36-44"><a href="constrained-area-vs.-treated-area.html#cb36-44" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">count</span>(treatment_category) <span class="sc">|&gt;</span> </span>
+<span id="cb36-45"><a href="constrained-area-vs.-treated-area.html#cb36-45" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(n))</span>
+<span id="cb36-46"><a href="constrained-area-vs.-treated-area.html#cb36-46" aria-hidden="true" tabindex="-1"></a>    <span class="co"># unique areas</span></span>
+<span id="cb36-47"><a href="constrained-area-vs.-treated-area.html#cb36-47" aria-hidden="true" tabindex="-1"></a>    , constrained_by_wflndscp_wide_sf <span class="sc">|&gt;</span> </span>
+<span id="cb36-48"><a href="constrained-area-vs.-treated-area.html#cb36-48" aria-hidden="true" tabindex="-1"></a>      sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb36-49"><a href="constrained-area-vs.-treated-area.html#cb36-49" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">count</span>(area_name) <span class="sc">|&gt;</span> </span>
+<span id="cb36-50"><a href="constrained-area-vs.-treated-area.html#cb36-50" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(n))</span>
+<span id="cb36-51"><a href="constrained-area-vs.-treated-area.html#cb36-51" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb36-52"><a href="constrained-area-vs.-treated-area.html#cb36-52" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="cb36-53"><a href="constrained-area-vs.-treated-area.html#cb36-53" aria-hidden="true" tabindex="-1"></a>    treatment_by_type_area</span>
+<span id="cb36-54"><a href="constrained-area-vs.-treated-area.html#cb36-54" aria-hidden="true" tabindex="-1"></a>    , <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(area_name, treatment_category)</span>
+<span id="cb36-55"><a href="constrained-area-vs.-treated-area.html#cb36-55" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb36-56"><a href="constrained-area-vs.-treated-area.html#cb36-56" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(constrained_by_wflndscp_wide_sf <span class="sc">|&gt;</span> sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>(), <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(area_name)) <span class="sc">|&gt;</span> </span>
+<span id="cb36-57"><a href="constrained-area-vs.-treated-area.html#cb36-57" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb36-58"><a href="constrained-area-vs.-treated-area.html#cb36-58" aria-hidden="true" tabindex="-1"></a>    <span class="at">treatment_area_ha =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(treatment_area_ha), <span class="dv">0</span>, treatment_area_ha)</span>
+<span id="cb36-59"><a href="constrained-area-vs.-treated-area.html#cb36-59" aria-hidden="true" tabindex="-1"></a>    , <span class="at">treatment_area_acres =</span> (treatment_area_ha<span class="sc">*</span><span class="dv">10000</span>)<span class="sc">/</span><span class="fl">4046.85642</span></span>
+<span id="cb36-60"><a href="constrained-area-vs.-treated-area.html#cb36-60" aria-hidden="true" tabindex="-1"></a>    , <span class="at">pct_treated_area =</span> treatment_area_ha<span class="sc">/</span>feature_area_ha</span>
+<span id="cb36-61"><a href="constrained-area-vs.-treated-area.html#cb36-61" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb36-62"><a href="constrained-area-vs.-treated-area.html#cb36-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-63"><a href="constrained-area-vs.-treated-area.html#cb36-63" aria-hidden="true" tabindex="-1"></a><span class="co"># aggregate by year, area !!!! because some treatment types might overlap spatially</span></span>
+<span id="cb36-64"><a href="constrained-area-vs.-treated-area.html#cb36-64" aria-hidden="true" tabindex="-1"></a>treatment_by_area_yr <span class="ot">&lt;-</span> treatment_in_landscapes <span class="sc">|&gt;</span> </span>
+<span id="cb36-65"><a href="constrained-area-vs.-treated-area.html#cb36-65" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">treatment_year =</span> lubridate<span class="sc">::</span><span class="fu">year</span>(date_completed)) <span class="sc">|&gt;</span> </span>
+<span id="cb36-66"><a href="constrained-area-vs.-treated-area.html#cb36-66" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(</span>
+<span id="cb36-67"><a href="constrained-area-vs.-treated-area.html#cb36-67" aria-hidden="true" tabindex="-1"></a>      fiscal_year_completed</span>
+<span id="cb36-68"><a href="constrained-area-vs.-treated-area.html#cb36-68" aria-hidden="true" tabindex="-1"></a>      , area_name</span>
+<span id="cb36-69"><a href="constrained-area-vs.-treated-area.html#cb36-69" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb36-70"><a href="constrained-area-vs.-treated-area.html#cb36-70" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">geometry =</span> sf<span class="sc">::</span><span class="fu">st_union</span>(geometry)) <span class="sc">|&gt;</span> </span>
+<span id="cb36-71"><a href="constrained-area-vs.-treated-area.html#cb36-71" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb36-72"><a href="constrained-area-vs.-treated-area.html#cb36-72" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb36-73"><a href="constrained-area-vs.-treated-area.html#cb36-73" aria-hidden="true" tabindex="-1"></a>    <span class="at">treatment_area_ha =</span> <span class="fu">as.numeric</span>(sf<span class="sc">::</span><span class="fu">st_area</span>(geometry))<span class="sc">/</span><span class="dv">10000</span></span>
+<span id="cb36-74"><a href="constrained-area-vs.-treated-area.html#cb36-74" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb36-75"><a href="constrained-area-vs.-treated-area.html#cb36-75" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>()</span>
+<span id="cb36-76"><a href="constrained-area-vs.-treated-area.html#cb36-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-77"><a href="constrained-area-vs.-treated-area.html#cb36-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-78"><a href="constrained-area-vs.-treated-area.html#cb36-78" aria-hidden="true" tabindex="-1"></a><span class="co"># aggregate by year, trt type, area</span></span>
+<span id="cb36-79"><a href="constrained-area-vs.-treated-area.html#cb36-79" aria-hidden="true" tabindex="-1"></a>treatment_by_type_area_yr <span class="ot">&lt;-</span> treatment_in_landscapes <span class="sc">|&gt;</span> </span>
+<span id="cb36-80"><a href="constrained-area-vs.-treated-area.html#cb36-80" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">treatment_year =</span> lubridate<span class="sc">::</span><span class="fu">year</span>(date_completed)) <span class="sc">|&gt;</span> </span>
+<span id="cb36-81"><a href="constrained-area-vs.-treated-area.html#cb36-81" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(</span>
+<span id="cb36-82"><a href="constrained-area-vs.-treated-area.html#cb36-82" aria-hidden="true" tabindex="-1"></a>      fiscal_year_completed</span>
+<span id="cb36-83"><a href="constrained-area-vs.-treated-area.html#cb36-83" aria-hidden="true" tabindex="-1"></a>      , facts_src</span>
+<span id="cb36-84"><a href="constrained-area-vs.-treated-area.html#cb36-84" aria-hidden="true" tabindex="-1"></a>      , treatment_category</span>
+<span id="cb36-85"><a href="constrained-area-vs.-treated-area.html#cb36-85" aria-hidden="true" tabindex="-1"></a>      , area_name</span>
+<span id="cb36-86"><a href="constrained-area-vs.-treated-area.html#cb36-86" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb36-87"><a href="constrained-area-vs.-treated-area.html#cb36-87" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">geometry =</span> sf<span class="sc">::</span><span class="fu">st_union</span>(geometry)) <span class="sc">|&gt;</span> </span>
+<span id="cb36-88"><a href="constrained-area-vs.-treated-area.html#cb36-88" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb36-89"><a href="constrained-area-vs.-treated-area.html#cb36-89" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb36-90"><a href="constrained-area-vs.-treated-area.html#cb36-90" aria-hidden="true" tabindex="-1"></a>    <span class="at">treatment_area_ha =</span> <span class="fu">as.numeric</span>(sf<span class="sc">::</span><span class="fu">st_area</span>(geometry))<span class="sc">/</span><span class="dv">10000</span></span>
+<span id="cb36-91"><a href="constrained-area-vs.-treated-area.html#cb36-91" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb36-92"><a href="constrained-area-vs.-treated-area.html#cb36-92" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>()</span>
+<span id="cb36-93"><a href="constrained-area-vs.-treated-area.html#cb36-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-94"><a href="constrained-area-vs.-treated-area.html#cb36-94" aria-hidden="true" tabindex="-1"></a><span class="co"># create full set of data with all possible combinations</span></span>
+<span id="cb36-95"><a href="constrained-area-vs.-treated-area.html#cb36-95" aria-hidden="true" tabindex="-1"></a>base_join_temp <span class="ot">&lt;-</span> constrained_by_wflndscp_wide_sf <span class="sc">|&gt;</span> </span>
+<span id="cb36-96"><a href="constrained-area-vs.-treated-area.html#cb36-96" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb36-97"><a href="constrained-area-vs.-treated-area.html#cb36-97" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">count</span>(area_name) <span class="sc">|&gt;</span> </span>
+<span id="cb36-98"><a href="constrained-area-vs.-treated-area.html#cb36-98" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(n)) <span class="sc">|&gt;</span> </span>
+<span id="cb36-99"><a href="constrained-area-vs.-treated-area.html#cb36-99" aria-hidden="true" tabindex="-1"></a>  <span class="co"># cross with treatment types</span></span>
+<span id="cb36-100"><a href="constrained-area-vs.-treated-area.html#cb36-100" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">cross_join</span>(</span>
+<span id="cb36-101"><a href="constrained-area-vs.-treated-area.html#cb36-101" aria-hidden="true" tabindex="-1"></a>    treatment_by_type_area_yr <span class="sc">|&gt;</span> </span>
+<span id="cb36-102"><a href="constrained-area-vs.-treated-area.html#cb36-102" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">count</span>(facts_src,treatment_category) <span class="sc">|&gt;</span> </span>
+<span id="cb36-103"><a href="constrained-area-vs.-treated-area.html#cb36-103" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(n))</span>
+<span id="cb36-104"><a href="constrained-area-vs.-treated-area.html#cb36-104" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb36-105"><a href="constrained-area-vs.-treated-area.html#cb36-105" aria-hidden="true" tabindex="-1"></a>  <span class="co"># cross with years</span></span>
+<span id="cb36-106"><a href="constrained-area-vs.-treated-area.html#cb36-106" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">cross_join</span>(<span class="fu">data.frame</span>(<span class="at">fiscal_year_completed =</span> <span class="fu">unique</span>(treatment_by_type_area_yr<span class="sc">$</span>fiscal_year_completed)))</span>
+<span id="cb36-107"><a href="constrained-area-vs.-treated-area.html#cb36-107" aria-hidden="true" tabindex="-1"></a><span class="co"># JOIN WITH aggregated data  </span></span>
+<span id="cb36-108"><a href="constrained-area-vs.-treated-area.html#cb36-108" aria-hidden="true" tabindex="-1"></a><span class="co"># treatment_by_type_area_yr</span></span>
+<span id="cb36-109"><a href="constrained-area-vs.-treated-area.html#cb36-109" aria-hidden="true" tabindex="-1"></a>  treatment_by_type_area_yr <span class="ot">&lt;-</span> base_join_temp <span class="sc">|&gt;</span> </span>
+<span id="cb36-110"><a href="constrained-area-vs.-treated-area.html#cb36-110" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">left_join</span>(treatment_by_type_area_yr, <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(area_name,fiscal_year_completed,facts_src,treatment_category)) <span class="sc">|&gt;</span> </span>
+<span id="cb36-111"><a href="constrained-area-vs.-treated-area.html#cb36-111" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb36-112"><a href="constrained-area-vs.-treated-area.html#cb36-112" aria-hidden="true" tabindex="-1"></a>      <span class="at">treatment_area_ha =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(treatment_area_ha), <span class="dv">0</span>, treatment_area_ha)</span>
+<span id="cb36-113"><a href="constrained-area-vs.-treated-area.html#cb36-113" aria-hidden="true" tabindex="-1"></a>      , <span class="at">treatment_label =</span> <span class="fu">paste0</span>(facts_src,<span class="st">&quot;: &quot;</span>,treatment_category) <span class="sc">|&gt;</span> <span class="fu">tolower</span>()</span>
+<span id="cb36-114"><a href="constrained-area-vs.-treated-area.html#cb36-114" aria-hidden="true" tabindex="-1"></a>      , <span class="at">treatment_area_acres =</span> (treatment_area_ha<span class="sc">*</span><span class="dv">10000</span>)<span class="sc">/</span><span class="fl">4046.85642</span></span>
+<span id="cb36-115"><a href="constrained-area-vs.-treated-area.html#cb36-115" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb36-116"><a href="constrained-area-vs.-treated-area.html#cb36-116" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">inner_join</span>(constrained_by_wflndscp_wide_sf <span class="sc">|&gt;</span> sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>(), <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(area_name))</span>
+<span id="cb36-117"><a href="constrained-area-vs.-treated-area.html#cb36-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-118"><a href="constrained-area-vs.-treated-area.html#cb36-118" aria-hidden="true" tabindex="-1"></a><span class="co"># treatment_by_area_yr</span></span>
+<span id="cb36-119"><a href="constrained-area-vs.-treated-area.html#cb36-119" aria-hidden="true" tabindex="-1"></a>  treatment_by_area_yr <span class="ot">&lt;-</span> base_join_temp <span class="sc">|&gt;</span> </span>
+<span id="cb36-120"><a href="constrained-area-vs.-treated-area.html#cb36-120" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">count</span>(area_name, fiscal_year_completed) <span class="sc">|&gt;</span> </span>
+<span id="cb36-121"><a href="constrained-area-vs.-treated-area.html#cb36-121" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(n)) <span class="sc">|&gt;</span> </span>
+<span id="cb36-122"><a href="constrained-area-vs.-treated-area.html#cb36-122" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">left_join</span>(treatment_by_area_yr, <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(area_name,fiscal_year_completed)) <span class="sc">|&gt;</span> </span>
+<span id="cb36-123"><a href="constrained-area-vs.-treated-area.html#cb36-123" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb36-124"><a href="constrained-area-vs.-treated-area.html#cb36-124" aria-hidden="true" tabindex="-1"></a>      <span class="at">treatment_area_ha =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(treatment_area_ha), <span class="dv">0</span>, treatment_area_ha)</span>
+<span id="cb36-125"><a href="constrained-area-vs.-treated-area.html#cb36-125" aria-hidden="true" tabindex="-1"></a>      , <span class="at">treatment_area_acres =</span> (treatment_area_ha<span class="sc">*</span><span class="dv">10000</span>)<span class="sc">/</span><span class="fl">4046.85642</span></span>
+<span id="cb36-126"><a href="constrained-area-vs.-treated-area.html#cb36-126" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb36-127"><a href="constrained-area-vs.-treated-area.html#cb36-127" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">inner_join</span>(constrained_by_wflndscp_wide_sf <span class="sc">|&gt;</span> sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>(), <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(area_name))</span></code></pre></div>
+<p>Combine treatment layers with watersheds</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="constrained-area-vs.-treated-area.html#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># combine with wfp areas</span></span>
+<span id="cb37-2"><a href="constrained-area-vs.-treated-area.html#cb37-2" aria-hidden="true" tabindex="-1"></a>treatment_in_watersheds <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb37-3"><a href="constrained-area-vs.-treated-area.html#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># harvests</span></span>
+<span id="cb37-4"><a href="constrained-area-vs.-treated-area.html#cb37-4" aria-hidden="true" tabindex="-1"></a>    sf<span class="sc">::</span><span class="fu">st_intersection</span>(</span>
+<span id="cb37-5"><a href="constrained-area-vs.-treated-area.html#cb37-5" aria-hidden="true" tabindex="-1"></a>      harvests</span>
+<span id="cb37-6"><a href="constrained-area-vs.-treated-area.html#cb37-6" aria-hidden="true" tabindex="-1"></a>      , constrained_byftr_huc12_wide_sf <span class="sc">|&gt;</span> </span>
+<span id="cb37-7"><a href="constrained-area-vs.-treated-area.html#cb37-7" aria-hidden="true" tabindex="-1"></a>        dplyr<span class="sc">::</span><span class="fu">select</span>(area_name, huc12, cnstrnt_class, rmn_cnstrnt_class)</span>
+<span id="cb37-8"><a href="constrained-area-vs.-treated-area.html#cb37-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb37-9"><a href="constrained-area-vs.-treated-area.html#cb37-9" aria-hidden="true" tabindex="-1"></a>  , <span class="co"># haz fuel</span></span>
+<span id="cb37-10"><a href="constrained-area-vs.-treated-area.html#cb37-10" aria-hidden="true" tabindex="-1"></a>    sf<span class="sc">::</span><span class="fu">st_intersection</span>(</span>
+<span id="cb37-11"><a href="constrained-area-vs.-treated-area.html#cb37-11" aria-hidden="true" tabindex="-1"></a>      haz_fuel</span>
+<span id="cb37-12"><a href="constrained-area-vs.-treated-area.html#cb37-12" aria-hidden="true" tabindex="-1"></a>      , constrained_byftr_huc12_wide_sf <span class="sc">|&gt;</span> </span>
+<span id="cb37-13"><a href="constrained-area-vs.-treated-area.html#cb37-13" aria-hidden="true" tabindex="-1"></a>        dplyr<span class="sc">::</span><span class="fu">select</span>(area_name, huc12, cnstrnt_class, rmn_cnstrnt_class)</span>
+<span id="cb37-14"><a href="constrained-area-vs.-treated-area.html#cb37-14" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb37-15"><a href="constrained-area-vs.-treated-area.html#cb37-15" aria-hidden="true" tabindex="-1"></a>) </span>
+<span id="cb37-16"><a href="constrained-area-vs.-treated-area.html#cb37-16" aria-hidden="true" tabindex="-1"></a><span class="fu">gc</span>()</span>
+<span id="cb37-17"><a href="constrained-area-vs.-treated-area.html#cb37-17" aria-hidden="true" tabindex="-1"></a><span class="co"># aggregate by trt type, area, constraint class</span></span>
+<span id="cb37-18"><a href="constrained-area-vs.-treated-area.html#cb37-18" aria-hidden="true" tabindex="-1"></a>treatment_by_cnstrnt_type_area <span class="ot">&lt;-</span> treatment_in_watersheds <span class="sc">|&gt;</span> </span>
+<span id="cb37-19"><a href="constrained-area-vs.-treated-area.html#cb37-19" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(</span>
+<span id="cb37-20"><a href="constrained-area-vs.-treated-area.html#cb37-20" aria-hidden="true" tabindex="-1"></a>      treatment_category</span>
+<span id="cb37-21"><a href="constrained-area-vs.-treated-area.html#cb37-21" aria-hidden="true" tabindex="-1"></a>      , area_name</span>
+<span id="cb37-22"><a href="constrained-area-vs.-treated-area.html#cb37-22" aria-hidden="true" tabindex="-1"></a>      , cnstrnt_class, rmn_cnstrnt_class</span>
+<span id="cb37-23"><a href="constrained-area-vs.-treated-area.html#cb37-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb37-24"><a href="constrained-area-vs.-treated-area.html#cb37-24" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
+<span id="cb37-25"><a href="constrained-area-vs.-treated-area.html#cb37-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">geometry =</span> sf<span class="sc">::</span><span class="fu">st_union</span>(geometry)</span>
+<span id="cb37-26"><a href="constrained-area-vs.-treated-area.html#cb37-26" aria-hidden="true" tabindex="-1"></a>    , <span class="at">n_treatments =</span> dplyr<span class="sc">::</span><span class="fu">n_distinct</span>(suid)</span>
+<span id="cb37-27"><a href="constrained-area-vs.-treated-area.html#cb37-27" aria-hidden="true" tabindex="-1"></a>    , <span class="at">min_fiscal_year_completed =</span> <span class="fu">min</span>(fiscal_year_completed)</span>
+<span id="cb37-28"><a href="constrained-area-vs.-treated-area.html#cb37-28" aria-hidden="true" tabindex="-1"></a>    , <span class="at">max_fiscal_year_completed =</span> <span class="fu">max</span>(fiscal_year_completed)</span>
+<span id="cb37-29"><a href="constrained-area-vs.-treated-area.html#cb37-29" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb37-30"><a href="constrained-area-vs.-treated-area.html#cb37-30" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb37-31"><a href="constrained-area-vs.-treated-area.html#cb37-31" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb37-32"><a href="constrained-area-vs.-treated-area.html#cb37-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">treatment_area_ha =</span> <span class="fu">as.numeric</span>(sf<span class="sc">::</span><span class="fu">st_area</span>(geometry))<span class="sc">/</span><span class="dv">10000</span></span>
+<span id="cb37-33"><a href="constrained-area-vs.-treated-area.html#cb37-33" aria-hidden="true" tabindex="-1"></a>    , <span class="at">pot_min_fiscal_year_completed =</span> lubridate<span class="sc">::</span><span class="fu">year</span>(<span class="fu">Sys.Date</span>())<span class="sc">-</span>years_back<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb37-34"><a href="constrained-area-vs.-treated-area.html#cb37-34" aria-hidden="true" tabindex="-1"></a>    , <span class="at">pot_max_fiscal_year_completed =</span> lubridate<span class="sc">::</span><span class="fu">year</span>(<span class="fu">Sys.Date</span>())</span>
+<span id="cb37-35"><a href="constrained-area-vs.-treated-area.html#cb37-35" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb37-36"><a href="constrained-area-vs.-treated-area.html#cb37-36" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>()</span>
+<span id="cb37-37"><a href="constrained-area-vs.-treated-area.html#cb37-37" aria-hidden="true" tabindex="-1"></a><span class="fu">gc</span>()</span>
+<span id="cb37-38"><a href="constrained-area-vs.-treated-area.html#cb37-38" aria-hidden="true" tabindex="-1"></a><span class="co"># join with full data</span></span>
+<span id="cb37-39"><a href="constrained-area-vs.-treated-area.html#cb37-39" aria-hidden="true" tabindex="-1"></a>treatment_by_cnstrnt_type_area <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">cross_join</span>(</span>
+<span id="cb37-40"><a href="constrained-area-vs.-treated-area.html#cb37-40" aria-hidden="true" tabindex="-1"></a>    <span class="co"># unique trt types</span></span>
+<span id="cb37-41"><a href="constrained-area-vs.-treated-area.html#cb37-41" aria-hidden="true" tabindex="-1"></a>    treatment_in_landscapes <span class="sc">|&gt;</span> </span>
+<span id="cb37-42"><a href="constrained-area-vs.-treated-area.html#cb37-42" aria-hidden="true" tabindex="-1"></a>      sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb37-43"><a href="constrained-area-vs.-treated-area.html#cb37-43" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">count</span>(treatment_category) <span class="sc">|&gt;</span> </span>
+<span id="cb37-44"><a href="constrained-area-vs.-treated-area.html#cb37-44" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(n))</span>
+<span id="cb37-45"><a href="constrained-area-vs.-treated-area.html#cb37-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># unique areas</span></span>
+<span id="cb37-46"><a href="constrained-area-vs.-treated-area.html#cb37-46" aria-hidden="true" tabindex="-1"></a>    , constrained_by_wflndscp_wide_sf <span class="sc">|&gt;</span> </span>
+<span id="cb37-47"><a href="constrained-area-vs.-treated-area.html#cb37-47" aria-hidden="true" tabindex="-1"></a>      sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb37-48"><a href="constrained-area-vs.-treated-area.html#cb37-48" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">count</span>(area_name) <span class="sc">|&gt;</span> </span>
+<span id="cb37-49"><a href="constrained-area-vs.-treated-area.html#cb37-49" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(n))</span>
+<span id="cb37-50"><a href="constrained-area-vs.-treated-area.html#cb37-50" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb37-51"><a href="constrained-area-vs.-treated-area.html#cb37-51" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">cross_join</span>(</span>
+<span id="cb37-52"><a href="constrained-area-vs.-treated-area.html#cb37-52" aria-hidden="true" tabindex="-1"></a>    constrained_byftr_huc12_wide_sf <span class="sc">|&gt;</span> </span>
+<span id="cb37-53"><a href="constrained-area-vs.-treated-area.html#cb37-53" aria-hidden="true" tabindex="-1"></a>      sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb37-54"><a href="constrained-area-vs.-treated-area.html#cb37-54" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">count</span>(cnstrnt_class, rmn_cnstrnt_class) <span class="sc">|&gt;</span> </span>
+<span id="cb37-55"><a href="constrained-area-vs.-treated-area.html#cb37-55" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(n))</span>
+<span id="cb37-56"><a href="constrained-area-vs.-treated-area.html#cb37-56" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb37-57"><a href="constrained-area-vs.-treated-area.html#cb37-57" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="cb37-58"><a href="constrained-area-vs.-treated-area.html#cb37-58" aria-hidden="true" tabindex="-1"></a>    treatment_by_cnstrnt_type_area</span>
+<span id="cb37-59"><a href="constrained-area-vs.-treated-area.html#cb37-59" aria-hidden="true" tabindex="-1"></a>    , <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(area_name, treatment_category,cnstrnt_class, rmn_cnstrnt_class)</span>
+<span id="cb37-60"><a href="constrained-area-vs.-treated-area.html#cb37-60" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb37-61"><a href="constrained-area-vs.-treated-area.html#cb37-61" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="cb37-62"><a href="constrained-area-vs.-treated-area.html#cb37-62" aria-hidden="true" tabindex="-1"></a>    sf<span class="sc">::</span><span class="fu">st_intersection</span>(</span>
+<span id="cb37-63"><a href="constrained-area-vs.-treated-area.html#cb37-63" aria-hidden="true" tabindex="-1"></a>        constrained_byftr_huc12_wide_sf</span>
+<span id="cb37-64"><a href="constrained-area-vs.-treated-area.html#cb37-64" aria-hidden="true" tabindex="-1"></a>        , constrained_by_wflndscp_wide_sf <span class="sc">|&gt;</span> </span>
+<span id="cb37-65"><a href="constrained-area-vs.-treated-area.html#cb37-65" aria-hidden="true" tabindex="-1"></a>          dplyr<span class="sc">::</span><span class="fu">select</span>(geometry)</span>
+<span id="cb37-66"><a href="constrained-area-vs.-treated-area.html#cb37-66" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">|&gt;</span> </span>
+<span id="cb37-67"><a href="constrained-area-vs.-treated-area.html#cb37-67" aria-hidden="true" tabindex="-1"></a>        dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">feature_area_ha =</span> <span class="fu">as.numeric</span>(sf<span class="sc">::</span><span class="fu">st_area</span>(geometry))<span class="sc">/</span><span class="dv">10000</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb37-68"><a href="constrained-area-vs.-treated-area.html#cb37-68" aria-hidden="true" tabindex="-1"></a>        sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb37-69"><a href="constrained-area-vs.-treated-area.html#cb37-69" aria-hidden="true" tabindex="-1"></a>        dplyr<span class="sc">::</span><span class="fu">group_by</span>(area_name, cnstrnt_class, rmn_cnstrnt_class) <span class="sc">|&gt;</span> </span>
+<span id="cb37-70"><a href="constrained-area-vs.-treated-area.html#cb37-70" aria-hidden="true" tabindex="-1"></a>        dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">feature_area_ha =</span> <span class="fu">sum</span>(feature_area_ha))</span>
+<span id="cb37-71"><a href="constrained-area-vs.-treated-area.html#cb37-71" aria-hidden="true" tabindex="-1"></a>    , <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(area_name, cnstrnt_class, rmn_cnstrnt_class)</span>
+<span id="cb37-72"><a href="constrained-area-vs.-treated-area.html#cb37-72" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb37-73"><a href="constrained-area-vs.-treated-area.html#cb37-73" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb37-74"><a href="constrained-area-vs.-treated-area.html#cb37-74" aria-hidden="true" tabindex="-1"></a>    <span class="at">treatment_area_ha =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(treatment_area_ha), <span class="dv">0</span>, treatment_area_ha)</span>
+<span id="cb37-75"><a href="constrained-area-vs.-treated-area.html#cb37-75" aria-hidden="true" tabindex="-1"></a>    , <span class="at">treatment_area_acres =</span> (treatment_area_ha<span class="sc">*</span><span class="dv">10000</span>)<span class="sc">/</span><span class="fl">4046.85642</span></span>
+<span id="cb37-76"><a href="constrained-area-vs.-treated-area.html#cb37-76" aria-hidden="true" tabindex="-1"></a>    , <span class="at">pct_treated_area =</span> treatment_area_ha<span class="sc">/</span>feature_area_ha</span>
+<span id="cb37-77"><a href="constrained-area-vs.-treated-area.html#cb37-77" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+</div>
+<div id="treatment-acres-by-year-table" class="section level2 hasAnchor" number="7.3">
+<h2><span class="header-section-number">7.3</span> Treatment acres by year table<a href="constrained-area-vs.-treated-area.html#treatment-acres-by-year-table" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="constrained-area-vs.-treated-area.html#cb38-1" aria-hidden="true" tabindex="-1"></a>treatment_table_temp <span class="ot">&lt;-</span> treatment_by_type_area_yr <span class="sc">|&gt;</span> </span>
+<span id="cb38-2"><a href="constrained-area-vs.-treated-area.html#cb38-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(fiscal_year_completed<span class="sc">&gt;=</span><span class="dv">2022</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb38-3"><a href="constrained-area-vs.-treated-area.html#cb38-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">nm =</span> <span class="fu">paste</span>(facts_src,treatment_category,<span class="at">sep =</span> <span class="st">&quot;_&quot;</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb38-4"><a href="constrained-area-vs.-treated-area.html#cb38-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(area_name,fiscal_year_completed,nm,tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;treatment_area&quot;</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb38-5"><a href="constrained-area-vs.-treated-area.html#cb38-5" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(</span>
+<span id="cb38-6"><a href="constrained-area-vs.-treated-area.html#cb38-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_from =</span> nm</span>
+<span id="cb38-7"><a href="constrained-area-vs.-treated-area.html#cb38-7" aria-hidden="true" tabindex="-1"></a>    , <span class="at">values_from =</span> tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;treatment_area&quot;</span>)</span>
+<span id="cb38-8"><a href="constrained-area-vs.-treated-area.html#cb38-8" aria-hidden="true" tabindex="-1"></a>    , <span class="at">names_glue =</span> <span class="st">&quot;{nm}_{.value}&quot;</span></span>
+<span id="cb38-9"><a href="constrained-area-vs.-treated-area.html#cb38-9" aria-hidden="true" tabindex="-1"></a>    , <span class="at">values_fill =</span> <span class="dv">0</span></span>
+<span id="cb38-10"><a href="constrained-area-vs.-treated-area.html#cb38-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb38-11"><a href="constrained-area-vs.-treated-area.html#cb38-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># join with targets</span></span>
+<span id="cb38-12"><a href="constrained-area-vs.-treated-area.html#cb38-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="cb38-13"><a href="constrained-area-vs.-treated-area.html#cb38-13" aria-hidden="true" tabindex="-1"></a>    treatment_targets <span class="sc">|&gt;</span> </span>
+<span id="cb38-14"><a href="constrained-area-vs.-treated-area.html#cb38-14" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(area_name, tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;target_acres_20&quot;</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb38-15"><a href="constrained-area-vs.-treated-area.html#cb38-15" aria-hidden="true" tabindex="-1"></a>      tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(</span>
+<span id="cb38-16"><a href="constrained-area-vs.-treated-area.html#cb38-16" aria-hidden="true" tabindex="-1"></a>        <span class="at">cols =</span> tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;target_acres_20&quot;</span>)</span>
+<span id="cb38-17"><a href="constrained-area-vs.-treated-area.html#cb38-17" aria-hidden="true" tabindex="-1"></a>        , <span class="at">names_to =</span> <span class="st">&quot;fiscal_year_completed&quot;</span></span>
+<span id="cb38-18"><a href="constrained-area-vs.-treated-area.html#cb38-18" aria-hidden="true" tabindex="-1"></a>        , <span class="at">values_to =</span> <span class="st">&quot;target_area_acres&quot;</span></span>
+<span id="cb38-19"><a href="constrained-area-vs.-treated-area.html#cb38-19" aria-hidden="true" tabindex="-1"></a>        , <span class="at">names_prefix =</span> <span class="st">&quot;target_acres_&quot;</span></span>
+<span id="cb38-20"><a href="constrained-area-vs.-treated-area.html#cb38-20" aria-hidden="true" tabindex="-1"></a>        , <span class="at">values_drop_na =</span> F</span>
+<span id="cb38-21"><a href="constrained-area-vs.-treated-area.html#cb38-21" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">|&gt;</span> </span>
+<span id="cb38-22"><a href="constrained-area-vs.-treated-area.html#cb38-22" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">mutate</span>(dplyr<span class="sc">::</span><span class="fu">across</span>(</span>
+<span id="cb38-23"><a href="constrained-area-vs.-treated-area.html#cb38-23" aria-hidden="true" tabindex="-1"></a>        <span class="fu">c</span>(fiscal_year_completed,target_area_acres)</span>
+<span id="cb38-24"><a href="constrained-area-vs.-treated-area.html#cb38-24" aria-hidden="true" tabindex="-1"></a>        , <span class="sc">~</span> <span class="fu">as.numeric</span>(.x)</span>
+<span id="cb38-25"><a href="constrained-area-vs.-treated-area.html#cb38-25" aria-hidden="true" tabindex="-1"></a>      ))</span>
+<span id="cb38-26"><a href="constrained-area-vs.-treated-area.html#cb38-26" aria-hidden="true" tabindex="-1"></a>    , <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(area_name,fiscal_year_completed)</span>
+<span id="cb38-27"><a href="constrained-area-vs.-treated-area.html#cb38-27" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb38-28"><a href="constrained-area-vs.-treated-area.html#cb38-28" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
+<span id="cb38-29"><a href="constrained-area-vs.-treated-area.html#cb38-29" aria-hidden="true" tabindex="-1"></a>    treatment_by_area_yr <span class="sc">|&gt;</span> </span>
+<span id="cb38-30"><a href="constrained-area-vs.-treated-area.html#cb38-30" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(area_name, fiscal_year_completed, tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;treatment_area&quot;</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb38-31"><a href="constrained-area-vs.-treated-area.html#cb38-31" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">rename_with</span>(</span>
+<span id="cb38-32"><a href="constrained-area-vs.-treated-area.html#cb38-32" aria-hidden="true" tabindex="-1"></a>        <span class="sc">~</span> <span class="fu">paste0</span>(<span class="st">&quot;total_&quot;</span>, .x)</span>
+<span id="cb38-33"><a href="constrained-area-vs.-treated-area.html#cb38-33" aria-hidden="true" tabindex="-1"></a>        , tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;treatment_area&quot;</span>)</span>
+<span id="cb38-34"><a href="constrained-area-vs.-treated-area.html#cb38-34" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb38-35"><a href="constrained-area-vs.-treated-area.html#cb38-35" aria-hidden="true" tabindex="-1"></a>    , <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(area_name, fiscal_year_completed)</span>
+<span id="cb38-36"><a href="constrained-area-vs.-treated-area.html#cb38-36" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb38-37"><a href="constrained-area-vs.-treated-area.html#cb38-37" aria-hidden="true" tabindex="-1"></a>  <span class="co"># mutates</span></span>
+<span id="cb38-38"><a href="constrained-area-vs.-treated-area.html#cb38-38" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb38-39"><a href="constrained-area-vs.-treated-area.html#cb38-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">pct_to_target =</span> scales<span class="sc">::</span><span class="fu">percent</span>(total_treatment_area_acres<span class="sc">/</span>target_area_acres,<span class="at">accuracy=</span><span class="fl">0.1</span>)</span>
+<span id="cb38-40"><a href="constrained-area-vs.-treated-area.html#cb38-40" aria-hidden="true" tabindex="-1"></a>    , dplyr<span class="sc">::</span><span class="fu">across</span>(tidyselect<span class="sc">::</span><span class="fu">contains</span>(<span class="st">&quot;_area_&quot;</span>), <span class="sc">~</span> scales<span class="sc">::</span><span class="fu">comma</span>(.x,<span class="at">accuracy =</span> <span class="dv">1</span>))</span>
+<span id="cb38-41"><a href="constrained-area-vs.-treated-area.html#cb38-41" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb38-42"><a href="constrained-area-vs.-treated-area.html#cb38-42" aria-hidden="true" tabindex="-1"></a><span class="co"># make a table</span></span>
+<span id="cb38-43"><a href="constrained-area-vs.-treated-area.html#cb38-43" aria-hidden="true" tabindex="-1"></a>kableExtra<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb38-44"><a href="constrained-area-vs.-treated-area.html#cb38-44" aria-hidden="true" tabindex="-1"></a>    treatment_table_temp <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="cb38-45"><a href="constrained-area-vs.-treated-area.html#cb38-45" aria-hidden="true" tabindex="-1"></a>      fiscal_year_completed</span>
+<span id="cb38-46"><a href="constrained-area-vs.-treated-area.html#cb38-46" aria-hidden="true" tabindex="-1"></a>      , tidyselect<span class="sc">::</span><span class="fu">ends_with</span>(<span class="st">&quot;treatment_area_acres&quot;</span>)</span>
+<span id="cb38-47"><a href="constrained-area-vs.-treated-area.html#cb38-47" aria-hidden="true" tabindex="-1"></a>      , target_area_acres</span>
+<span id="cb38-48"><a href="constrained-area-vs.-treated-area.html#cb38-48" aria-hidden="true" tabindex="-1"></a>      , pct_to_target</span>
+<span id="cb38-49"><a href="constrained-area-vs.-treated-area.html#cb38-49" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb38-50"><a href="constrained-area-vs.-treated-area.html#cb38-50" aria-hidden="true" tabindex="-1"></a>    , <span class="at">caption =</span> <span class="st">&quot;Treatments in 21 Wildfire Crisis Strategy Priority Landscapes&lt;br&gt;*only treatments on National Forest System lands shown&quot;</span></span>
+<span id="cb38-51"><a href="constrained-area-vs.-treated-area.html#cb38-51" aria-hidden="true" tabindex="-1"></a>    , <span class="at">col.names =</span> <span class="fu">c</span>(</span>
+<span id="cb38-52"><a href="constrained-area-vs.-treated-area.html#cb38-52" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot; &quot;</span></span>
+<span id="cb38-53"><a href="constrained-area-vs.-treated-area.html#cb38-53" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;Timber Harvest: mechanical&quot;</span></span>
+<span id="cb38-54"><a href="constrained-area-vs.-treated-area.html#cb38-54" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;Hazardous Fuel Treatment: fire&quot;</span></span>
+<span id="cb38-55"><a href="constrained-area-vs.-treated-area.html#cb38-55" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;Hazardous Fuel Treatment: mechanical&quot;</span></span>
+<span id="cb38-56"><a href="constrained-area-vs.-treated-area.html#cb38-56" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;Total Treated*&quot;</span></span>
+<span id="cb38-57"><a href="constrained-area-vs.-treated-area.html#cb38-57" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;Target Treated&quot;</span></span>
+<span id="cb38-58"><a href="constrained-area-vs.-treated-area.html#cb38-58" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;% to Target&quot;</span></span>
+<span id="cb38-59"><a href="constrained-area-vs.-treated-area.html#cb38-59" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb38-60"><a href="constrained-area-vs.-treated-area.html#cb38-60" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span>  </span>
+<span id="cb38-61"><a href="constrained-area-vs.-treated-area.html#cb38-61" aria-hidden="true" tabindex="-1"></a>  kableExtra<span class="sc">::</span><span class="fu">add_header_above</span>(<span class="fu">c</span>(<span class="st">&quot; &quot;</span> <span class="ot">=</span> <span class="dv">1</span>, <span class="st">&quot;Acres&quot;</span><span class="ot">=</span><span class="dv">5</span>,<span class="st">&quot; &quot;</span><span class="ot">=</span><span class="dv">1</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb38-62"><a href="constrained-area-vs.-treated-area.html#cb38-62" aria-hidden="true" tabindex="-1"></a>  kableExtra<span class="sc">::</span><span class="fu">kable_classic</span>(<span class="at">full_width=</span>T) <span class="sc">|&gt;</span> </span>
+<span id="cb38-63"><a href="constrained-area-vs.-treated-area.html#cb38-63" aria-hidden="true" tabindex="-1"></a>  kableExtra<span class="sc">::</span><span class="fu">pack_rows</span>(<span class="at">index =</span> <span class="fu">table</span>(forcats<span class="sc">::</span><span class="fu">fct_inorder</span>(treatment_table_temp<span class="sc">$</span>area_name))) <span class="sc">|&gt;</span></span>
+<span id="cb38-64"><a href="constrained-area-vs.-treated-area.html#cb38-64" aria-hidden="true" tabindex="-1"></a>  kableExtra<span class="sc">::</span><span class="fu">kable_styling</span>(<span class="at">font_size =</span> <span class="dv">11</span>,<span class="at">fixed_thead =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb38-65"><a href="constrained-area-vs.-treated-area.html#cb38-65" aria-hidden="true" tabindex="-1"></a>  kableExtra<span class="sc">::</span><span class="fu">footnote</span>(</span>
+<span id="cb38-66"><a href="constrained-area-vs.-treated-area.html#cb38-66" aria-hidden="true" tabindex="-1"></a>    <span class="at">general =</span> <span class="fu">paste0</span>(</span>
+<span id="cb38-67"><a href="constrained-area-vs.-treated-area.html#cb38-67" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;treatment by fiscal year completed&quot;</span></span>
+<span id="cb38-68"><a href="constrained-area-vs.-treated-area.html#cb38-68" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot; | last updated: &quot;</span></span>
+<span id="cb38-69"><a href="constrained-area-vs.-treated-area.html#cb38-69" aria-hidden="true" tabindex="-1"></a>      , <span class="fu">file.info</span>(<span class="st">&quot;../data/S_USA.Activity_HazFuelTrt_PL.gdb/&quot;</span>)<span class="sc">$</span>ctime <span class="sc">|&gt;</span> lubridate<span class="sc">::</span><span class="fu">as_date</span>()</span>
+<span id="cb38-70"><a href="constrained-area-vs.-treated-area.html#cb38-70" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb38-71"><a href="constrained-area-vs.-treated-area.html#cb38-71" aria-hidden="true" tabindex="-1"></a>    , <span class="at">symbol =</span> <span class="fu">c</span>(<span class="st">&quot;overlapping area counted once&quot;</span>)</span>
+<span id="cb38-72"><a href="constrained-area-vs.-treated-area.html#cb38-72" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+</div>
+<div id="treatment-area-versus-mechanically-available-area" class="section level2 hasAnchor" number="7.4">
+<h2><span class="header-section-number">7.4</span> Treatment area versus Mechanically Available Area<a href="constrained-area-vs.-treated-area.html#treatment-area-versus-mechanically-available-area" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="constrained-area-vs.-treated-area.html#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb39-2"><a href="constrained-area-vs.-treated-area.html#cb39-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> treatment_by_type_area</span>
+<span id="cb39-3"><a href="constrained-area-vs.-treated-area.html#cb39-3" aria-hidden="true" tabindex="-1"></a>    , <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">y =</span> pct_treated_area, <span class="at">x =</span> pct_rmn5_roads, <span class="at">color =</span> treatment_category)</span>
+<span id="cb39-4"><a href="constrained-area-vs.-treated-area.html#cb39-4" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb39-5"><a href="constrained-area-vs.-treated-area.html#cb39-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">4</span>, <span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span> </span>
+<span id="cb39-6"><a href="constrained-area-vs.-treated-area.html#cb39-6" aria-hidden="true" tabindex="-1"></a>  ggrepel<span class="sc">::</span><span class="fu">geom_text_repel</span>(</span>
+<span id="cb39-7"><a href="constrained-area-vs.-treated-area.html#cb39-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">mapping =</span> </span>
+<span id="cb39-8"><a href="constrained-area-vs.-treated-area.html#cb39-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(<span class="at">label =</span> stringr<span class="sc">::</span><span class="fu">str_wrap</span>(</span>
+<span id="cb39-9"><a href="constrained-area-vs.-treated-area.html#cb39-9" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ifelse</span>(</span>
+<span id="cb39-10"><a href="constrained-area-vs.-treated-area.html#cb39-10" aria-hidden="true" tabindex="-1"></a>          stringr<span class="sc">::</span><span class="fu">str_count</span>(area_name, <span class="st">&quot;</span><span class="sc">\\</span><span class="st">w+&quot;</span>)<span class="sc">&lt;</span><span class="dv">4</span></span>
+<span id="cb39-11"><a href="constrained-area-vs.-treated-area.html#cb39-11" aria-hidden="true" tabindex="-1"></a>          , stringr<span class="sc">::</span><span class="fu">word</span>(area_name,<span class="dv">1</span>,stringr<span class="sc">::</span><span class="fu">str_count</span>(area_name, <span class="st">&quot;</span><span class="sc">\\</span><span class="st">w+&quot;</span>))</span>
+<span id="cb39-12"><a href="constrained-area-vs.-treated-area.html#cb39-12" aria-hidden="true" tabindex="-1"></a>          , stringr<span class="sc">::</span><span class="fu">word</span>(area_name,<span class="dv">1</span>,<span class="dv">4</span>)</span>
+<span id="cb39-13"><a href="constrained-area-vs.-treated-area.html#cb39-13" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb39-14"><a href="constrained-area-vs.-treated-area.html#cb39-14" aria-hidden="true" tabindex="-1"></a>        , <span class="dv">7</span>)</span>
+<span id="cb39-15"><a href="constrained-area-vs.-treated-area.html#cb39-15" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb39-16"><a href="constrained-area-vs.-treated-area.html#cb39-16" aria-hidden="true" tabindex="-1"></a>    , <span class="at">size =</span> <span class="fl">1.5</span></span>
+<span id="cb39-17"><a href="constrained-area-vs.-treated-area.html#cb39-17" aria-hidden="true" tabindex="-1"></a>    , <span class="at">color =</span> <span class="st">&quot;black&quot;</span></span>
+<span id="cb39-18"><a href="constrained-area-vs.-treated-area.html#cb39-18" aria-hidden="true" tabindex="-1"></a>    , <span class="at">segment.size =</span> <span class="fl">0.2</span></span>
+<span id="cb39-19"><a href="constrained-area-vs.-treated-area.html#cb39-19" aria-hidden="true" tabindex="-1"></a>    , <span class="at">segment.alpha =</span> <span class="fl">0.6</span></span>
+<span id="cb39-20"><a href="constrained-area-vs.-treated-area.html#cb39-20" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span> </span>
+<span id="cb39-21"><a href="constrained-area-vs.-treated-area.html#cb39-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="at">cols =</span> <span class="fu">vars</span>(stringr<span class="sc">::</span><span class="fu">str_to_title</span>(treatment_category))) <span class="sc">+</span></span>
+<span id="cb39-22"><a href="constrained-area-vs.-treated-area.html#cb39-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;firebrick&quot;</span>,<span class="st">&quot;navy&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb39-23"><a href="constrained-area-vs.-treated-area.html#cb39-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">percent_format</span>(), <span class="at">breaks =</span> scales<span class="sc">::</span><span class="fu">extended_breaks</span>(<span class="at">n=</span><span class="dv">8</span>)) <span class="sc">+</span></span>
+<span id="cb39-24"><a href="constrained-area-vs.-treated-area.html#cb39-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">percent_format</span>(), <span class="at">breaks =</span> scales<span class="sc">::</span><span class="fu">extended_breaks</span>(<span class="at">n=</span><span class="dv">8</span>)) <span class="sc">+</span></span>
+<span id="cb39-25"><a href="constrained-area-vs.-treated-area.html#cb39-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb39-26"><a href="constrained-area-vs.-treated-area.html#cb39-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb39-27"><a href="constrained-area-vs.-treated-area.html#cb39-27" aria-hidden="true" tabindex="-1"></a>    , <span class="at">y =</span> <span class="st">&quot;Landscape Area Treated (%)&quot;</span></span>
+<span id="cb39-28"><a href="constrained-area-vs.-treated-area.html#cb39-28" aria-hidden="true" tabindex="-1"></a>    , <span class="at">x =</span> <span class="st">&quot;Forested Area Mechanically Available (%)&quot;</span></span>
+<span id="cb39-29"><a href="constrained-area-vs.-treated-area.html#cb39-29" aria-hidden="true" tabindex="-1"></a>    , <span class="at">title =</span> <span class="fu">paste0</span>(</span>
+<span id="cb39-30"><a href="constrained-area-vs.-treated-area.html#cb39-30" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;Treatments Completed FY-&quot;</span></span>
+<span id="cb39-31"><a href="constrained-area-vs.-treated-area.html#cb39-31" aria-hidden="true" tabindex="-1"></a>      , <span class="fu">min</span>(treatment_by_type_area<span class="sc">$</span>pot_min_fiscal_year_completed)</span>
+<span id="cb39-32"><a href="constrained-area-vs.-treated-area.html#cb39-32" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot; to FY-&quot;</span></span>
+<span id="cb39-33"><a href="constrained-area-vs.-treated-area.html#cb39-33" aria-hidden="true" tabindex="-1"></a>      , <span class="fu">max</span>(treatment_by_type_area<span class="sc">$</span>pot_max_fiscal_year_completed)</span>
+<span id="cb39-34"><a href="constrained-area-vs.-treated-area.html#cb39-34" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb39-35"><a href="constrained-area-vs.-treated-area.html#cb39-35" aria-hidden="true" tabindex="-1"></a>    , <span class="at">subtitle =</span> <span class="st">&quot;*only treatments on National Forest System lands included&quot;</span></span>
+<span id="cb39-36"><a href="constrained-area-vs.-treated-area.html#cb39-36" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb39-37"><a href="constrained-area-vs.-treated-area.html#cb39-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_light</span>() <span class="sc">+</span></span>
+<span id="cb39-38"><a href="constrained-area-vs.-treated-area.html#cb39-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb39-39"><a href="constrained-area-vs.-treated-area.html#cb39-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span> <span class="co"># c(0.9, 0.9)</span></span>
+<span id="cb39-40"><a href="constrained-area-vs.-treated-area.html#cb39-40" aria-hidden="true" tabindex="-1"></a>    , <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">9</span>)</span>
+<span id="cb39-41"><a href="constrained-area-vs.-treated-area.html#cb39-41" aria-hidden="true" tabindex="-1"></a>    , <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">7</span>)</span>
+<span id="cb39-42"><a href="constrained-area-vs.-treated-area.html#cb39-42" aria-hidden="true" tabindex="-1"></a>    , <span class="at">strip.text =</span> <span class="fu">element_text</span>(<span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">face =</span> <span class="st">&quot;bold&quot;</span>)</span>
+<span id="cb39-43"><a href="constrained-area-vs.-treated-area.html#cb39-43" aria-hidden="true" tabindex="-1"></a>    , <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">9</span>)</span>
+<span id="cb39-44"><a href="constrained-area-vs.-treated-area.html#cb39-44" aria-hidden="true" tabindex="-1"></a>    , <span class="at">plot.subtitle =</span>  <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>)</span>
+<span id="cb39-45"><a href="constrained-area-vs.-treated-area.html#cb39-45" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<p><img src="csu_sandbox_files/figure-html/unnamed-chunk-29-1.png" width="960" /></p>
+</div>
+<div id="treatment-in-subwatersheds-by-level-of-constraint" class="section level2 hasAnchor" number="7.5">
+<h2><span class="header-section-number">7.5</span> Treatment in Subwatersheds by Level of Constraint<a href="constrained-area-vs.-treated-area.html#treatment-in-subwatersheds-by-level-of-constraint" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="constrained-area-vs.-treated-area.html#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb40-2"><a href="constrained-area-vs.-treated-area.html#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> treatment_by_cnstrnt_type_area <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(treatment_category<span class="sc">==</span><span class="st">&quot;mechanical&quot;</span>)</span>
+<span id="cb40-3"><a href="constrained-area-vs.-treated-area.html#cb40-3" aria-hidden="true" tabindex="-1"></a>  , <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">y =</span> cnstrnt_class, pct_treated_area, <span class="at">fill =</span> cnstrnt_class)</span>
+<span id="cb40-4"><a href="constrained-area-vs.-treated-area.html#cb40-4" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb40-5"><a href="constrained-area-vs.-treated-area.html#cb40-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb40-6"><a href="constrained-area-vs.-treated-area.html#cb40-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(</span>
+<span id="cb40-7"><a href="constrained-area-vs.-treated-area.html#cb40-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">mapping =</span> <span class="fu">aes</span>(</span>
+<span id="cb40-8"><a href="constrained-area-vs.-treated-area.html#cb40-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">label =</span> scales<span class="sc">::</span><span class="fu">percent</span>(pct_treated_area, <span class="at">accuracy =</span> <span class="fl">0.1</span>)</span>
+<span id="cb40-9"><a href="constrained-area-vs.-treated-area.html#cb40-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb40-10"><a href="constrained-area-vs.-treated-area.html#cb40-10" aria-hidden="true" tabindex="-1"></a>    , <span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">size =</span> <span class="dv">3</span></span>
+<span id="cb40-11"><a href="constrained-area-vs.-treated-area.html#cb40-11" aria-hidden="true" tabindex="-1"></a>    , <span class="at">hjust =</span> <span class="sc">-</span><span class="fl">0.1</span></span>
+<span id="cb40-12"><a href="constrained-area-vs.-treated-area.html#cb40-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb40-13"><a href="constrained-area-vs.-treated-area.html#cb40-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">type =</span> <span class="st">&quot;div&quot;</span>, <span class="at">palette =</span> <span class="st">&quot;RdYlBu&quot;</span>, <span class="at">direction =</span> <span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb40-14"><a href="constrained-area-vs.-treated-area.html#cb40-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(</span>
+<span id="cb40-15"><a href="constrained-area-vs.-treated-area.html#cb40-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">facets =</span> <span class="fu">vars</span>(area_name)</span>
+<span id="cb40-16"><a href="constrained-area-vs.-treated-area.html#cb40-16" aria-hidden="true" tabindex="-1"></a>    , <span class="at">ncol =</span> <span class="dv">3</span></span>
+<span id="cb40-17"><a href="constrained-area-vs.-treated-area.html#cb40-17" aria-hidden="true" tabindex="-1"></a>    , <span class="at">labeller =</span> <span class="fu">label_wrap_gen</span>(<span class="at">width =</span> <span class="dv">35</span>, <span class="at">multi_line =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb40-18"><a href="constrained-area-vs.-treated-area.html#cb40-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb40-19"><a href="constrained-area-vs.-treated-area.html#cb40-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">expand =</span> <span class="fu">expansion</span>(<span class="at">mult =</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">1</span>)),<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">percent_format</span>()) <span class="sc">+</span></span>
+<span id="cb40-20"><a href="constrained-area-vs.-treated-area.html#cb40-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb40-21"><a href="constrained-area-vs.-treated-area.html#cb40-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;Level of</span><span class="sc">\n</span><span class="st">Constraint&quot;</span></span>
+<span id="cb40-22"><a href="constrained-area-vs.-treated-area.html#cb40-22" aria-hidden="true" tabindex="-1"></a>    , <span class="at">x =</span> <span class="st">&quot;Subwatershed Area</span><span class="sc">\n</span><span class="st">Mechanically Treated (%)&quot;</span></span>
+<span id="cb40-23"><a href="constrained-area-vs.-treated-area.html#cb40-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb40-24"><a href="constrained-area-vs.-treated-area.html#cb40-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_light</span>() <span class="sc">+</span></span>
+<span id="cb40-25"><a href="constrained-area-vs.-treated-area.html#cb40-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb40-26"><a href="constrained-area-vs.-treated-area.html#cb40-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span></span>
+<span id="cb40-27"><a href="constrained-area-vs.-treated-area.html#cb40-27" aria-hidden="true" tabindex="-1"></a>    , <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">9</span>)</span>
+<span id="cb40-28"><a href="constrained-area-vs.-treated-area.html#cb40-28" aria-hidden="true" tabindex="-1"></a>    , <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">7</span>)</span>
+<span id="cb40-29"><a href="constrained-area-vs.-treated-area.html#cb40-29" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<p><img src="csu_sandbox_files/figure-html/unnamed-chunk-30-1.png" width="960" /></p>
+</div>
+<div id="treatment-by-cover-type" class="section level2 hasAnchor" number="7.6">
+<h2><span class="header-section-number">7.6</span> Treatment by Cover Type<a href="constrained-area-vs.-treated-area.html#treatment-by-cover-type" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>What is the forest versus shrubland classification of the area treated? This <a href="https://code.earthengine.google.com/15afaf7d703102e82f82d482552b2356?noload=true">GEE script</a> was used to calculate the area within treatment boundaries by NLCD landcover class.</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="constrained-area-vs.-treated-area.html#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># treatment_by_type_area |&gt; </span></span>
+<span id="cb41-2"><a href="constrained-area-vs.-treated-area.html#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::select(area_name,treatment_category,treatment_area_ha) |&gt; </span></span>
+<span id="cb41-3"><a href="constrained-area-vs.-treated-area.html#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   write.csv(&quot;../data/treatment_by_type_area.csv&quot;, row.names = F)</span></span>
+<span id="cb41-4"><a href="constrained-area-vs.-treated-area.html#cb41-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-5"><a href="constrained-area-vs.-treated-area.html#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="co"># xxx_treatment_by_type_area &lt;- readr::read_csv(&quot;../data/treatment_by_type_area.csv&quot;)</span></span>
+<span id="cb41-6"><a href="constrained-area-vs.-treated-area.html#cb41-6" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot(xxx_treatment_by_type_area,aes(x=treatment_category,y=treatment_area_ha,fill=treatment_category)) +</span></span>
+<span id="cb41-7"><a href="constrained-area-vs.-treated-area.html#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_col() +</span></span>
+<span id="cb41-8"><a href="constrained-area-vs.-treated-area.html#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   facet_wrap(facets = vars(area_name),ncol=3,scales = &quot;free_y&quot;) +</span></span>
+<span id="cb41-9"><a href="constrained-area-vs.-treated-area.html#cb41-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme_light() +</span></span>
+<span id="cb41-10"><a href="constrained-area-vs.-treated-area.html#cb41-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(legend.position = &quot;none&quot;)</span></span>
+<span id="cb41-11"><a href="constrained-area-vs.-treated-area.html#cb41-11" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb41-12"><a href="constrained-area-vs.-treated-area.html#cb41-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-13"><a href="constrained-area-vs.-treated-area.html#cb41-13" aria-hidden="true" tabindex="-1"></a>treatment_in_landscapes_statistics <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">&quot;../data/treatment_in_landscapes_statistics.csv&quot;</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb41-14"><a href="constrained-area-vs.-treated-area.html#cb41-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename_with</span>(</span>
+<span id="cb41-15"><a href="constrained-area-vs.-treated-area.html#cb41-15" aria-hidden="true" tabindex="-1"></a>    <span class="sc">~</span> <span class="fu">gsub</span>(<span class="st">&quot;^</span><span class="sc">\\</span><span class="st">_|</span><span class="sc">\\</span><span class="st">_$&quot;</span>, <span class="st">&quot;&quot;</span>, .x)</span>
+<span id="cb41-16"><a href="constrained-area-vs.-treated-area.html#cb41-16" aria-hidden="true" tabindex="-1"></a>    , <span class="fu">everything</span>()</span>
+<span id="cb41-17"><a href="constrained-area-vs.-treated-area.html#cb41-17" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb41-18"><a href="constrained-area-vs.-treated-area.html#cb41-18" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(area_nm,tidyselect<span class="sc">::</span><span class="fu">ends_with</span>(<span class="st">&quot;_m2&quot;</span>),tidyselect<span class="sc">::</span><span class="fu">ends_with</span>(<span class="st">&quot;_fs_&quot;</span>),trtmnt) <span class="sc">|&gt;</span> </span>
+<span id="cb41-19"><a href="constrained-area-vs.-treated-area.html#cb41-19" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">area_name =</span> area_nm,<span class="at">treatment_category=</span>trtmnt</span>
+<span id="cb41-20"><a href="constrained-area-vs.-treated-area.html#cb41-20" aria-hidden="true" tabindex="-1"></a>                ,<span class="at">pot_min_fiscal_year_completed=</span>mn_fs_</span>
+<span id="cb41-21"><a href="constrained-area-vs.-treated-area.html#cb41-21" aria-hidden="true" tabindex="-1"></a>                ,<span class="at">pot_max_fiscal_year_completed=</span>mx_fs_</span>
+<span id="cb41-22"><a href="constrained-area-vs.-treated-area.html#cb41-22" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb41-23"><a href="constrained-area-vs.-treated-area.html#cb41-23" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(dplyr<span class="sc">::</span><span class="fu">across</span>(</span>
+<span id="cb41-24"><a href="constrained-area-vs.-treated-area.html#cb41-24" aria-hidden="true" tabindex="-1"></a>      tidyselect<span class="sc">::</span><span class="fu">ends_with</span>(<span class="st">&quot;_m2&quot;</span>)</span>
+<span id="cb41-25"><a href="constrained-area-vs.-treated-area.html#cb41-25" aria-hidden="true" tabindex="-1"></a>      , <span class="sc">~</span> .x<span class="sc">/</span><span class="dv">10000</span></span>
+<span id="cb41-26"><a href="constrained-area-vs.-treated-area.html#cb41-26" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb41-27"><a href="constrained-area-vs.-treated-area.html#cb41-27" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb41-28"><a href="constrained-area-vs.-treated-area.html#cb41-28" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename_with</span>(</span>
+<span id="cb41-29"><a href="constrained-area-vs.-treated-area.html#cb41-29" aria-hidden="true" tabindex="-1"></a>    <span class="sc">~</span> <span class="fu">gsub</span>(<span class="st">&quot;_m2&quot;</span>, <span class="st">&quot;_ha&quot;</span>, .x)</span>
+<span id="cb41-30"><a href="constrained-area-vs.-treated-area.html#cb41-30" aria-hidden="true" tabindex="-1"></a>    , tidyselect<span class="sc">::</span><span class="fu">ends_with</span>(<span class="st">&quot;_m2&quot;</span>)</span>
+<span id="cb41-31"><a href="constrained-area-vs.-treated-area.html#cb41-31" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb41-32"><a href="constrained-area-vs.-treated-area.html#cb41-32" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(area_name,treatment_category</span>
+<span id="cb41-33"><a href="constrained-area-vs.-treated-area.html#cb41-33" aria-hidden="true" tabindex="-1"></a>                  ,pot_min_fiscal_year_completed,pot_max_fiscal_year_completed</span>
+<span id="cb41-34"><a href="constrained-area-vs.-treated-area.html#cb41-34" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb41-35"><a href="constrained-area-vs.-treated-area.html#cb41-35" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
+<span id="cb41-36"><a href="constrained-area-vs.-treated-area.html#cb41-36" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">across</span>(</span>
+<span id="cb41-37"><a href="constrained-area-vs.-treated-area.html#cb41-37" aria-hidden="true" tabindex="-1"></a>      tidyselect<span class="sc">::</span><span class="fu">ends_with</span>(<span class="st">&quot;_ha&quot;</span>)</span>
+<span id="cb41-38"><a href="constrained-area-vs.-treated-area.html#cb41-38" aria-hidden="true" tabindex="-1"></a>      , <span class="sc">~</span> <span class="fu">sum</span>(.x,<span class="at">na.rm =</span> T)</span>
+<span id="cb41-39"><a href="constrained-area-vs.-treated-area.html#cb41-39" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb41-40"><a href="constrained-area-vs.-treated-area.html#cb41-40" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb41-41"><a href="constrained-area-vs.-treated-area.html#cb41-41" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>()</span>
+<span id="cb41-42"><a href="constrained-area-vs.-treated-area.html#cb41-42" aria-hidden="true" tabindex="-1"></a><span class="co"># plot</span></span>
+<span id="cb41-43"><a href="constrained-area-vs.-treated-area.html#cb41-43" aria-hidden="true" tabindex="-1"></a>treatment_in_landscapes_statistics <span class="sc">|&gt;</span> </span>
+<span id="cb41-44"><a href="constrained-area-vs.-treated-area.html#cb41-44" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb41-45"><a href="constrained-area-vs.-treated-area.html#cb41-45" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">across</span>(</span>
+<span id="cb41-46"><a href="constrained-area-vs.-treated-area.html#cb41-46" aria-hidden="true" tabindex="-1"></a>      <span class="fu">c</span>(forest_area_ha,shrubland_area_ha)</span>
+<span id="cb41-47"><a href="constrained-area-vs.-treated-area.html#cb41-47" aria-hidden="true" tabindex="-1"></a>      , <span class="sc">~</span> .x<span class="sc">/</span>feature_area_ha</span>
+<span id="cb41-48"><a href="constrained-area-vs.-treated-area.html#cb41-48" aria-hidden="true" tabindex="-1"></a>      , <span class="at">.names =</span> <span class="st">&quot;pct_{.col}&quot;</span></span>
+<span id="cb41-49"><a href="constrained-area-vs.-treated-area.html#cb41-49" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb41-50"><a href="constrained-area-vs.-treated-area.html#cb41-50" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb41-51"><a href="constrained-area-vs.-treated-area.html#cb41-51" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb41-52"><a href="constrained-area-vs.-treated-area.html#cb41-52" aria-hidden="true" tabindex="-1"></a>    <span class="at">pct_other_area_ha =</span> <span class="dv">1</span><span class="sc">-</span>(pct_forest_area_ha<span class="sc">+</span>pct_shrubland_area_ha)</span>
+<span id="cb41-53"><a href="constrained-area-vs.-treated-area.html#cb41-53" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb41-54"><a href="constrained-area-vs.-treated-area.html#cb41-54" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(</span>
+<span id="cb41-55"><a href="constrained-area-vs.-treated-area.html#cb41-55" aria-hidden="true" tabindex="-1"></a>      <span class="at">cols =</span> tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;pct_&quot;</span>)</span>
+<span id="cb41-56"><a href="constrained-area-vs.-treated-area.html#cb41-56" aria-hidden="true" tabindex="-1"></a>      , <span class="at">names_to =</span> <span class="st">&quot;class&quot;</span></span>
+<span id="cb41-57"><a href="constrained-area-vs.-treated-area.html#cb41-57" aria-hidden="true" tabindex="-1"></a>      , <span class="at">values_to =</span> <span class="st">&quot;pct_treatment_area&quot;</span></span>
+<span id="cb41-58"><a href="constrained-area-vs.-treated-area.html#cb41-58" aria-hidden="true" tabindex="-1"></a>      , <span class="at">names_prefix =</span> <span class="st">&quot;pct_&quot;</span></span>
+<span id="cb41-59"><a href="constrained-area-vs.-treated-area.html#cb41-59" aria-hidden="true" tabindex="-1"></a>      , <span class="at">values_drop_na =</span> F</span>
+<span id="cb41-60"><a href="constrained-area-vs.-treated-area.html#cb41-60" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span></span>
+<span id="cb41-61"><a href="constrained-area-vs.-treated-area.html#cb41-61" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb41-62"><a href="constrained-area-vs.-treated-area.html#cb41-62" aria-hidden="true" tabindex="-1"></a>    <span class="at">class =</span> stringr<span class="sc">::</span><span class="fu">str_remove_all</span>(class,<span class="st">&quot;_area_ha&quot;</span>) <span class="sc">|&gt;</span> stringr<span class="sc">::</span><span class="fu">str_to_title</span>()</span>
+<span id="cb41-63"><a href="constrained-area-vs.-treated-area.html#cb41-63" aria-hidden="true" tabindex="-1"></a>    , <span class="at">treatment_category =</span> stringr<span class="sc">::</span><span class="fu">str_to_title</span>(treatment_category)</span>
+<span id="cb41-64"><a href="constrained-area-vs.-treated-area.html#cb41-64" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb41-65"><a href="constrained-area-vs.-treated-area.html#cb41-65" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb41-66"><a href="constrained-area-vs.-treated-area.html#cb41-66" aria-hidden="true" tabindex="-1"></a>    <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> pct_treatment_area, <span class="at">y =</span> <span class="fu">reorder</span>(area_name,<span class="fu">desc</span>(area_name)), <span class="at">fill=</span>class)</span>
+<span id="cb41-67"><a href="constrained-area-vs.-treated-area.html#cb41-67" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb41-68"><a href="constrained-area-vs.-treated-area.html#cb41-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.7</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb41-69"><a href="constrained-area-vs.-treated-area.html#cb41-69" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(</span>
+<span id="cb41-70"><a href="constrained-area-vs.-treated-area.html#cb41-70" aria-hidden="true" tabindex="-1"></a>    <span class="at">mapping =</span> <span class="fu">aes</span>(</span>
+<span id="cb41-71"><a href="constrained-area-vs.-treated-area.html#cb41-71" aria-hidden="true" tabindex="-1"></a>      <span class="at">label =</span> scales<span class="sc">::</span><span class="fu">percent</span>(<span class="fu">ifelse</span>(pct_treatment_area<span class="sc">&gt;</span>.<span class="dv">03</span>,pct_treatment_area,<span class="cn">NA</span>), <span class="at">accuracy =</span> <span class="dv">1</span>)</span>
+<span id="cb41-72"><a href="constrained-area-vs.-treated-area.html#cb41-72" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb41-73"><a href="constrained-area-vs.-treated-area.html#cb41-73" aria-hidden="true" tabindex="-1"></a>    , <span class="at">position =</span> <span class="fu">position_stack</span>(<span class="at">vjust =</span> <span class="fl">0.5</span>)</span>
+<span id="cb41-74"><a href="constrained-area-vs.-treated-area.html#cb41-74" aria-hidden="true" tabindex="-1"></a>    , <span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">size =</span> <span class="dv">3</span></span>
+<span id="cb41-75"><a href="constrained-area-vs.-treated-area.html#cb41-75" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb41-76"><a href="constrained-area-vs.-treated-area.html#cb41-76" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="at">cols =</span> <span class="fu">vars</span>( treatment_category))<span class="sc">+</span></span>
+<span id="cb41-77"><a href="constrained-area-vs.-treated-area.html#cb41-77" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;Forest&quot;</span><span class="ot">=</span><span class="st">&quot;forestgreen&quot;</span>,<span class="st">&quot;Shrubland&quot;</span><span class="ot">=</span><span class="st">&quot;tan2&quot;</span>,<span class="st">&quot;Other&quot;</span><span class="ot">=</span><span class="st">&quot;gray77&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb41-78"><a href="constrained-area-vs.-treated-area.html#cb41-78" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">percent_format</span>()) <span class="sc">+</span></span>
+<span id="cb41-79"><a href="constrained-area-vs.-treated-area.html#cb41-79" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb41-80"><a href="constrained-area-vs.-treated-area.html#cb41-80" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">&quot;NLCD</span><span class="sc">\n</span><span class="st">Cover</span><span class="sc">\n</span><span class="st">Type&quot;</span></span>
+<span id="cb41-81"><a href="constrained-area-vs.-treated-area.html#cb41-81" aria-hidden="true" tabindex="-1"></a>    , <span class="at">y =</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb41-82"><a href="constrained-area-vs.-treated-area.html#cb41-82" aria-hidden="true" tabindex="-1"></a>    , <span class="at">x =</span> <span class="st">&quot;Percent of Area Treated&quot;</span></span>
+<span id="cb41-83"><a href="constrained-area-vs.-treated-area.html#cb41-83" aria-hidden="true" tabindex="-1"></a>    , <span class="at">title =</span> <span class="fu">paste0</span>(</span>
+<span id="cb41-84"><a href="constrained-area-vs.-treated-area.html#cb41-84" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;Treatments Completed FY-&quot;</span></span>
+<span id="cb41-85"><a href="constrained-area-vs.-treated-area.html#cb41-85" aria-hidden="true" tabindex="-1"></a>      , <span class="fu">min</span>(treatment_in_landscapes_statistics<span class="sc">$</span>pot_min_fiscal_year_completed)</span>
+<span id="cb41-86"><a href="constrained-area-vs.-treated-area.html#cb41-86" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot; to FY-&quot;</span></span>
+<span id="cb41-87"><a href="constrained-area-vs.-treated-area.html#cb41-87" aria-hidden="true" tabindex="-1"></a>      , <span class="fu">max</span>(treatment_in_landscapes_statistics<span class="sc">$</span>pot_max_fiscal_year_completed)</span>
+<span id="cb41-88"><a href="constrained-area-vs.-treated-area.html#cb41-88" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb41-89"><a href="constrained-area-vs.-treated-area.html#cb41-89" aria-hidden="true" tabindex="-1"></a>    , <span class="at">subtitle =</span> <span class="st">&quot;*only treatments on National Forest System lands included&quot;</span></span>
+<span id="cb41-90"><a href="constrained-area-vs.-treated-area.html#cb41-90" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb41-91"><a href="constrained-area-vs.-treated-area.html#cb41-91" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_light</span>() <span class="sc">+</span></span>
+<span id="cb41-92"><a href="constrained-area-vs.-treated-area.html#cb41-92" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb41-93"><a href="constrained-area-vs.-treated-area.html#cb41-93" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">&quot;top&quot;</span> <span class="co"># c(0.9, 0.9)</span></span>
+<span id="cb41-94"><a href="constrained-area-vs.-treated-area.html#cb41-94" aria-hidden="true" tabindex="-1"></a>    , <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">9</span>)</span>
+<span id="cb41-95"><a href="constrained-area-vs.-treated-area.html#cb41-95" aria-hidden="true" tabindex="-1"></a>    , <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">9</span>)</span>
+<span id="cb41-96"><a href="constrained-area-vs.-treated-area.html#cb41-96" aria-hidden="true" tabindex="-1"></a>    , <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">7</span>)</span>
+<span id="cb41-97"><a href="constrained-area-vs.-treated-area.html#cb41-97" aria-hidden="true" tabindex="-1"></a>    , <span class="at">strip.text =</span> <span class="fu">element_text</span>(<span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">face =</span> <span class="st">&quot;bold&quot;</span>)</span>
+<span id="cb41-98"><a href="constrained-area-vs.-treated-area.html#cb41-98" aria-hidden="true" tabindex="-1"></a>    , <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">9</span>)</span>
+<span id="cb41-99"><a href="constrained-area-vs.-treated-area.html#cb41-99" aria-hidden="true" tabindex="-1"></a>    , <span class="at">plot.subtitle =</span>  <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>)</span>
+<span id="cb41-100"><a href="constrained-area-vs.-treated-area.html#cb41-100" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<p><img src="csu_sandbox_files/figure-html/unnamed-chunk-31-1.png" width="960" /></p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="wildfire-crisis-strategy-priority-landscapes.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>
