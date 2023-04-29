@@ -560,7 +560,6 @@ ggplot(
 
 ```
 
-
 ## Treatment in Subwatersheds by Level of Constraint
 
 ```{r}
@@ -571,10 +570,10 @@ ggplot(
   geom_col(width = 0.7) +
   geom_text(
     mapping = aes(
-      label = scales::percent(pct_treated_area, accuracy = 1)
+      label = scales::percent(pct_treated_area, accuracy = 0.1)
     )
     , color = "black", size = 3
-    , vjust = -0.5
+    , hjust = -0.1
   ) +
   scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
   facet_wrap(
@@ -582,7 +581,7 @@ ggplot(
     , ncol = 3
     , labeller = label_wrap_gen(width = 35, multi_line = TRUE)
   ) +
-  scale_x_continuous(labels = scales::percent_format(), expand = expansion(mult = c(0, .3))) +
+  scale_x_continuous(expand = expansion(mult = c(0, .1)),labels = scales::percent_format()) +
   labs(
     y = "Level of\nConstraint"
     , x = "Subwatershed Area\nMechanically Treated (%)"
@@ -590,32 +589,8 @@ ggplot(
   theme_light() +
   theme(
     legend.position = "none"
-    , axis.text.x = element_text(angle=90,hjust=0.95,vjust=0.2)
-  )
-```
-
-## Treatment acres by type plot
-
-```{r}
-treatment_by_type_area_yr |> 
-  dplyr::filter(fiscal_year_completed>=2022)
-```
-
-
-
-```{r}
-# "Hazardous Fuel Treatment"
-
-ggplot(
-  data = treatment_by_type_area_yr
-  , mapping = aes(x = treatment_year, y = treatment_area_ha, color = treatment_label)
-) +
-  geom_line() + 
-  facet_wrap(facets = vars(area_name), ncol = 3, scales = "free_y") +
-  scale_color_brewer(type = "qual", palette = "Dark2") +
-  theme_light() + 
-  theme(
-    legend.position = "top"
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_text(size=7)
   )
 ```
 
