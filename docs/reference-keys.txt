@@ -1,5 +1,6 @@
 tab:est-table
 tab:est-table2
+tab:trt-yr-tbl
 caution
 objective
 data-sources
@@ -41,4 +42,5 @@ forest-management-activities-facts
 treatment-acres-by-year-table
 treatment-area-versus-mechanically-available-area
 treatment-in-subwatersheds-by-level-of-constraint
+total-area-treated-by-level-of-constraint
 treatment-by-cover-type

@@ -261,7 +261,7 @@ Note, some of these areas have a very low percentage of forested area. For examp
 
 What is the landcover classification of the remaining area? This [GEE script](https://code.earthengine.google.com/69cee569d87fa6ce27723fcf579fbb32?noload=true) was used to calculate the area by NLCD landcover class.
 
-```{r}
+```{r nlcd-area}
 # nlcd class groups
 nlcd_reclass_df_temp <- data.frame(
     class_id = c(11,12,21,22,23,24,31,41,42,43,51,52,71,72,73,74,81,82,90,95) |> as.character()
@@ -348,7 +348,7 @@ ggplot(
   labs(
     fill = "NLCD\nCover\nType"
     , y = ""
-    , x = "Percent of Area"
+    , x = "% Landscape Area"
   ) +
   theme_light() +
   theme(
@@ -696,7 +696,7 @@ ggplot(
   labs(
     fill = "Level of\nConstraint"
     , y = ""
-    , x = "Percent of Subwatersheds"
+    , x = "% of Subwatersheds"
   ) +
   theme_light() +
   theme(

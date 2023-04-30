@@ -214,7 +214,7 @@ gc()
 
 Combine treatment layers with landscape areas
 
-```{r}
+```{r intrsct-ls-trt}
 # combine with wfp areas
 treatment_in_landscapes <- rbind(
   # harvests
@@ -352,7 +352,7 @@ gc()
 
 Combine treatment layers with watersheds
 
-```{r}
+```{r intrsct-ws-trt}
 # combine with wfp areas
 treatment_in_watersheds <- rbind(
   # harvests
@@ -440,7 +440,7 @@ gc()
 
 ## Treatment acres by year table
 
-```{r}
+```{r trt-yr-tbl, results='asis'}
 treatment_table_temp <- treatment_by_type_area_yr |> 
   dplyr::filter(fiscal_year_completed>=2022) |> 
   dplyr::mutate(nm = paste(facts_src,treatment_category,sep = "_")) |> 
@@ -517,35 +517,35 @@ kableExtra::kable(
 
 ## Treatment area versus Mechanically Available Area
 
-```{r}
+```{r trt-avail}
 ggplot(
     data = treatment_by_type_area
-    , mapping = aes(y = pct_treated_area, x = pct_rmn5_roads, color = treatment_category)
+    , mapping = aes(y = pct_treated_area, x = pct_rmn5_roads, fill = treatment_category)
   ) +
-  geom_point(size = 4, alpha = 0.8) + 
+  geom_point(size = 4.5, alpha = 0.8,shape=21,color="gray66") + 
   ggrepel::geom_text_repel(
     mapping = 
       aes(label = stringr::str_wrap(
         ifelse(
-          stringr::str_count(area_name, "\\w+")<4
+          stringr::str_count(area_name, "\\w+")<3
           , stringr::word(area_name,1,stringr::str_count(area_name, "\\w+"))
-          , stringr::word(area_name,1,4)
+          , stringr::word(area_name,1,3)
         )
         , 7)
       )
-    , size = 1.5
-    , color = "black"
+    , size = 2
+    , color = "gray33"
     , segment.size = 0.2
     , segment.alpha = 0.6
   ) + 
   facet_grid(cols = vars(stringr::str_to_title(treatment_category))) +
-  scale_color_manual(values = c("firebrick","navy")) +
+  scale_fill_manual(values = c("firebrick","navy")) +
   scale_x_continuous(labels = scales::percent_format(), breaks = scales::extended_breaks(n=8)) +
   scale_y_continuous(labels = scales::percent_format(), breaks = scales::extended_breaks(n=8)) +
   labs(
     fill = ""
-    , y = "Landscape Area Treated (%)"
-    , x = "Forested Area Mechanically Available (%)"
+    , y = "% Landscape Area Treated"
+    , x = "% Forested Area\nMechanically Available"
     , title = paste0(
       "Treatments Completed FY-"
       , min(treatment_by_type_area$pot_min_fiscal_year_completed)
@@ -568,10 +568,10 @@ ggplot(
 
 ## Treatment in Subwatersheds by Level of Constraint
 
-```{r}
+```{r trt-sw, fig.height=9}
 ggplot(
   data = treatment_by_cnstrnt_type_area |> dplyr::filter(treatment_category=="mechanical")
-  , mapping = aes(y = cnstrnt_class, pct_treated_area, fill = cnstrnt_class)
+  , mapping = aes(y = cnstrnt_class, x = pct_treated_area, fill = cnstrnt_class)
 ) +
   geom_col(width = 0.7) +
   geom_text(
@@ -590,13 +590,78 @@ ggplot(
   scale_x_continuous(expand = expansion(mult = c(0, .1)),labels = scales::percent_format()) +
   labs(
     y = "Level of\nConstraint"
-    , x = "Subwatershed Area\nMechanically Treated (%)"
+    , x = "% Subwatershed Area\nMechanically Treated"
+    , title = paste0(
+      "Mechanical Treatments Completed FY-"
+      , min(treatment_by_type_area$pot_min_fiscal_year_completed)
+      , " to FY-"
+      , max(treatment_by_type_area$pot_max_fiscal_year_completed)
+    )
+    , subtitle = "*only treatments on National Forest System lands included"
   ) +
   theme_light() +
   theme(
     legend.position = "none"
     , axis.title = element_text(size=9)
     , axis.text.x = element_text(size=7)
+    , plot.title = element_text(size = 9)
+    , plot.subtitle =  element_text(size = 8)
+  )
+```
+
+## Total Area Treated by Level of Constraint
+
+```{r trt-sw-tot}
+treatment_by_cnstrnt_type_area |> 
+  dplyr::group_by(treatment_category, cnstrnt_class) |> 
+  dplyr::summarise(
+    dplyr::across(
+      tidyselect::starts_with("treatment_area_")
+      , ~ sum(.x,na.rm = T)
+    )
+  ) |> 
+ggplot(
+  mapping = aes(y = cnstrnt_class, x = treatment_area_acres, fill = cnstrnt_class)
+) +
+  geom_col(width = 0.7) +
+  geom_text(
+    mapping = aes(
+      label = scales::comma(treatment_area_ha,suffix = "k ha", scale = 1e-3, accuracy = 0.1) 
+    )
+    , color = "black", size = 3
+    , hjust = -0.1
+  ) +
+  geom_text(
+    mapping = aes(
+      label = scales::comma(treatment_area_acres,suffix = "k ac", scale = 1e-3, accuracy = 0.1) 
+    )
+    , color = "black", size = 2.5
+    , hjust = -0.15
+    , vjust = 3
+  ) +
+  scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
+  facet_grid(cols = vars(stringr::str_to_title( treatment_category)))+
+  scale_x_continuous(expand = expansion(mult = c(0, .2)),labels = scales::comma_format()) +
+  labs(
+    y = "Level of\nConstraint"
+    , x = "Area Treated"
+    , title = paste0(
+      "Treatments Completed FY-"
+      , min(treatment_by_type_area$pot_min_fiscal_year_completed)
+      , " to FY-"
+      , max(treatment_by_type_area$pot_max_fiscal_year_completed)
+    )
+    , subtitle = "*only treatments on National Forest System lands included"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "none"
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_blank()
+    , axis.ticks.x = element_blank()
+    , strip.text = element_text(color = "black", face = "bold")
+    , plot.title = element_text(size = 9)
+    , plot.subtitle =  element_text(size = 8)
   )
 ```
 
@@ -604,19 +669,8 @@ ggplot(
 
 What is the forest versus shrubland classification of the area treated? This [GEE script](https://code.earthengine.google.com/15afaf7d703102e82f82d482552b2356?noload=true) was used to calculate the area within treatment boundaries by NLCD landcover class.
 
-```{r}
-# treatment_by_type_area |> 
-#   dplyr::select(area_name,treatment_category,treatment_area_ha) |> 
-#   write.csv("../data/treatment_by_type_area.csv", row.names = F)
-
-# xxx_treatment_by_type_area <- readr::read_csv("../data/treatment_by_type_area.csv")
-# ggplot(xxx_treatment_by_type_area,aes(x=treatment_category,y=treatment_area_ha,fill=treatment_category)) +
-#   geom_col() +
-#   facet_wrap(facets = vars(area_name),ncol=3,scales = "free_y") +
-#   theme_light() +
-#   theme(legend.position = "none")
-# 
-
+```{r trt-nlcd}
+# read data
 treatment_in_landscapes_statistics <- readr::read_csv("../data/treatment_in_landscapes_statistics.csv") |> 
   dplyr::rename_with(
     ~ gsub("^\\_|\\_$", "", .x)
@@ -646,6 +700,8 @@ treatment_in_landscapes_statistics <- readr::read_csv("../data/treatment_in_land
     )
   ) |> 
   dplyr::ungroup()
+# get color list
+nlcd_color_temp <- FedData::nlcd_colors() |> dplyr::filter(ID %in% c(42,52)) |> dplyr::pull(Color)
 # plot
 treatment_in_landscapes_statistics |> 
   dplyr::mutate(
@@ -675,18 +731,18 @@ ggplot(
   geom_col(width = 0.7, alpha=0.8) +
   geom_text(
     mapping = aes(
-      label = scales::percent(ifelse(pct_treatment_area>.03,pct_treatment_area,NA), accuracy = 1)
+      label = scales::percent(ifelse(pct_treatment_area>.05,pct_treatment_area,NA), accuracy = 1)
     )
     , position = position_stack(vjust = 0.5)
     , color = "black", size = 3
   ) +
   facet_grid(cols = vars( treatment_category))+
-  scale_fill_manual(values = c("Forest"="forestgreen","Shrubland"="tan2","Other"="gray77")) +
+  scale_fill_manual(values = c("Forest"=nlcd_color_temp[1],"Shrubland"=nlcd_color_temp[2],"Other"="gray88")) +
   scale_x_continuous(labels = scales::percent_format()) +
   labs(
     fill = "NLCD\nCover\nType"
     , y = ""
-    , x = "Percent of Area Treated"
+    , x = "% Area Treated"
     , title = paste0(
       "Treatments Completed FY-"
       , min(treatment_in_landscapes_statistics$pot_min_fiscal_year_completed)
