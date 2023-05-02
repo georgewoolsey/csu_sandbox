@@ -1,4 +1,20 @@
-var ex_polygon = ee.FeatureCollection("users/GeorgeWoolsey/unit_bbox");
+//    state          area
+//  1 Montana     407243.
+//  2 Utah        588619.
+//  3 New Mexico  591839.
+//  4 Nevada     1371150.
+//  5 Colorado   1449046.
+//  6 Idaho      1480891.
+//  7 Washington 1691911.
+//  8 California 2380632.
+//  9 Arizona    3827108.
+// 10 Oregon     5226732.
+//////////////////////////////////////////
+// 'Montana','Utah','New Mexico','Nevada'
+// 'Colorado','California'
+// 'Idaho','Washington'
+// 'Arizona'
+// 'Oregon'
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // BEGIN: USER-DEFINED PARAMETERS AND DATA
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -15,20 +31,20 @@ var ex_polygon = ee.FeatureCollection("users/GeorgeWoolsey/unit_bbox");
       // , 'Rio Grande National Forest'
       // , 'San Juan National Forest'
       // , 'White River National Forest'
-      '02','03'
-      // 'Montana'
+      // '02','03'
+      'Arizona'
     ]);
     var my_feature_collection = 
     ///////////////// states
       // ee.FeatureCollection("TIGER/2018/States")
       //   .filter(ee.Filter.inList('STUSPS', ft_list))
     ///////////////// usfs forests
-      ee.FeatureCollection("users/GeorgeWoolsey/L48_USFS_NatlForests")
-        // .filter(ee.Filter.inList('COMMONNAME', ft_list))
-        .filter(ee.Filter.inList('REGION', ft_list))
+      // ee.FeatureCollection("users/GeorgeWoolsey/L48_USFS_NatlForests")
+      //   // .filter(ee.Filter.inList('COMMONNAME', ft_list))
+      //   .filter(ee.Filter.inList('REGION', ft_list))
     ///////////////// wildfire priority landscapes
-      // ee.FeatureCollection("projects/forestmgmtconstraint/assets/Wildfire_Crisis_Strategy_Landscapes")
-      // .filter(ee.Filter.inList('STATE', ft_list))
+      ee.FeatureCollection("projects/forestmgmtconstraint/assets/Wildfire_Crisis_Strategy_Landscapes")
+      .filter(ee.Filter.inList('STATE', ft_list))
     ;
     // var my_feature_collection = ex_polygon
       // .map(function(feature){
@@ -37,31 +53,34 @@ var ex_polygon = ee.FeatureCollection("users/GeorgeWoolsey/unit_bbox");
       //   ;
       // })
     // ;
-    print(my_feature_collection.aggregate_array('COMMONNAME'), 'FORESTS TO DO' );
+    print(my_feature_collection.aggregate_array('NAME'), 'FORESTS TO DO' );
   //////////////////////////////////////////////////
   // 2. DEFINE NLCD LANDCOVER CLASSES TO CONSIDER
   // SEE:
   // .. https://www.mrlc.gov/data/legends/national-land-cover-database-class-legend-and-description
   //////////////////////////////////////////////////
     // A list of NLCD cover classes
-      var nlcd_class_list = [41,42,43];
+      var nlcd_class_list = [41,42,43,51,52];
   //////////////////////////////////////////////////
   // 3. CONSTRAINT PARAMETERS
   //////////////////////////////////////////////////
     // A) HOW FAR (FEET) FROM EXISTING ROADS CAN TREATMENT BE APPLIED?
       var dist_from_road_feet = 2000;
     // B) WHAT IS THE MAXIMUM SLOPE (%) ON WHICH TREATMENT CAN BE APPLIED?
-      var max_slope_pct = 35;
+      var max_slope_pct = 50;
     // C) HOW FAR (FEET) FROM RIPARIAN ZONES SHOULD TREATMENT BE CONSTRAINED?
-      var riparian_buffer_feet = 100;
+      var riparian_buffer_feet = 50;
     // D) ON WHICH LAND DESIGNATION AREAS IS TREATMENT CONSTRAINED BY GAP STATUS CODE?
       // .. options = 1,2,3,4 alone or in combination
       // see: https://www.usgs.gov/programs/gap-analysis-project/science/pad-us-data-overview
       var gap_status_list = [1];
+    // E) USE ADMINISTRATIVE BOUNDARIES?
+      // [1] = yes; [0] = no
+      var use_admin_yes1_no0 = [0]; 
   //////////////////////////////////////////////////
   // 4. NAME EXPORT FILES PREFIX
   //////////////////////////////////////////////////
-    var my_export_prefix = 'forestmgmtconstraint';
+    var my_export_prefix = 'wfpriority_all_sc3_az';
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // END: USER-DEFINED PARAMETERS AND DATA
@@ -69,6 +88,16 @@ var ex_polygon = ee.FeatureCollection("users/GeorgeWoolsey/unit_bbox");
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // LOAD ALL DATA FOR ANALYSIS
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////
+  // SET SWITCH TO INCLUDE ADMIN OR NOT...DON'T CHANGE
+  //////////////////////////////////////////////////
+  var is_this_a_one_fn = function(number) {
+    number = ee.Number(number);   // Cast the input to a Number so we can use mod.
+    var is_one = number.eq(1);
+    return ee.Number(is_one);
+  };
+  var admin_mask_this = ee.List(use_admin_yes1_no0.map(is_this_a_one_fn)).get(0);
+  // print(admin_mask_this,'admin_mask_this');
   //////////////////////////////////////////////////
   // Import the NLCD collection.
   //////////////////////////////////////////////////
@@ -364,7 +393,7 @@ var constraint_image_fn = function(my_feature){
     //     })
     //     .filterBounds(my_feature.geometry())
     //   ;
-    var admin_bounds = 
+    var admin_bounds_mask = 
       ee.FeatureCollection([
         usfws_poly.filterBounds(my_feature.geometry())
         // , usfws_lines_buff
@@ -379,7 +408,7 @@ var constraint_image_fn = function(my_feature){
       .flatten()
       .map(function(feature){
           return feature
-            .set('admin_bounds', ee.Number(1))
+            .set('admin_bounds', ee.Number(1)) // admin_mask_this works b/c this is 1
           ;
         })
       // convert to image instead of unioning features
@@ -387,6 +416,10 @@ var constraint_image_fn = function(my_feature){
         properties: ['admin_bounds'],
         reducer: ee.Reducer.min()
       })
+    ;
+    // APPLY FILTER TO INCLUDE ADMIN BOUNDS OR NOT
+    var admin_bounds = admin_bounds_mask
+      .updateMask(admin_bounds_mask.eq(ee.Number(admin_mask_this)))
     ;
   //////////////////////////////////////////////////
   // NATIONAL HYDROGRAPHY DATASET (NHD)
@@ -477,24 +510,12 @@ var constraint_image_fn = function(my_feature){
     ])
   ;
 };
-// call constraint function
-// this is for just area_classified:
-// var all_classified = ee.ImageCollection(
-//   my_feature_collection.map(constraint_image_fn)
-// );
-// this is for just new_feature:
-// var all_classified = ee.FeatureCollection(
-//   my_feature_collection.map(constraint_image_fn)
-// );
-// // print(all_classified.first());
-// this is for both:
+//////////////////////////////////////////////////////////////////////////////
+// call constraint function for AOI
+//////////////////////////////////////////////////////////////////////////////
 var all_classified_img_coll = ee.ImageCollection(
   my_feature_collection.map(constraint_image_fn)
 );
-// print(all_classified_img_coll, 'all_classified_img_coll');
-// // Create a list of image objects.
-var imageList = all_classified_img_coll.toList(my_feature_collection.size());
-// print(imageList, 'imageList');
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // CONVERT IMAGE TO VECTORS FN
@@ -549,12 +570,9 @@ var constraint_stats_fn = function(my_feature) {
   var ft_id = my_feature.get('system:index')
   // filter image collection
   var this_image = ee.Image(
-    imageList
-    .filter(ee.Filter.eq(
-      'system:index', ft_id
-      )
-    )
-    .get(0)
+    all_classified_img_coll
+    .filter(ee.Filter.eq('system:index', ft_id))
+    .first()
   );
   // define vars for area calcs
   var nlcd_mask = this_image.select('nlcd_mask');

@@ -671,7 +671,7 @@ What is the forest versus shrubland classification of the area treated? This [GE
 
 ```{r trt-nlcd}
 # read data
-treatment_in_landscapes_statistics <- readr::read_csv("../data/treatment_in_landscapes_statistics.csv") |> 
+treatment_in_landscapes_statistics <- readr::read_csv("../data/wildfirepriority/treatment_in_landscapes_statistics.csv") |> 
   dplyr::rename_with(
     ~ gsub("^\\_|\\_$", "", .x)
     , everything()
