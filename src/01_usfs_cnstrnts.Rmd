@@ -34,7 +34,7 @@ Analysis limited to forests in the western US managed by the United States Depar
 
 **Regions 1, 2, 3, 4, 5, and 6**
 
-```{r, echo=FALSE, out.width="60%", out.height="60%", fig.align='center', fig.cap="USFS Region Map", fig.show='hold'}
+```{r, echo=FALSE, out.width="60%", out.height="60%", fig.align='center', fig.cap="USFS Region Map", fig.show='hold',results='asis'}
 # knitr::include_graphics("https://www.fs.usda.gov/sites/default/files/legacy_files/media/2013/27/regional%20offices%20map.png")
 knitr::include_graphics("https://www.fs.usda.gov/sites/default/files/users/user3771/USA-FOIA-regions-plain-844px-notitle.png")
 ```

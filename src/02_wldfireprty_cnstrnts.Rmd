@@ -37,7 +37,7 @@ remove(list = ls())
 gc()
 ```
 
-```{r, echo=FALSE, out.width="50%", out.height="50%", fig.align='center', fig.cap="Wildfire Crisis Strategy Priority Landscapes", fig.show='hold'}
+```{r, echo=FALSE, out.width="50%", out.height="50%", fig.align='center', fig.cap="Wildfire Crisis Strategy Priority Landscapes", fig.show='hold',results='asis'}
 knitr::include_graphics("https://www.fs.usda.gov/sites/default/files/2023-01/wcs-landscapes2-graphics4.jpg")
 ```
 

@@ -55,16 +55,16 @@
       // [1] = yes; [0] = no
       var use_admin_yes1_no0 = [1]; 
   //////////////////////////////////////////////////
-  // 4. DEFINE MINIMUM PERCENT OF SUB-WATERSHED (HUC12)
+  // 4. DEFINE MINIMUM PERCENT OF SUB-WATERSHED (fireshed)
   // WITHIN FEATURE TO RETURN CALCUALTION FOR
   //////////////////////////////////////////////////
     // E.G. 0.25 RETURNS ONLY SUB-WATERSHEDS THAT HAVE AT LEAST 25% OF AREA WITHIN THE PRIMARY FEATURE
     // SET TO 0 TO RETURN ALL SUB-WATERSHEDS THAT INTERSECT PRIMARY FEATURE
-    var minimum_pct_huc12_area_within = 0.25;
+    var minimum_pct_fireshed_area_within = 0.0;
   //////////////////////////////////////////////////
   // 5. NAME EXPORT FILES PREFIX
   //////////////////////////////////////////////////
-    var my_export_prefix = 'wfpriority_huc12_sc1_mtutnmnv';
+    var my_export_prefix = 'wfpriority_fireshed_sc1_mtutnmnv';
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // END: USER-DEFINED PARAMETERS AND DATA
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -82,46 +82,46 @@
   var admin_mask_this = ee.List(use_admin_yes1_no0.map(is_this_a_one_fn)).get(0);
   // print(admin_mask_this,'admin_mask_this');
   //////////////////////////////////////////////////
-  // HUC-12 subwatershed
+  // Fireshed registry project area 
   //////////////////////////////////////////////////
-  var huc12 = ee.FeatureCollection("USGS/WBD/2017/HUC12")
+  var fireshed = ee.FeatureCollection("projects/forestmgmtconstraint/assets/fireshed_registry_project_area")
     .filterBounds(my_feature_collection)
     .map(function(my_feature){
-      var huc12_area_m2 = ee.Number(my_feature.geometry().area());
-      return my_feature.set('huc12_area_m2', huc12_area_m2);
+      var pa_area_m2 = ee.Number(my_feature.geometry().area());
+      return my_feature.set('pa_area_m2', pa_area_m2);
     })
   ;
-  print(huc12.size(),'huc12.size');
+  print(fireshed.size(),'fireshed.size');
   //////////////////////////////////////////////////
-  // HUC-12 subwatershed intersection for export only (no constraint calc)
-  // intersect huc12 with user defined feature collection to return only features with minimum pct within
+  // Fireshed registry project area  intersection for export only (no constraint calc)
+  // intersect fireshed with user defined feature collection to return only features with minimum pct within
   //////////////////////////////////////////////////
-  var huc12_my_feature_collection = my_feature_collection.map(function(big_feature){
+  var fireshed_my_feature_collection = my_feature_collection.map(function(big_feature){
     // var big_feature = ee.Feature(big_feature);
-    var huc12_intersection = huc12
+    var fireshed_intersection = fireshed
       .map(function(small_feature){
         var ft_intrsct = small_feature.intersection({'right': big_feature}); // , 'maxError': 1
-        var huc12_intrsct_area_m2 = ee.Number(ft_intrsct.geometry().area());
-        var huc12_area_m2 = ee.Number(small_feature.get('huc12_area_m2'));
+        var pa_intrsct_area_m2 = ee.Number(ft_intrsct.geometry().area());
+        var pa_area_m2 = ee.Number(small_feature.get('pa_area_m2'));
         return ft_intrsct
           .set({
-            'huc12_intrsct_area_m2': huc12_intrsct_area_m2
-            , 'pct_huc12_intrsct': huc12_intrsct_area_m2.divide(huc12_area_m2)
+            'pa_intrsct_area_m2': pa_intrsct_area_m2
+            , 'pct_pa_intrsct': pa_intrsct_area_m2.divide(pa_area_m2)
           })
-          .select(['huc12','huc12_intrsct_area_m2','pct_huc12_intrsct','huc12_area_m2'])
+          .select(['pa_id','pa_intrsct_area_m2','pct_pa_intrsct','pa_area_m2'])
           .copyProperties(big_feature)
         ;
       }, true) // true on map returns non-null features
-      .filter(ee.Filter.gte('pct_huc12_intrsct', ee.Number(minimum_pct_huc12_area_within)))
+      .filter(ee.Filter.gte('pct_pa_intrsct', ee.Number(minimum_pct_fireshed_area_within)))
     ;
-    return huc12_intersection;
+    return fireshed_intersection;
   }).flatten();
   // null geometry
-  var huc12_my_feature_collection = huc12_my_feature_collection.map(function(ft){
+  var fireshed_my_feature_collection = fireshed_my_feature_collection.map(function(ft){
     var nullfeat = ee.Feature(null);
     return nullfeat.copyProperties(ft);
   });
-  // print(huc12_my_feature_collection.first(),'huc12_my_feature_collection');
+  // print(fireshed_my_feature_collection.first(),'fireshed_my_feature_collection');
   //////////////////////////////////////////////////
   // Import the NLCD collection.
   //////////////////////////////////////////////////
@@ -524,10 +524,10 @@ var constraint_image_fn = function(my_feature){
   ;
 };
 //////////////////////////////////////////////////////////////////////////////
-// call constraint function for huc12 that intersect user defined features
+// call constraint function for fireshed that intersect user defined features
 //////////////////////////////////////////////////////////////////////////////
   var all_classified_img_coll = ee.ImageCollection(
-    huc12.map(constraint_image_fn)
+    fireshed.map(constraint_image_fn)
   );
   // print(all_classified_img_coll.count(),'all_classified_img_coll.count');
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -679,10 +679,10 @@ var constraint_stats_fn = function(my_feature) {
   return new_feature;
 };
 //////////////////////////////////////////////////////////////////////////////
-// call constraint stats function for huc12 that intersect user defined features
+// call constraint stats function for fireshed that intersect user defined features
 //////////////////////////////////////////////////////////////////////////////
 var all_classified_ft_coll = ee.FeatureCollection(
-  huc12.map(constraint_stats_fn)
+  fireshed.map(constraint_stats_fn)
 );
 // print(all_classified_ft_coll.first(), 'stats');
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -693,8 +693,8 @@ var all_classified_ft_coll = ee.FeatureCollection(
   ////////////////////////////////////////////////////////
   // Use an equals filter to specify how the collections match.
   var joinFilter = ee.Filter.equals({
-    leftField: 'huc12',
-    rightField: 'huc12'
+    leftField: 'pa_id',
+    rightField: 'pa_id'
   });
   // Define the join.
   var innerJoin = ee.Join.inner('primary', 'secondary');
@@ -705,8 +705,8 @@ var all_classified_ft_coll = ee.FeatureCollection(
     })
   ;
   // Apply the join.
-  var huc12_my_feature_collection_join = innerJoin
-    .apply(huc12_my_feature_collection, all_classified_ft_coll_ngeos, joinFilter)
+  var fireshed_my_feature_collection_join = innerJoin
+    .apply(fireshed_my_feature_collection, all_classified_ft_coll_ngeos, joinFilter)
     .map(function(pair) {
       var f1 = ee.Feature(pair.get('primary'));
       var f2 = ee.Feature(pair.get('secondary'));
@@ -715,7 +715,7 @@ var all_classified_ft_coll = ee.FeatureCollection(
   ;
 
   // Print the result.
-  // print(huc12_my_feature_collection_join.first(), 'huc12_my_feature_collection_join');
+  // print(fireshed_my_feature_collection_join.first(), 'fireshed_my_feature_collection_join');
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //EXPORTS
@@ -724,7 +724,7 @@ var all_classified_ft_coll = ee.FeatureCollection(
 // EXPORT TABLE OF STATS
 ///////////////////////////
 // null geometry so csv can be exported
-  var exprt_ft_coll = huc12_my_feature_collection_join.map(function(ft){
+  var exprt_ft_coll = fireshed_my_feature_collection_join.map(function(ft){
     var nullfeat = ee.Feature(null);
     return nullfeat.copyProperties(ft);
   });
@@ -760,16 +760,16 @@ var all_classified_ft_coll = ee.FeatureCollection(
     print(min_val, 'min');
     print(max_val, 'max');
   ////////////////////////////
-  // filter huc12
+  // filter fireshed
   ////////////////////////////
   var this_id = my_feature_collection.first().get('ADMINFORES');
-  var display_huc12_intersection = huc12_my_feature_collection
+  var display_fireshed_intersection = fireshed_my_feature_collection
     .filter(ee.Filter.eq('ADMINFORES',this_id))
   ;
   //////////////////////////////////////////////////////////
   Map.centerObject(my_feature_collection, 10);
-  Map.addLayer(huc12, {color:'gray'}, 'huc12',0, 0.5);
-  Map.addLayer(display_huc12_intersection, {color:'red'}, 'huc12_intersection',1, 0.5);
+  Map.addLayer(fireshed, {color:'gray'}, 'fireshed',0, 0.5);
+  Map.addLayer(display_fireshed_intersection, {color:'red'}, 'fireshed_intersection',1, 0.5);
   Map.addLayer(outline, {min:68, max:164, palette:palette}, 'my features', 1);
 
 
@@ -778,7 +778,7 @@ var all_classified_ft_coll = ee.FeatureCollection(
 //////////////////////////////////////////////////
 /////////////////////////////////////
 // // get id of feature
-//   var my_feature = huc12.filter(ee.Filter.eq('huc12','140100010303')).first();
+//   var my_feature = fireshed.filter(ee.Filter.eq('fireshed','140100010303')).first();
 //   print(my_feature, 'my_feature');
 //   var ft_id = ee.Feature(my_feature).id();
 //   print(ft_id,'ft_id');
@@ -822,49 +822,49 @@ var all_classified_ft_coll = ee.FeatureCollection(
 // 16 Fremont-Winema                                   1137662.
 // 17 Okanogan-Wenatchee                               1556457.
 
-// usfs_huc12_061
+// usfs_fireshed_061
 // 'Columbia River Gorge National Scenic Area'
 
-// usfs_huc12_067
+// usfs_fireshed_067
 // , 'Fremont-Winema National Forest'
 
-// usfs_huc12_068
+// usfs_fireshed_068
 // , 'Wallowa-Whitman National Forest'
 
-// usfs_huc12_0615
+// usfs_fireshed_0615
 // , 'Malheur National Forest'
 
-// usfs_huc12_062
+// usfs_fireshed_062
 // 'Mt. Hood National Forest'
 
-// usfs_huc12_063
+// usfs_fireshed_063
 // 'Olympic National Forest'
 // , 'Umpqua National Forest'
 
-// usfs_huc12_064
+// usfs_fireshed_064
 // , 'Gifford Pinchot National Forest'
 
-// usfs_huc12_065
+// usfs_fireshed_065
 // 'Ochoco National Forest'
 // , 'Siuslaw National Forest'
 
-// usfs_huc12_066
+// usfs_fireshed_066
 // , 'Umatilla National Forest'
 // , 'Colville National Forest'
 ///////////////////////////////////////////////////////////not working
-// usfs_huc12_069
+// usfs_fireshed_069
 // , 'Okanogan-Wenatchee National Forest'
 
-// usfs_huc12_0611
+// usfs_fireshed_0611
 // 'Mt. Baker-Snoqualmie National Forest'
 
-// usfs_huc12_0612
+// usfs_fireshed_0612
 // 'Deschutes National Forest'
 
-// usfs_huc12_0613
+// usfs_fireshed_0613
 // 'Rogue River-Siskiyou National Forests'
 
-// usfs_huc12_0614
+// usfs_fireshed_0614
 // 'Willamette National Forest'
 
 
