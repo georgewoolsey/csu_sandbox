@@ -93,6 +93,56 @@ mapview::mapview(constrained_byftr_huc12_wide_sf, zcol = "cnstrnt_class"
   , label = FALSE
   , legend = FALSE)
 xxx <- sf::st_read("../data/treatment_in_landscapes.shp")
+###################################################################################
+###################################################################################
+###################################################################################
+tbl_temp <- constrained_by_wflndscp_wide_sf |> 
+  sf::st_drop_geometry() |> 
+  dplyr::mutate(
+    dplyr::across(
+      tidyselect::ends_with("_ha")
+      , ~ scales::comma(.x, accuracy = 1)
+    )
+    , dplyr::across(
+      tidyselect::starts_with("pct_")
+      , ~ scales::percent(.x, accuracy = 0.1)
+    )
+  ) |> 
+  dplyr::select(
+    state
+    , name
+    , covertype_area_ha
+    , pct_forested_area
+    , pct_rdctn1_protected
+    , pct_rdctn2_slope
+    , pct_rdctn3_administrative
+    , pct_rdctn4_riparian
+    , pct_rdctn5_roads
+    , rmn5_roads_area_ha
+    , pct_rmn5_roads
+  ) |> 
+  dplyr::arrange(state,name)
+# make table
+kableExtra::kable(
+    tbl_temp |> dplyr::select(-c(state))
+    , caption = "Forested area of each Wildfire Crisis Strategy Priority Landscape<br>percent reduction of different types of constraints on mechanical treatment"
+    , col.names = c(
+      ""
+      , "Forested (ha)", "Forested %"
+      , "Protected"
+      , "Slope>35%"
+      , "Administrative"
+      , "Riparian Buffer (100ft)"
+      , "Roads>2000ft"
+      , "Remaining (ha)"
+      , "Remaining (%)"
+    )
+  ) |>  
+  add_header_above(c(" " = 1, "Area of\nPriority Landscape"=2, "Constraint\nLeast Flexible to Most Flexible" = 5, " " = 2)) |>
+  kable_classic(full_width=T) |> 
+  pack_rows(index = table(forcats::fct_inorder(tbl_temp$state))) |> 
+  kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE) |>  
+  kableExtra::scroll_box(width = "740px")
 
 ```
 
