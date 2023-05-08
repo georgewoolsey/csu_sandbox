@@ -97,114 +97,61 @@ kableExtra::kable(
   kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE)
 ```
 
+## Data Preparation
 
-```{r sc-ld-dta}
-# load data
-wf_landscapes <- sf::read_sf("../data/Wildfire_Crisis_Strategy_Landscapes/Wildfire_Crisis_Strategy_Landscapes_(Feature_Layer).shp") |> 
-  dplyr::rename_with(tolower) |> 
-  sf::st_make_valid()
-wf_landscapes <- wf_landscapes |> 
+### Load landscape-level data
+
+Landscape-level constraint analysis data was created via this [Google Earth Engine script](https://code.earthengine.google.com/2b330779ad5c813bdd40bde765c4b079?noload=true); WCS priority landscape spatial data was created in this [prior section](#wflndscp).
+
+```{r ls-ld-dta}
+# load wcs priority landscapes
+wf_landscapes <- sf::st_read("../data/constrained_by_wflndscp_wide_sf.gpkg") |> 
+  dplyr::select(1:10)
+  #rename sf geom column
+    names(wf_landscapes)[names(wf_landscapes)==tolower(attr(wf_landscapes, "sf_column"))] = "geometry"
+    sf::st_geometry(wf_landscapes) = "geometry"
+# set crs
+transform_crs <- sf::st_crs(wf_landscapes)
+# load landscape constraint scenario data
+constrained_by_scnro_ls <- list.files("../data/wildfirepriority/all/",pattern = "\\.csv$") %>%
+  purrr::keep(stringr::str_starts(.,"wfpriority_all_sc")) %>% 
+  purrr::map(function(x){
+    readr::read_csv(
+      paste0("../data/wildfirepriority/all/",x)
+      , name_repair = "universal"
+      , col_types = cols(.default = "c")
+    ) %>% 
+    dplyr::rename_with(tolower) %>% 
+    dplyr::rename_with(make.names) %>% 
+    dplyr::select(state,name,tidyselect::ends_with("_m2"),tidyselect::starts_with("pct_")) %>% 
+    dplyr::mutate(scenario_id = stringr::word(x,3,sep="_") %>% readr::parse_number()) %>% 
+    dplyr::relocate(scenario_id)
+  }) %>%
+  dplyr::bind_rows() %>%
+  dplyr::inner_join(
+    wf_landscapes %>%
+      sf::st_drop_geometry() %>%
+      dplyr::select(state,name,area_name)
+    , by = dplyr::join_by(state,name)
+  ) %>%
+  dplyr::relocate(area_name,.after = "scenario_id") %>%
+  dplyr::group_by(area_name,scenario_id) %>%
+  dplyr::filter(dplyr::row_number()==1) %>%
+  dplyr::ungroup() %>%
   dplyr::mutate(
-    hectares = (as.numeric(sf::st_area(geometry))/10000) 
-    , Mil.Hectares = hectares |> 
-      scales::comma(suffix = " M", scale = 1e-6, accuracy = .01)
-    , acres = (as.numeric(sf::st_area(geometry))/4046.85642) 
-    , Mil.Acres = acres |> 
-      scales::comma(suffix = " M", scale = 1e-6, accuracy = .01)
-  )
-mapview::mapviewOptions(homebutton = FALSE, basemaps = c("OpenStreetMap"))
-# map
-mapview::mapview( wf_landscapes
-        , zcol = "state"
-        , col.regions = viridis::viridis(n = wf_landscapes$state |> unique() |> length())
-        , alpha.regions = 0.6
-        , lwd = 0
-        , label = FALSE
-        , legend = FALSE
-        , layer.name = "WF Priority LS"
-        , popup = leafpop::popupTable(
-            wf_landscapes
-            , zcol = c(
-              "state"
-              , "name"
-              , "Mil.Hectares"
-              , "Mil.Acres"
-            )
-            , row.numbers = FALSE
-            , feature.id = FALSE
-          )
-  )
-```
-
-```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
-remove(list = ls()[grep("_temp",ls())])
-gc()
-```
-
-## Load landscape-level data{#wflndscp}
-
-Data created via this [Google Earth Engine script](https://code.earthengine.google.com/bc974ce5d2f8a25a2eb75af5766395b9?noload=true)
-
-```{r data-read2}
-# data table
-# read multiple files
-constrained_wide_byftr <-
-  list.files("../data/wildfirepriority/")[grep("wildfirepriority_statistics",list.files("../data/wildfirepriority/"))] |> 
-    purrr::map(function(x){
-      readr::read_csv(paste0("../data/wildfirepriority/",x)) |> 
-        dplyr::rename_with(tolower) |> 
-        dplyr::rename_with(make.names) |> 
-        dplyr::rename(feature_id = system.index) |> 
-        dplyr::select(c(
-            feature_id,projectid,region,state,name
-            , tidyselect::ends_with("_m2")
-            , tidyselect::starts_with("pct_")
-          )
-         )
-    }) |> 
-    dplyr::bind_rows() |> 
-      dplyr::left_join(
-        data.frame(state = datasets::state.name, state_abb = datasets::state.abb)
-        , by = join_by("state")
-      ) |> 
-      dplyr::mutate(
-        area_name = paste0(
-          ifelse(is.na(state_abb) | state_abb == "", "UNK", state_abb)
-          , ": "
-          , name
-        )
-      ) |> 
-      dplyr::mutate(across(
-        tidyselect::ends_with("_m2")
-        , ~ as.numeric(.x) / 10000
-      )) |> 
-      dplyr::rename_with(
-        ~ gsub("_m2", "_ha", .x)
-        , tidyselect::ends_with("_m2")
-      ) 
-# aggregate data to region/forest level
-constrained_wide <- constrained_wide_byftr |> 
-  dplyr::group_by(projectid,region,state,name,area_name) |> 
-  dplyr::summarise(
     dplyr::across(
-      tidyselect::ends_with("_ha")
-      , list(sum = ~ sum(.x, na.rm=T))
+      tidyselect::ends_with("_m2")
+      , ~ as.numeric(.x) / 10000
     )
-  ) |> 
+    , dplyr::across(
+      tidyselect::starts_with("pct_")
+      , ~ as.numeric(.x)
+    )
+  ) %>%
   dplyr::rename_with(
-    ~ gsub("_ha_sum", "_ha", .x)
-    , tidyselect::ends_with("_ha_sum")
-  ) |> 
-  dplyr::ungroup() |> 
-  dplyr::mutate(across(
-    tidyselect::ends_with("_ha") & tidyselect::starts_with("rmn")
-    , ~ .x/covertype_area_ha
-    , .names =  "pct_{.col}"
-  )) |> 
-  dplyr::rename_with(
-    ~ gsub("_area_ha", "", .x)
-    , tidyselect::starts_with("pct_")
-  ) |> 
+    ~ gsub("_m2", "_ha", .x)
+    , tidyselect::ends_with("_m2")
+  ) %>%
   # calculate pct reduction
   dplyr::mutate(
     pct_rdctn1_protected = -1*(1 - pct_rmn1_protected)
@@ -213,17 +160,112 @@ constrained_wide <- constrained_wide_byftr |>
     , pct_rdctn4_riparian = -1*(pct_rmn3_administrative - pct_rmn4_riparian)
     , pct_rdctn5_roads = -1*(pct_rmn4_riparian - pct_rmn5_roads)
     , pct_rdctn_total = -1*(1 - pct_rmn5_roads)
-    , pct_forested_area = covertype_area_ha/feature_area_ha
+    , pct_covertype_area = covertype_area_ha/feature_area_ha
   )
-# join with spatial data and write out
-constrained_by_wflndscp_wide_sf <- wf_landscapes |> 
-  dplyr::select(state,name,investment,tidyselect::ends_with("res")) |> 
-  dplyr::left_join(
-    constrained_wide
+```
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
+remove(list = ls()[grep("_temp",ls())])
+gc()
+```
+
+## Load fireshed project area data
+
+Data created via this [Google Earth Engine script](https://code.earthengine.google.com/003e3994cfc4c469d52d224225a4b109?noload=true)
+
+See [this section](#fsheds) for exploration of fireshed and project area spatial data
+
+```{r fs-ld-dta}
+# load firesheds
+fireshed <- sf::st_read("../data/firesheds/fireshed.gpkg") |> 
+  sf::st_transform(transform_crs)
+  #rename sf geom column
+    names(fireshed)[names(fireshed)==tolower(attr(fireshed, "sf_column"))] = "geometry"
+    sf::st_geometry(fireshed) = "geometry"
+# load fireshed project areas
+fireshed_proj_area <- sf::st_read("../data/firesheds/fireshed_proj_area.gpkg") |> 
+  sf::st_transform(transform_crs)
+  #rename sf geom column
+    names(fireshed_proj_area)[names(fireshed_proj_area)==tolower(attr(fireshed_proj_area, "sf_column"))] = "geometry"
+    sf::st_geometry(fireshed_proj_area) = "geometry"
+# load landscape constraint scenario data
+constrained_by_scnro_ls_pa <-
+  list.files("../data/wildfirepriority/fireshed/",pattern = "\\.csv$") %>%
+  purrr::keep(stringr::str_starts(.,"wfpriority_fireshed_sc")) %>% 
+  purrr::map(function(x){
+    readr::read_csv(
+      paste0("../data/wildfirepriority/fireshed/",x)
+      , name_repair = "universal"
+      , col_types = cols(.default = "c")
+    ) %>% 
+    dplyr::rename_with(tolower) %>% 
+    dplyr::rename_with(make.names) %>% 
+    dplyr::select(state,name,pa_id,tidyselect::ends_with("_m2"),tidyselect::starts_with("pct_")) %>% 
+    dplyr::mutate(scenario_id = stringr::word(x,3,sep="_") %>% readr::parse_number()) %>% 
+    dplyr::relocate(scenario_id)
+  }) %>%
+  dplyr::bind_rows() %>%
+  dplyr::inner_join(
+    wf_landscapes %>%
+      sf::st_drop_geometry() %>%
+      dplyr::select(state,name,area_name)
     , by = dplyr::join_by(state,name)
+  ) %>%
+  dplyr::relocate(area_name,.after = "scenario_id") %>%
+  dplyr::mutate(
+    dplyr::across(
+      tidyselect::ends_with("_m2")
+      , ~ as.numeric(.x) / 10000
+    )
+    , dplyr::across(
+      tidyselect::starts_with("pct_")
+      , ~ as.numeric(.x)
+    )
+  ) %>%
+  dplyr::rename_with(
+    ~ gsub("_m2", "_ha", .x)
+    , tidyselect::ends_with("_m2")
+  ) %>%
+  dplyr::group_by(area_name,pa_id,scenario_id) %>%
+  dplyr::arrange(desc(pct_pa_intrsct)) %>%
+  dplyr::filter(dplyr::row_number()==1) %>%
+  dplyr::ungroup() %>%
+  # calculate pct reduction
+  dplyr::mutate(
+    pct_rdctn1_protected = -1*(1 - pct_rmn1_protected)
+    , pct_rdctn2_slope = -1*(pct_rmn1_protected - pct_rmn2_slope)
+    , pct_rdctn3_administrative = -1*(pct_rmn2_slope - pct_rmn3_administrative)
+    , pct_rdctn4_riparian = -1*(pct_rmn3_administrative - pct_rmn4_riparian)
+    , pct_rdctn5_roads = -1*(pct_rmn4_riparian - pct_rmn5_roads)
+    , pct_rdctn_total = -1*(1 - pct_rmn5_roads)
+    , pct_covertype_area = covertype_area_ha/feature_area_ha
+    # calculate level of constraint
+      , cnstrnt_lvl = dplyr::case_when(
+          -pct_rdctn_total >= 0.85 ~ 1
+          , -pct_rdctn_total >= 0.65 ~ 2
+          , -pct_rdctn_total >= 0.0 ~ 3
+        )
+      , cnstrnt_class = factor(
+          cnstrnt_lvl 
+          , levels = 1:3
+          , labels = c("high constraint", "med. constraint", "low constraint")
+          , ordered = T
+        ) %>% forcats::fct_rev()
+      , rmn_cnstrnt_class = factor(
+          cnstrnt_lvl 
+          , levels = 1:3
+          , labels = c("0–15% treatable", "16–35% treatable", ">35% treatable")
+          , ordered = T
+        ) %>% forcats::fct_rev()
+  ) %>% 
+  # join with fireshed data
+  dplyr::inner_join(
+    fireshed_proj_area %>%
+      sf::st_drop_geometry() %>%
+      dplyr::select(pa_id, tidyselect::starts_with("pa_exposure"), tidyselect::starts_with("fireshed_")) %>%
+      dplyr::mutate(pa_id=as.character(pa_id))
+    , by = dplyr::join_by(pa_id)
   )
-# save for reading later
-sf::st_write(constrained_by_wflndscp_wide_sf, "../data/constrained_by_wflndscp_wide_sf.gpkg", append=F)
 ```
 
 ## Reduction Treatable Area Table

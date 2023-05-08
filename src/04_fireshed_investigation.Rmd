@@ -1,4 +1,4 @@
-# Exploring the Fireshed Registry
+# Exploring the Fireshed Registry{#fsheds}
 
 The fireshed registry employs a nested spatial framework that organizes landscape variation in wildfire risk to developed areas into containers or “firesheds” and displays these data on a background of maps on management and disturbances, including past and predicted wildfire events and their potential impacts ([Ager et al. 2021](https://scholar.google.com/scholar?cluster=7852635540589253195&hl=en&as_sdt=0,6)). Also, see [Ager et al. (2021b)](https://scholar.google.com/scholar?cluster=735871002853083947&hl=en&as_sdt=0,6).
 
@@ -139,6 +139,8 @@ fireshed <- sf::st_read("../data/firesheds/Fireshed_Registry3A_Fireshed/Fireshed
         fireshed_area_ha = as.numeric(sf::st_area(geometry))/10000
         , fireshed_area_acres = (fireshed_area_ha*10000)/4046.85642
       )
+  # save for reading later
+  sf::st_write(fireshed,"../data/firesheds/fireshed.gpkg",append=F)
 ### fireshed_proj_area
 fireshed_proj_area <- sf::st_read("../data/firesheds/Fireshed_Registry3A_Project_Area/Fireshed_Registry%3A_Project_Area_(Feature_Layer).shp") |>
   sf::st_transform(transform_crs) |> 
@@ -196,33 +198,36 @@ fireshed_proj_area <- sf::st_read("../data/firesheds/Fireshed_Registry3A_Project
       dplyr::mutate(
         pa_area_ha = as.numeric(sf::st_area(geometry))/10000
         , pa_area_acres = (pa_area_ha*10000)/4046.85642
+      ) |> 
+      # JOIN WITH FIRESHED DATA
+      dplyr::inner_join(
+        fireshed |>
+          sf::st_drop_geometry() |>
+          dplyr::select(fireshed_id, crisis_strategy, exp_total
+                        , exposure_pct_rank, exposure_pct_rank_grp
+          ) |> 
+          dplyr::rename(exposure_total=exp_total) |> 
+          dplyr::rename_with(
+            ~ paste0("fireshed_",.x)
+            , -c(fireshed_id)
+          )
+        , by = dplyr::join_by(fireshed_id)
+      ) |>
+      dplyr::select(pa_id,pa_area_ha,exp_total,exposure_pct_rank,exposure_pct_rank_grp
+                    , tidyselect::starts_with("fireshed_")
+      ) |> 
+      dplyr::rename(exposure_total=exp_total) |> 
+      dplyr::rename_with(
+        ~ paste0("pa_",.x)
+        , -c(geometry,tidyselect::starts_with("fireshed_"),tidyselect::starts_with("pa_"))
       )
+  # save for reading later
+  sf::st_write(fireshed_proj_area,"../data/firesheds/fireshed_proj_area.gpkg",append=F)
 ```
 
 ```{r, eval=FALSE,include=FALSE}
 # write out data for upload to GEE
 fireshed_proj_area |> 
-  dplyr::inner_join(
-    fireshed |>
-      sf::st_drop_geometry() |>
-      dplyr::select(fireshed_id, crisis_strategy, exp_total
-                    , exposure_pct_rank, exposure_pct_rank_grp
-      ) |> 
-      dplyr::rename(exposure_total=exp_total) |> 
-      dplyr::rename_with(
-        ~ paste0("fireshed_",.x)
-        , -c(fireshed_id)
-      )
-    , by = dplyr::join_by(fireshed_id)
-  ) |>
-  dplyr::select(pa_id,pa_area_ha,exp_total,exposure_pct_rank,exposure_pct_rank_grp
-                , tidyselect::starts_with("fireshed_")
-  ) |> 
-  dplyr::rename(exposure_total=exp_total) |> 
-  dplyr::rename_with(
-    ~ paste0("pa_",.x)
-    , -c(geometry,tidyselect::starts_with("fireshed_"),tidyselect::starts_with("pa_"))
-  ) |> 
   # usfs region 1-6 states
   sf::st_intersection(
     USAboundaries::us_states(states = c(
@@ -237,7 +242,11 @@ fireshed_proj_area |>
   sf::st_write("../data/fireshed_registry_project_area.shp", append=F)
 ```
 
-```{r}
+## Area of firesheds
+
+what is the area of firesheds that intersect priority landscapes?
+
+```{r, results='asis'}
 # what is the area of firesheds that intersect priority landscapes?
 fireshed |> 
   sf::st_filter(
@@ -261,7 +270,16 @@ fireshed |>
       tidyselect::starts_with("fireshed_area_")
       , ~ scales::comma(.x, suffix = " M", scale = 1e-6, accuracy = .01)
     )
-  )
+  ) |> 
+  kableExtra::kable(
+    caption = "Area of firesheds by `crisis_strategy` column"
+  ) |> 
+  kableExtra::kable_classic(full_width=T)
+```
+
+what is the area of firesheds within priority landscapes?
+
+```{r, results='asis'}
 # what is the area of firesheds within priority landscapes?
 fireshed |> 
   sf::st_intersection(
@@ -284,7 +302,7 @@ fireshed |>
   dplyr::summarise(
     dplyr::across(
       tidyselect::starts_with("fireshed_area_")
-      , list(sum=sum,mean=mean)
+      , list(sum=sum)
     )
   ) |> 
   dplyr::mutate(
@@ -292,9 +310,15 @@ fireshed |>
       tidyselect::starts_with("fireshed_area_")
       , ~ scales::comma(.x, suffix = " M", scale = 1e-6, accuracy = .01)
     )
-  )
+  ) |> 
+  kableExtra::kable(
+    caption = "Area of firesheds within WCS landscape boundaries by `crisis_strategy` column"
+  ) |> 
+  kableExtra::kable_classic(full_width=T)
+```
 
 
+```{r, eval=FALSE, include=FALSE}
 # intersect
 fireshed |> 
   sf::st_filter(
@@ -384,7 +408,7 @@ plt_fshed_fn(my_fill = ntllandrank_pct_rank_grp, my_title = "National Land Rank 
 
 Replicate Figure 1 from [Ager et al. (2021b)](https://scholar.google.com/scholar?cluster=735871002853083947&hl=en&as_sdt=0,6) (p.3)
 
-*Project areas and associated building exposure from ignitions within the project areas on priority lanscape lands in the western US.*
+*Project areas and associated building exposure from ignitions within the project areas on priority landscape lands in the western US.*
 
 Note, fireshed percentiles are based on the total exposure within the fireshed project area (i.e., number of exposed buildings per year)
 
@@ -404,7 +428,7 @@ ggplot() +
   geom_sf(
     data = fireshed_proj_area |> 
       sf::st_intersection(constrained_by_wflndscp_wide_sf)
-    , mapping = aes(fill=exposure_pct_rank_grp)
+    , mapping = aes(fill=pa_exposure_pct_rank_grp)
   ) + 
   scale_fill_manual(values=c("firebrick","orange3","khaki","seagreen3","royalblue")) +
   labs(
@@ -473,6 +497,8 @@ attempting to match the priority landscape map from the [WCS press kit](https://
 ```{r, echo=FALSE, out.width="50%", out.height="50%", fig.align='center', fig.cap="Wildfire Crisis Strategy Priority Landscapes", fig.show='hold',results='asis'}
 knitr::include_graphics("https://www.fs.usda.gov/sites/default/files/2023-01/wcs-landscapes2-graphics4.jpg")
 ```
+
+plot only firesheds that have a non-null `crisis_strategy` value in the western US
 
 ```{r}
   fireshed |> 

@@ -1310,9 +1310,10 @@ split_poly_fn <- function(sf_poly, n_areas){
     setNames(c("lon","lat"))
   k_means <- kmeans(points, centers = n_areas)
   # create voronoi polygons
-  voronoi_polys <- dismo::voronoi(k_means$centers, ext = sf_poly |> sf::as_Spatial())
+  voronoi_polys <- dismo::voronoi(k_means$centers, ext = sf_poly |> sf::as_Spatial()) |> 
+    sf::st_as_sf()
   # clip to sf_poly
-  crs(voronoi_polys) <- crs(sf_poly)
+  sf::st_crs(voronoi_polys) <- sf::st_crs(sf_poly)
   voronoi_sf <- sf::st_as_sf(voronoi_polys)
   equal_areas <- sf::st_intersection(voronoi_sf, sf_poly)
   equal_areas$split_area_ha <- as.numeric(sf::st_area(equal_areas))/10000
@@ -1342,8 +1343,12 @@ fire_landscapes_split <- 1:nrow(fire_landscapes) |>
   }) |> 
   dplyr::bind_rows()
 mapview::mapview(fire_landscapes_split, zcol = "NAME", legend = F)
-sf::st_write(fire_landscapes_split
-             , "../data/Wildfire_Crisis_Strategy_Landscapes/Wildfire_Crisis_Strategy_Landscapes_split.shp"
+# write
+fire_landscapes_split |> 
+  # dplyr::filter(NAME == "Klamath River Basin") |> 
+  # dplyr::select(id,NAME,STATE) |> 
+sf::st_write(
+             "../data/Wildfire_Crisis_Strategy_Landscapes/Wildfire_Crisis_Strategy_Landscapes_split.shp"
              , append = F
             )
 sf::st_crs(fire_landscapes_split)
