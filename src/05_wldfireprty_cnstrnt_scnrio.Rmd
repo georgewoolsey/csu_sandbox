@@ -161,7 +161,22 @@ constrained_by_scnro_ls <- list.files("../data/wildfirepriority/all/",pattern = 
     , pct_rdctn5_roads = -1*(pct_rmn4_riparian - pct_rmn5_roads)
     , pct_rdctn_total = -1*(1 - pct_rmn5_roads)
     , pct_covertype_area = covertype_area_ha/feature_area_ha
+    # scenario description
+    , scenario_lab = factor(
+      scenario_id
+      , levels = 1:3
+      , labels = paste0("Scenario ", 1:3)
+      , ordered = T
+    ) |> forcats::fct_rev()
+    , scenario_desc = factor(
+      scenario_id
+      , levels = 1:3
+      , labels = c("Scenario 1\n(status quo)", "Scenario 2\n(slopes+roads)", "Scenario 3\n(slopes+roads+admin)")
+      , ordered = T
+    )
   )
+  
+
 ```
 
 ```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
@@ -257,6 +272,19 @@ constrained_by_scnro_ls_pa <-
           , labels = c("0–15% treatable", "16–35% treatable", ">35% treatable")
           , ordered = T
         ) %>% forcats::fct_rev()
+      # scenario description
+      , scenario_lab = factor(
+          scenario_id
+          , levels = 1:3
+          , labels = paste0("Scenario ", 1:3)
+          , ordered = T
+        ) |> forcats::fct_rev()
+      , scenario_desc = factor(
+        scenario_id
+        , levels = 1:3
+        , labels = c("Scenario 1\n(status quo)", "Scenario 2\n(slopes+roads)", "Scenario 3\n(slopes+roads+admin)")
+        , ordered = T
+      )
   ) %>% 
   # join with fireshed data
   dplyr::inner_join(
@@ -268,55 +296,66 @@ constrained_by_scnro_ls_pa <-
   )
 ```
 
-## Reduction Treatable Area Table
+```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
+remove(list = ls()[grep("_temp",ls())])
+gc()
+```
 
-```{r est-table2, results='asis'}
-tbl_temp <- constrained_wide |> 
-  dplyr::mutate(
-    dplyr::across(
-      tidyselect::ends_with("_ha")
-      , ~ scales::comma(.x, accuracy = 1)
-    )
-    , dplyr::across(
-      tidyselect::starts_with("pct_")
-      , ~ scales::percent(.x, accuracy = 0.1)
-    )
-  ) |> 
-  dplyr::select(
-    state
-    , name
-    , covertype_area_ha
-    , pct_forested_area
-    , pct_rdctn1_protected
-    , pct_rdctn2_slope
-    , pct_rdctn3_administrative
-    , pct_rdctn4_riparian
-    , pct_rdctn5_roads
-    , rmn5_roads_area_ha
-    , pct_rmn5_roads
-  ) |> 
-  dplyr::arrange(state,name)
-# make table
-kableExtra::kable(
-    tbl_temp |> dplyr::select(-c(state))
-    , caption = "Forested area of each Wildfire Crisis Strategy Priority Landscape<br>percent reduction of different types of constraints on mechanical treatment"
-    , col.names = c(
-      ""
-      , "Forested (ha)", "Forested %"
-      , "Protected"
-      , "Slope>35%"
-      , "Administrative"
-      , "Riparian Buffer (100ft)"
-      , "Roads>2000ft"
-      , "Remaining (ha)"
-      , "Remaining (%)"
-    )
-  ) |>  
-  add_header_above(c(" " = 1, "Area of\nPriority Landscape"=2, "Constraint\nLeast Flexible to Most Flexible" = 5, " " = 2)) |>
-  kable_classic(full_width=T) |> 
-  pack_rows(index = table(forcats::fct_inorder(tbl_temp$state))) |> 
-  kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE) |>  
-  kableExtra::scroll_box(width = "740px")
+## Landscape-level analysis 
+
+### Reduction Treatable Area Table
+
+```{r ls-tab1, results='asis'}
+scnum_temp<-2
+  tbl_temp <- constrained_by_scnro_ls |> 
+    dplyr::filter(scenario_id==scnum_temp) |> 
+    dplyr::mutate(
+      dplyr::across(
+        tidyselect::ends_with("_ha")
+        , ~ scales::comma(.x, accuracy = 1)
+      )
+      , dplyr::across(
+        tidyselect::starts_with("pct_")
+        , ~ scales::percent(.x, accuracy = 0.1)
+      )
+    ) |> 
+    dplyr::select(
+      state
+      , name
+      , covertype_area_ha
+      , pct_covertype_area
+      , pct_rdctn1_protected
+      , pct_rdctn2_slope
+      , pct_rdctn3_administrative
+      , pct_rdctn4_riparian
+      , pct_rdctn5_roads
+      , rmn5_roads_area_ha
+      , pct_rmn5_roads
+    ) |> 
+    dplyr::arrange(state,name)
+  # make table 
+  kableExtra::kable(
+      tbl_temp |> dplyr::select(-c(state))
+      , caption = paste0("<b><font color=navy>Scenario ",scnum_temp,"</font></b><br>percent reduction of different types of constraints on mechanical treatment")
+      , col.names = c(
+        ""
+        , "Forest+Shrub\n(ha)", "Forest+Shrub\n%"
+        , "Protected"
+        , "Slope\nSteepness"
+        , "Administrative"
+        , "Riparian\nBuffer"
+        , "Road\nDistance"
+        , "Remaining (ha)"
+        , "Remaining (%)"
+      )
+      , escape = F
+    ) |>  
+    add_header_above(c(" " = 1, "Area of\nPriority Landscape"=2, "Constraint\nLeast Flexible to Most Flexible" = 5, " " = 2)) |>
+    kable_classic(full_width=T) |> 
+    pack_rows(index = table(forcats::fct_inorder(tbl_temp$state))) |> 
+    kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE) |>  
+    kableExtra::scroll_box(width = "740px")
+  
 ```
 
 ```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
@@ -325,293 +364,16 @@ gc()
 
 ```
 
-## Forested Area Plot
+### Change in Available by Scenario
 
-```{r wf-forested-area}
-ggplot(data = constrained_wide, mapping = aes(x = pct_forested_area, y = reorder(area_name, -pct_forested_area), fill = state)) +
-  geom_col(color = NA, width = 0.7) +
-  geom_text(
-    mapping = aes(label = scales::percent(pct_forested_area, accuracy = 1))
-    , color = "black", size = 3
-    , hjust = -0.1
-  ) +
-  scale_fill_viridis_d(option = "viridis", alpha = 0.8) +
-  scale_x_continuous(expand = expansion(mult = c(0, .1)),labels = scales::percent_format()) +
-  labs(
-    fill = ""
-    , y = ""
-    , x = "% Priority Landscape Area Forested"
-  ) +
-  theme_light() +
-  theme(
-    legend.position = "none" # c(0.9, 0.9)
-    , legend.title = element_text(size=7)
-    , axis.title = element_text(size=9)
-    , axis.text.x = element_text(size=7)
-  )
-
-```
-
-## Landcover Class Area
-
-Note, some of these areas have a very low percentage of forested area. For example, only **`r constrained_wide |> dplyr::arrange(pct_forested_area) |> dplyr::filter(dplyr::row_number()==1) |>  dplyr::pull(pct_forested_area) |> scales::percent(accuracy=1)`** of the **`r constrained_wide |> dplyr::arrange(pct_forested_area) |> dplyr::filter(dplyr::row_number()==1) |>  dplyr::pull(area_name)`** landscape is forested (NLCD class 41-43).
-
-What is the landcover classification of the remaining area? This [GEE script](https://code.earthengine.google.com/69cee569d87fa6ce27723fcf579fbb32?noload=true) was used to calculate the area by NLCD landcover class.
-
-```{r nlcd-area}
-# nlcd class groups
-nlcd_reclass_df_temp <- data.frame(
-    class_id = c(11,12,21,22,23,24,31,41,42,43,51,52,71,72,73,74,81,82,90,95) |> as.character()
-    , class_label = c(
-      "Water"
-      , "Water"
-      , "Developed"
-      , "Developed"
-      , "Developed"
-      , "Developed"
-      , "Barren"
-      , "Forest"
-      , "Forest"
-      , "Forest"
-      , "Shrubland"
-      , "Shrubland"
-      , "Herbaceous"
-      , "Herbaceous"
-      , "Herbaceous"
-      , "Herbaceous"
-      , "Planted/Cultivated" # double-check name
-      , "Planted/Cultivated"
-      , "Wetlands"
-      , "Wetlands"
-      )
-  ) |> 
-  dplyr::left_join(
-    FedData::nlcd_colors() |> dplyr::rename(class_id=ID) |> dplyr::rename_with(tolower) |> dplyr::mutate_all(as.character)
-    , by = dplyr::join_by(class_id)
-  )
-# load data by wf priority 
-wf_nlcd_area <- readr::read_csv("../data/wildfirepriority/wfpriority_nlcd_area.csv") |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::left_join(
-    constrained_wide |> 
-      dplyr::select(name,state,area_name)
-    , by = dplyr::join_by(name,state)
-  ) |> 
-  tidyr::pivot_longer(
-    cols = tidyselect::starts_with("area_m2_nlcd_cl")
-    , names_to = "class_id"
-    , values_to = "area_m2"
-    , names_prefix = "area_m2_nlcd_cl_"
-    , values_drop_na = F
-  ) |> 
-  dplyr::left_join(
-    nlcd_reclass_df_temp
-    , by = dplyr::join_by(class_id)
-  )
-# get color palette
-nlcd_colors <- wf_nlcd_area |> 
-  dplyr::group_by(class_id,color,class_label) |> 
-  dplyr::summarise(sum_area = sum(area_m2,na.rm = T)) |> 
-  dplyr::arrange(class_label,desc(sum_area)) |> 
-  dplyr::group_by(class_label) |> 
-  dplyr::filter(dplyr::row_number()==1) |> 
-  dplyr::ungroup() |> 
-  dplyr::pull(color)
-# aggregate and plot
-wf_nlcd_area |> 
-  dplyr::group_by(area_name,class_label) |> 
-  dplyr::summarise(sum_area_ha = sum(area_m2,na.rm = F)/10000) |> 
-  dplyr::mutate(sum_area_ha = ifelse(is.na(sum_area_ha),0,sum_area_ha)) |> 
-  dplyr::group_by(area_name) |> 
-  dplyr::mutate(pct_area = sum_area_ha/sum(sum_area_ha)) |>
-  dplyr::ungroup() |> 
-  dplyr::left_join(
-    constrained_wide |> dplyr::select(area_name,pct_forested_area)
-    , by = dplyr::join_by(area_name)
-  ) |> 
+```{r ls-chg-avai, fig.height=9}
 ggplot(
-    mapping = aes(x = pct_area, y = reorder(area_name, -pct_forested_area), fill=class_label)
-  ) +
-  geom_col(width = 0.7, alpha=0.8) +
-  geom_text(
-    mapping = aes(
-      label = scales::percent(ifelse(pct_area>.03,pct_area,NA), accuracy = 1)
-    )
-    , position = position_stack(vjust = 0.5)
-    , color = "black", size = 3
-  ) +
-  scale_fill_manual(values = nlcd_colors) +
-  scale_x_continuous(labels = scales::percent_format()) +
-  labs(
-    fill = "NLCD\nCover\nType"
-    , y = ""
-    , x = "% Landscape Area"
-  ) +
-  theme_light() +
-  theme(
-    legend.position = "top" # c(0.9, 0.9)
-    , legend.title = element_text(size=9)
-    , axis.title = element_text(size=9)
-    , axis.text.x = element_text(size=7)
-  )
-  
-```
-
-
-What should be done about these low-forest landscapes? Include shrubland as part of area considered for constraint analysis.
-
-## Remaining Treatable Forest Plot
-
-```{r plt-rmn2}
-ggplot(data = constrained_wide, mapping = aes(x = pct_rmn5_roads, y = reorder(area_name, -pct_rmn5_roads), fill = state)) +
-  geom_col(color = NA, width = 0.7) +
-  geom_text(
-    mapping = aes(label = scales::percent(pct_rmn5_roads, accuracy = 1))
-    , color = "black", size = 3
-    , hjust = -0.1
-  ) +
-  # facet_grid(rows = vars(state), scales = "free_y", switch = "y") + 
-  scale_fill_viridis_d(option = "viridis", alpha = 0.8) +
-  scale_x_continuous(expand = expansion(mult = c(0, .1)),labels = scales::percent_format()) +
-  labs(
-    fill = ""
-    , y = ""
-    , x = "Treatable Forested Area Remaining (%)"
-  ) +
-  theme_light() +
-  theme(
-    legend.position = "none" # c(0.9, 0.9)
-    , legend.title = element_text(size=7)
-    , axis.title = element_text(size=9)
-    , axis.text.x = element_text(size=7)
-    # , strip.background = element_blank()
-    # , strip.text = element_text(color = "black", face = "bold")
-    # , strip.placement = "outside"
-  )
-```
-
-## Reduction by Constraint Plot
-
-```{r plt-rdctn-cnstrt2}
-# reshape
-constrained_pct_rdctn_long <- constrained_wide |>
-  dplyr::select(state, name, area_name, tidyselect::starts_with("pct_rdctn")) |> 
-  tidyr::pivot_longer(
-    cols = tidyselect::starts_with("pct_rdctn")
-    , names_to = "constraint"
-    , values_to = "pct_rdctn"
-    , names_prefix = "pct_rdctn"
-    , values_drop_na = F
-  ) |> 
-  tidyr::separate_wider_delim(constraint, "_", names = c("constraint_lvl", "constraint")) |> 
-  dplyr::mutate(
-    constraint_lvl = as.numeric(constraint_lvl)
-    , constraint = factor(
-        constraint
-        , ordered = TRUE
-        , levels = c(
-          "protected"
-          , "slope"
-          , "administrative"
-          , "riparian"
-          , "roads"
-          , "total"       
-        )
-        , labels = c(
-          "Protected"
-          , "Slope>35%"
-          , "Administrative"
-          , "Riparian Buffer (100ft)"
-          , "Roads>2000ft"
-          , "Total"
-        )
-      ) |> forcats::fct_rev()
-  ) |> 
-  dplyr::left_join(
-    constrained_wide |> dplyr::select(state,name,pct_rdctn_total)
-    , by = join_by(state,name)
-  )
-# plot
-ggplot() +
-  geom_col(
-    data = constrained_pct_rdctn_long |> dplyr::filter(constraint!="Total")
-    , mapping = aes(y = reorder(area_name,-pct_rdctn_total), x = pct_rdctn, fill = constraint)
-    , color = NA, width = 0.7
-  ) +
-  geom_text(
-    data = constrained_pct_rdctn_long |> dplyr::filter(constraint=="Total")
-    , mapping = aes(
-      y = reorder(area_name,-pct_rdctn_total), x = pct_rdctn_total
-      , label = scales::percent(pct_rdctn_total, accuracy = 1)
-    )
-    , color = "black", size = 3
-    , hjust = -0.1
-  ) +
-  # facet_grid(rows = vars(state), scales = "free_y", switch = "y") + 
-  scale_fill_viridis_d(option = "plasma", alpha = 0.8) +
-  scale_x_reverse(expand = expansion(mult = c(0, .1)),labels = scales::percent_format()) +
-  labs(
-    fill = ""
-    , y = ""
-    , x = "Constraint Reduction in Treatable Forested Area (%)"
-  ) +
-  theme_light() +
-  theme(
-    legend.position = "top"
-    , legend.direction  = "horizontal"
-    , legend.title = element_text(size=7)
-    , axis.title = element_text(size=9)
-    , axis.text.x = element_text(size=7)
-    # , strip.text = element_text(color = "black", face = "bold")
-    # , strip.placement = "outside"
-  )
-```
-
-## Reduction Treatable Area Plot
-
-```{r plt-rdctn2, results='hide', fig.height=12}
-# reshape
-constrained_pct_rmn_long <- constrained_wide |>
-  dplyr::mutate(pct_rmn_forested=1) |> 
-  dplyr::select(state, name, area_name, tidyselect::starts_with("pct_rmn")) |> 
-  tidyr::pivot_longer(
-    cols = tidyselect::starts_with("pct_rmn")
-    , names_to = "constraint"
-    , values_to = "pct_rmn"
-    , names_prefix = "pct_rmn"
-    , values_drop_na = F
-  ) |> 
-  tidyr::separate_wider_delim(constraint, "_", names = c("constraint_lvl", "constraint")) |> 
-  dplyr::mutate(
-    constraint = factor(
-        constraint
-        , ordered = TRUE
-        , levels = c(
-          "forested"
-          , "protected"
-          , "slope"
-          , "administrative"
-          , "riparian"
-          , "roads"       
-        )
-        , labels = c(
-          "Forested"
-          , "Protected"
-          , "Slope>35%"
-          , "Administrative"
-          , "Riparian Buffer (100ft)"
-          , "Roads>2000ft"
-        )
-      )
-  ) |> 
-  dplyr::arrange(state, name, constraint)
-# plot
-ggplot(data = constrained_pct_rmn_long
-         , mapping = aes(x = constraint, y = pct_rmn, group = area_name)
+    data = constrained_by_scnro_ls
+    , mapping = aes(x=scenario_desc,y=pct_rmn5_roads,group=area_name)
     ) +
     geom_line(mapping=aes(color = area_name), linewidth = 1.5) +
     geom_label(
-      mapping=aes(label = scales::percent(pct_rmn, scale = 100, accuracy = 1))
+      mapping=aes(label = scales::percent(pct_rmn5_roads, scale = 100, accuracy = 1))
       , color = "black"
       , size = 3
       , label.padding = unit(0.15, "lines")
@@ -621,327 +383,25 @@ ggplot(data = constrained_pct_rmn_long
       , labeller = label_wrap_gen(width = 35, multi_line = TRUE)
     ) +
     scale_color_viridis_d(option = "turbo", alpha = 0.8) +
-    scale_y_continuous(limits = c(-0.01,1.06), labels = scales::percent_format(), breaks = scales::extended_breaks(6)) +
-    scale_x_discrete(labels = scales::label_wrap(20)) +
+    scale_y_continuous(expand = expansion(mult = c(0.1, 0.1)), labels = scales::percent_format(), breaks = scales::extended_breaks(6)) +
+    # scale_x_discrete(labels = scales::label_wrap(20)) +
     labs(
-      x = "Constraint\nLeast Flexible \U2192 Most Flexible"
-      , y = "Forested Area Remaining"
-      # , subtitle = rgn
+      x = "Most Restrictive \U2192 Least Restrictive"
+      , y = "Percent Treatable Area Remaining"
     ) +
     theme_light() +
     theme(
       legend.position = "none"
-      , axis.text.x = element_text(angle=90,hjust=0.95,vjust=0.2)
-    )
-  
-```
-
-```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
-remove(list = ls()[grep("_temp",ls())])
-gc()
-```
-
----
-
-## Wildfire Crisis Strategy Priority Landscapes Subwatershed Level
-
-Sixth-level hydrologic units (HUs) enumerated with 12-digit codes, commonly referred to as subwatersheds, were used to characterize the spatial arrangement of constrained land. Subwatershed boundaries have been used to represent meaningful landscape management units and to approximate "firesheds" which are contiguous areas with similar fire history and problem fire characteristics where a coordinated suppression planning occurs.
-
-Subwatersheds that did not have at least *25%* of area within the boundary of the area of interest were excluded from this analysis. This cutoff was implemented under the assumption that with less than 25% of area available, treatment alone would not substantially affect wildfire behavior across the subwatershed.
-
-### Load subwatershed-level data
-
-Data created via this [Google Earth Engine script](https://code.earthengine.google.com/08e93fa1b68c878397ea92a6f84ebdfe?noload=true)
-
-```{r wf-read-sw}
-# data table
-  # read multiple files
-  constrained_byftr_huc12_wide <-
-    list.files("../data/wildfirepriority_subwatersheds/",pattern = "\\.csv$") |> 
-      purrr::map(function(x){
-        readr::read_csv(
-          paste0("../data/wildfirepriority_subwatersheds/",x)
-          , name_repair = "universal"
-          , col_types = cols(.default = "c")
-        )
-      }) |>
-      dplyr::bind_rows() |> 
-      dplyr::select(-dplyr::starts_with("shape", ignore.case = T)) |> 
-      dplyr::rename(huc12name = name) |> 
-      dplyr::rename_with(tolower) |> 
-        dplyr::rename_with(make.names) |> 
-        dplyr::rename(feature_id = system.index) |> 
-        dplyr::left_join(
-          data.frame(state = datasets::state.name, state_abb = datasets::state.abb)
-          , by = join_by("state")
-        ) |> 
-        dplyr::mutate(
-          area_name = paste0(
-            ifelse(is.na(state_abb) | state_abb == "", "UNK", state_abb)
-            , ": "
-            , name
-          )
-          , dplyr::across(
-              tidyselect::ends_with("_m2")
-              , ~ as.numeric(.x) / 10000
-            )
-          , dplyr::across(
-              tidyselect::starts_with("pct_rmn")
-              , ~ as.numeric(.x)
-            )
-        ) |> 
-        dplyr::rename_with(
-          ~ gsub("_m2", "_ha", .x)
-          , tidyselect::ends_with("_m2")
-        ) |> 
-    # calculate pct reduction
-    dplyr::mutate(
-      pct_rdctn1_protected = -1*(1 - pct_rmn1_protected)
-      , pct_rdctn2_slope = -1*(pct_rmn1_protected - pct_rmn2_slope)
-      , pct_rdctn3_administrative = -1*(pct_rmn2_slope - pct_rmn3_administrative)
-      , pct_rdctn4_riparian = -1*(pct_rmn3_administrative - pct_rmn4_riparian)
-      , pct_rdctn5_roads = -1*(pct_rmn4_riparian - pct_rmn5_roads)
-      , pct_rdctn_total = -1*(1 - pct_rmn5_roads)
-      , cnstrnt_lvl = dplyr::case_when(
-        -pct_rdctn_total >= 0.85 ~ 1
-        , -pct_rdctn_total >= 0.65 ~ 2
-        , -pct_rdctn_total >= 0.0 ~ 3
-      )
-    ) |> 
-    dplyr::mutate(
-      cnstrnt_class = factor(
-        cnstrnt_lvl 
-        , levels = 1:3
-        , labels = c("high constraint", "med. constraint", "low constraint")
-        , ordered = T
-      ) |> forcats::fct_rev()
-      , rmn_cnstrnt_class = factor(
-        cnstrnt_lvl 
-        , levels = 1:3
-        , labels = c("0–15% treatable", "16–35% treatable", ">35% treatable")
-        , ordered = T
-      ) |> forcats::fct_rev()
-    )
-  
-```
-
-### Distribution of Subwatershed Area
-
-```{r wf-dist-sw-area, fig.height=9}
-# plot
-ggplot(data = constrained_byftr_huc12_wide
-         , mapping = aes(x = huc12_area_ha, y = area_name)
-    ) +
-    geom_vline(xintercept = median(constrained_byftr_huc12_wide$huc12_area_ha), linetype="dashed", color="gray66") +
-    geom_violin(aes(fill = state)) + 
-    geom_boxplot(width = 0.15) +
-    # geom_point(size = 0.7, color = "gray33", alpha = 0.2) +
-    geom_text(
-      data = constrained_byftr_huc12_wide |> 
-        dplyr::group_by(area_name) |> 
-        dplyr::summarise(n=n(), max_area=max(huc12_area_ha))
-      , mapping = aes(x = -1,y=area_name,label=paste0("n=",scales::comma(n)))
-      , size = 3
-      , color = "black"
-      , hjust = 0.7
-    ) +
-    scale_fill_viridis_d(option = "viridis", alpha = 0.8) +
-    scale_x_continuous(labels = scales::comma, breaks = scales::extended_breaks(n=7)) +
-    labs(
-      fill = ""
-      , y = ""
-      , x = "Subwatershed Area (ha)"
-    ) +
-    theme_light() +
-    theme(
-      legend.position = "none" # c(0.9, 0.9)
-      , axis.title = element_text(size=9)
-      , axis.text.x = element_text(size=7)
+      , axis.text.y = element_text(size=7)
     )
 ```
 
-### Distribution of Subwatershed Constraint
+### Reduction by Constraint
 
-Based on model simulations of how much area generally needs to be treated to influence wildfire behavior, we binned the subwatersheds into three classes of mechanical constraint: 
-
-* **high** (85–100% [i.e., only 0–15% is available for mechanical treatment]): fuels treatment would principally need to rely on fire
-* **medium** (65– 84%): could use a combination of fire and mechanical thinning
-* **low** (65%): could effectively influence wildfire behavior with mechanical treatment alone
-
-```{r wfplt-cnstrntcl-sw}
-constrained_byftr_huc12_wide |> 
-  dplyr::count(area_name,cnstrnt_class) |> 
-  dplyr::group_by(area_name) |> 
-  dplyr::mutate(
-    pct = n/sum(n)
-    , high_pct=max(ifelse(cnstrnt_class=="high constraint",pct,0)) 
-    , tot = sum(n)
-  ) |> 
-ggplot() +
-  geom_col(
-    mapping = aes(x = pct, y = reorder(area_name, high_pct), fill=cnstrnt_class)
-    ,width = 0.7, alpha=0.8
-  ) +
-  geom_text(
-    mapping = aes(x = pct, y = reorder(area_name, high_pct), fill=cnstrnt_class
-        ,label = scales::percent(pct, accuracy = 1)
-      )
-    , position = position_stack(vjust = 0.5)
-    , color = "black", size = 3
-  ) +
-  geom_text(
-      data = constrained_byftr_huc12_wide |>
-        dplyr::group_by(area_name) |>
-        dplyr::summarise(n=n(), high_n=sum(ifelse(cnstrnt_class=="high constraint",1,0)))
-      , mapping = aes(x = -0.05,y=reorder(area_name, -(high_n/n)),label=paste0("n=",scales::comma(n)))
-      , size = 3
-      , color = "black"
-      , hjust = 0.7
-    ) +
-  scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
-  # facet_grid(rows = vars(state), scales = "free_y", switch = "y") + 
-  scale_x_continuous(labels = scales::percent_format()) +
-  labs(
-    fill = "Level of\nConstraint"
-    , y = ""
-    , x = "% of Subwatersheds"
-  ) +
-  theme_light() +
-  theme(
-    legend.position = "top" # c(0.9, 0.9)
-    , legend.title = element_text(size=7)
-    , axis.title = element_text(size=9)
-    , axis.text.x = element_text(size=7)
-    # , strip.background = element_blank()
-    , strip.text = element_text(color = "black", face = "bold")
-    , strip.placement = "outside"
-  )
-
-constrained_byftr_huc12_wide |> 
-        dplyr::group_by(area_name) |> 
-        dplyr::summarise(n=n(), high_n=sum(ifelse(cnstrnt_class=="high constraint",1,0)))
-```
-
-```{r wf-cnstrntcl-sum-dta}
-# there seem to be a lot of low constraint class huc12s with no forest ;\
-constrained_byftr_cnstrcl_wide <- constrained_byftr_huc12_wide |> 
-  dplyr::group_by(area_name,cnstrnt_class,rmn_cnstrnt_class) |> 
-  dplyr::summarise(
-    n = n()
-    , dplyr::across(
-      c(
-        huc12_area_ha
-        , covertype_area_ha
-        , pct_rdctn1_protected
-        , pct_rdctn2_slope
-        , pct_rdctn3_administrative
-        , pct_rdctn4_riparian
-        , pct_rdctn5_roads
-        , rmn5_roads_area_ha
-        , pct_rmn5_roads
-        , pct_rdctn_total
-      )
-      , ~ mean(as.numeric(.x), na.rm = T)
-    )
-  ) |> 
-  dplyr::group_by(area_name) |> 
-  dplyr::mutate(
-    pct_huc12s = n/sum(n)
-    , pct_forested_area = covertype_area_ha/huc12_area_ha
-  ) |>
-  dplyr::ungroup() |> 
-  dplyr::relocate(c(pct_huc12s), .after=n) |> 
-  dplyr::relocate(pct_forested_area, .after = covertype_area_ha)
-```
-
-```{r wf-cnstrntcl-sum-sw, results='asis', eval=FALSE, include=FALSE}
-### Summary Stats by Level of Constraint
-# make table
-constrained_byftr_cnstrcl_wide |> 
-  dplyr::mutate(
-    dplyr::across(
-      tidyselect::starts_with("pct_")
-      , ~ scales::percent(.x, accuracy = 0.1)
-    )
-    , dplyr::across(
-      c(tidyselect::ends_with("_ha"),n)
-      , ~ scales::comma(.x, accuracy = 1)
-    )
-  ) |> 
-  dplyr::select(-c(area_name,huc12_area_ha,pct_rdctn_total)) |> 
-kableExtra::kable(
-     caption = "Summary of Subwatershed Statistics in each Wildfire Crisis Strategy Priority Landscape<br>Mean percent reduction of different types of constraints on mechanical treatment"
-    , col.names = c(
-      "", "" # 2
-      , "#", "%" # 2
-      , "Forested (ha)", "Forested %" # 2
-      , "Protected"
-        , "Slope>35%"
-        , "Administrative"
-        , "Riparian Buffer (100ft)"
-        , "Roads>2000ft"  # 2
-      , "Remaining (ha)"
-      , "Remaining (%)"
-    )
-  ) |>  
-  add_header_above(c(
-    " " = 2
-    ,"Subwatersheds"=2
-    , "Area of\nsubwatershed"=2
-    , "Constraint\nLeast Flexible to Most Flexible" = 5
-    , " " = 2
-  )) |>
-  kable_classic(full_width=T) |> 
-  pack_rows(index = table(forcats::fct_inorder(constrained_byftr_cnstrcl_wide$area_name))) |> 
-  kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE) |>  
-  kableExtra::scroll_box(width = "740px")
-
-```
-
-### Forested Area by Level of Constraint
-
-```{r wf-area-cnstrnt-sw, fig.height=12}
-ggplot(
-    data = constrained_byftr_cnstrcl_wide
-    , mapping = aes(y = pct_forested_area, x = cnstrnt_class, fill=cnstrnt_class)
-  ) +
-  geom_col(width = 0.6, alpha=0.8) +
-  geom_text(
-    mapping = aes(
-      label = scales::percent(pct_forested_area, accuracy = 1)
-    )
-    , color = "black", size = 3
-    , vjust = -0.5
-  ) +
-  scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
-  facet_wrap(
-    facets = vars(area_name)
-    , ncol = 3
-    , labeller = label_wrap_gen(width = 35, multi_line = TRUE)
-  ) +
-  scale_y_continuous(labels = scales::percent_format(), expand = expansion(mult = c(0, .3))) +
-  scale_x_discrete(labels = scales::label_wrap(10)) +
-  labs(
-    x = "Level of\nConstraint"
-    , y = "% Subwatershed Area Forested"
-  ) +
-  theme_light() +
-  theme(
-    legend.position = "none"
-    , axis.text.x = element_text(angle=90,hjust=0.95,vjust=0.2)
-  )
-```
-
-### Constraint Reduction by Level of Constraint
-
-```{r wf-rdctn-cnstrt-sw, fig.height=12}
+```{r plt-rdctn-cnstrt2}
 # reshape
-constrained_byftr_huc12_pct_rdctn_long <-
-  constrained_byftr_cnstrcl_wide |>
-  dplyr::select(
-    area_name,cnstrnt_class,rmn_cnstrnt_class
-    ,tidyselect::starts_with("pct_rdctn")
-  ) |> 
+constrained_by_scnro_ls_long <- constrained_by_scnro_ls |>
+  dplyr::select(state, name, area_name, tidyselect::starts_with("scenario_"), tidyselect::starts_with("pct_rdctn")) |> 
   tidyr::pivot_longer(
     cols = tidyselect::starts_with("pct_rdctn")
     , names_to = "constraint"
@@ -961,45 +421,58 @@ constrained_byftr_huc12_pct_rdctn_long <-
           , "administrative"
           , "riparian"
           , "roads"
-          , "total"       
+          , "total"   
         )
         , labels = c(
           "Protected"
-          , "Slope>35%"
+          , "Slope\nSteepness"
           , "Administrative"
-          , "Riparian Buffer (100ft)"
-          , "Roads>2000ft"
+          , "Riparian\nBuffer"
+          , "Road\nDistance"
           , "Total"
         )
       ) |> forcats::fct_rev()
+  ) |> 
+  dplyr::left_join(
+    constrained_by_scnro_ls |> dplyr::select(state,name,scenario_id,pct_rdctn_total)
+    , by = join_by(state,name,scenario_id)
   )
 # plot
 ggplot() +
   geom_col(
-    data = constrained_byftr_huc12_pct_rdctn_long |> dplyr::filter(constraint!="Total")
-    , mapping = aes(y = cnstrnt_class, x = pct_rdctn, fill = constraint)
+    data = constrained_by_scnro_ls_long |> dplyr::filter(constraint!="Total")
+    , mapping = aes(y = scenario_lab, x = pct_rdctn, fill = constraint)
     , color = NA, width = 0.7
   ) +
   geom_text(
-    data = constrained_byftr_huc12_pct_rdctn_long |> dplyr::filter(constraint=="Total")
+    data = constrained_by_scnro_ls_long |> dplyr::filter(constraint!="Total")
     , mapping = aes(
-      y = cnstrnt_class, x = pct_rdctn
-      , label = scales::percent(pct_rdctn, accuracy = 1)
+      y = scenario_lab, x = pct_rdctn
+      , label = scales::percent(ifelse(pct_rdctn<.06*-1,pct_rdctn,NA), accuracy = 1)
+      , fontface = "bold"
     )
+    , position = position_stack(vjust = 0.5)
     , color = "black", size = 3
+  ) +
+  geom_text(
+    data = constrained_by_scnro_ls_long |> dplyr::filter(constraint=="Total")
+    , mapping = aes(
+      y = scenario_lab, x = pct_rdctn_total
+      , label = scales::percent(pct_rdctn_total, accuracy = 1)
+    )
+    , color = "black", size = 3.5
     , hjust = -0.1
   ) +
-  facet_wrap(
-    facets = vars(area_name)
-    , ncol = 3
-    , labeller = label_wrap_gen(width = 35, multi_line = TRUE)
-  ) +
-  scale_fill_viridis_d(option = "plasma", alpha = 0.8) +
+  facet_wrap(facets = vars(area_name)
+      , ncol = 3
+      , labeller = label_wrap_gen(width = 35, multi_line = TRUE)
+    ) +
+  scale_fill_viridis_d(option = "plasma", alpha = 0.7) +
   scale_x_reverse(expand = expansion(mult = c(0, .1)),labels = scales::percent_format()) +
   labs(
     fill = ""
     , y = ""
-    , x = "Constraint Reduction in Treatable Forested Area (%)"
+    , x = "Constraint Reduction in Treatable Area (%)"
   ) +
   theme_light() +
   theme(
@@ -1007,442 +480,8 @@ ggplot() +
     , legend.direction  = "horizontal"
     , legend.title = element_text(size=7)
     , axis.title = element_text(size=9)
-    , axis.text.x = element_text(size=7)
-  )
-```
-
-```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
-remove(list = ls()[grep("_temp",ls())])
-gc()
-```
-
-### Area Available for Mechanical Treatment
-
-```{r area-table-dta}
-area_table <- constrained_wide |> 
-  dplyr::left_join(
-    constrained_byftr_huc12_wide |> 
-      dplyr::group_by(area_name,cnstrnt_class) |> 
-      dplyr::summarise(
-        n = n()
-        , dplyr::across(
-          c(feature_area_ha,covertype_area_ha,rmn5_roads_area_ha)
-          , ~ sum(.x,na.rm = T)
-        )
-      ) |> 
-      dplyr::mutate(
-        cnstrnt_class = stringr::word(cnstrnt_class) |> stringr::str_remove_all("\\.")
-      ) |> 
-      dplyr::rename(
-        total_ha=feature_area_ha
-        ,forested_ha=covertype_area_ha
-        ,remaining_ha=rmn5_roads_area_ha
-      ) |> 
-      tidyr::pivot_wider(
-        names_from = cnstrnt_class
-        , values_from = c(tidyselect::ends_with("_ha"),n)
-        , names_glue = "{cnstrnt_class}_{.value}"
-        , values_fill = 0
-      )
-    , by = dplyr::join_by(area_name)
-  ) |> 
-  dplyr::select(area_name, tidyselect::ends_with("_ha")) |> 
-  dplyr::mutate(
-    dplyr::across(
-      tidyselect::ends_with("_ha")
-      , ~ (.x*10000)/4046.85642
-      , .names = "{.col}_acres"
-    )
-  ) |> 
-  dplyr::rename_with(
-    ~ gsub("_ha_acres", "_acres", .x)
-    , tidyselect::ends_with("_ha_acres")
-  ) |>
-  dplyr::select(
-    area_name
-    , feature_area_ha, feature_area_acres
-    , covertype_area_ha, covertype_area_acres
-    , rmn5_roads_area_ha, rmn5_roads_area_acres
-    , low_total_ha, low_total_acres
-    , low_forested_ha, low_forested_acres
-    , low_remaining_ha, low_remaining_acres
-  )
-# stack acres hectares
-area_table_temp <-
-dplyr::bind_rows(
-  area_table |> dplyr::select(area_name, tidyselect::ends_with("_ha")) |> 
-    dplyr::rename_with(
-      ~ gsub("_ha", "", .x)
-      , tidyselect::ends_with("_ha")
-    ) |> 
-    dplyr::mutate(units = "ha")
-  , area_table |> dplyr::select(area_name, tidyselect::ends_with("_acres")) |> 
-    dplyr::rename_with(
-      ~ gsub("_acres", "", .x)
-      , tidyselect::ends_with("_acres")
-    ) |> 
-    dplyr::mutate(units = "ac")
-) |> 
-  dplyr::mutate(
-    dplyr::across(
-      -c(area_name,units)
-      , ~ paste0(scales::comma(.x,accuracy=1)," ",units)
-    )
-  ) |> 
-  dplyr::arrange(area_name,desc(units)) |> 
-  dplyr::mutate(units = "") |> 
-  dplyr::relocate(units,.after="area_name")
-```
-
-by priority landscape
-
-```{r area-table-wfp, results='asis'}
-# table
-  kableExtra::kable(
-    area_table_temp |> dplyr::select(-c(area_name))
-    , caption = "Wildfire Crisis Strategy Priority Landscape<br>area potentially available for mechanical treatment"
-    , col.names = c(
-      " "
-      , "Total Area"
-      , "Forested"
-      , "Treatable Forest"
-      , "Low Constraint HU Area"
-      , "Low Constraint HU Forested"
-      , "Low Constraint HU Treatable Forest"
-    )
-  ) |>  
-  # add_header_above(c(" " = 1, "Hectares"=6)) |>
-  kable_classic(full_width=T) |> 
-  pack_rows(index = table(forcats::fct_inorder(area_table_temp$area_name))) |> 
-  kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE)
-
-```
-
-Overall
-
-```{r area-table-tot, results='asis'}
-total_area_temp <- dplyr::bind_rows(
-  area_table |> dplyr::select(tidyselect::ends_with("_ha")) |> 
-    dplyr::rename_with(
-      ~ gsub("_ha", "", .x)
-      , tidyselect::ends_with("_ha")
-    ) |> 
-    dplyr::mutate(units = "ha")
-  , area_table |> dplyr::select(tidyselect::ends_with("_acres")) |> 
-    dplyr::rename_with(
-      ~ gsub("_acres", "", .x)
-      , tidyselect::ends_with("_acres")
-    ) |> 
-    dplyr::mutate(units = "ac")
-) |> 
-  dplyr::group_by(units) |> 
-  dplyr::summarise(
-    dplyr::across(
-      dplyr::everything()
-      , sum
-    )
-  ) |> 
-  dplyr::mutate(
-    dplyr::across(
-      -c(units)
-      , ~ paste0(
-        scales::comma(.x,suffix = "M", scale = 1e-6, accuracy = .01)
-        ," ",units)
-    )
-  ) |> 
-  dplyr::mutate(area_name = "21 Wildfire Crisis Strategy Priority Landscapes") |> 
-  dplyr::arrange(area_name,desc(units)) |> 
-  dplyr::mutate(units = "") |> 
-  dplyr::relocate(c(area_name,units))
-total_area_temp
-# table
-  kableExtra::kable(
-    total_area_temp |> dplyr::select(-c(area_name,units))
-    , caption = "21 Wildfire Crisis Strategy Priority Landscapes<br>overall area potentially available for mechanical treatment"
-    , col.names = c(
-      "Total Area"
-      , "Forested"
-      , "Treatable Forest"
-      , "Low Constraint HU Area"
-      , "Low Constraint HU Forested"
-      , "Low Constraint HU Treatable Forest"
-    )
-  ) |>  
-  # add_header_above(c(" " = 1, "Hectares"=6)) |>
-  kable_classic(full_width=T) |> 
-  # pack_rows(index = table(forcats::fct_inorder(total_area_temp$area_name))) |> 
-  kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE)
-
-```
-
-```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
-remove(list = ls()[grep("_temp",ls())])
-gc()
-```
-
-
-### Map of Subwatersheds by Level of Constraint{#wf_read_sw}
-
-```{r huc12-get, results='hide'}
-ws_bounds <- nhdplusTools::get_huc(id = unique(constrained_byftr_huc12_wide$huc12), type = 'huc12')
-# ws_bounds <- nhdplusTools::get_huc(id = 
-#     constrained_byftr_huc12_wide |> 
-#       dplyr::filter(name == "4FRI") |> 
-#       dplyr::pull(huc12) |> 
-#       unique()
-#   , type = 'huc12'
-# )
-# join
-constrained_byftr_huc12_wide_sf <- constrained_byftr_huc12_wide |> 
-  dplyr::inner_join(
-    ws_bounds |> 
-      dplyr::select(huc12, geometry)
-    , by = dplyr::join_by(huc12)
-  ) |> 
-  sf::st_as_sf() 
-# save for reading later
-sf::st_write(constrained_byftr_huc12_wide_sf, "../data/constrained_byftr_huc12_wide_sf.gpkg", append=F)
-# polish for mapping
-constrained_byftr_huc12_wide_sf <- constrained_byftr_huc12_wide_sf |> 
-  dplyr::mutate(
-    dplyr::across(
-      tidyselect::starts_with("pct_")
-      , ~ scales::percent(as.numeric(.x), accuracy = 0.1)
-    )
-    , dplyr::across(
-      tidyselect::ends_with("_ha")
-      , ~ scales::comma(as.numeric(.x), accuracy = 1)
-    )
-  ) |> 
-  dplyr::mutate(
-    Priority.Area.Name = area_name
-    , Level.of.Constraint = cnstrnt_class
-    , Pct.Treatable.Class = rmn_cnstrnt_class
-    , HUC12.Name = huc12name
-    , HUC12.Area.Hectares = huc12_area_ha
-    , Forested.Area.Hectares = covertype_area_ha
-    , Pct.Rdctn.Protected = pct_rdctn1_protected
-    , Pct.Rdctn.Slope = pct_rdctn2_slope
-    , Pct.Rdctn.Administrative = pct_rdctn3_administrative
-    , Pct.Rdctn.Riparian = pct_rdctn4_riparian
-    , Pct.Rdctn.Roads = pct_rdctn5_roads
-    , Treatable.Forested.Area.Hectares = rmn5_roads_area_ha
-    , Pct.Treatable.Forested.Area = pct_rmn5_roads
-  )
-```
-
-
-```{r mapview-ws-wf, results='asis'}
-# mapview
-mapview::mapviewOptions(homebutton = FALSE, basemaps = c("OpenStreetMap"))
-mapview::mapview(
-  constrained_byftr_huc12_wide_sf
-  , zcol = "cnstrnt_class"
-  , col.regions = RColorBrewer::brewer.pal(n=3,name="RdYlBu") |> rev()
-  , alpha.regions = 0.6
-  , lwd = 0.2
-  , label = FALSE
-  , legend = FALSE
-  , layer.name = "Subwatershed Constraints"
-  , popup = leafpop::popupTable(
-      constrained_byftr_huc12_wide_sf
-      , zcol = c(
-        "Priority.Area.Name"
-        , "Level.of.Constraint"
-        , "Pct.Treatable.Class"
-        , "HUC12.Name"
-        , "HUC12.Area.Hectares"
-        , "Forested.Area.Hectares"
-        , "Pct.Rdctn.Protected"
-        , "Pct.Rdctn.Slope"
-        , "Pct.Rdctn.Administrative"
-        , "Pct.Rdctn.Riparian"
-        , "Pct.Rdctn.Roads"
-        , "Treatable.Forested.Area.Hectares"
-        , "Pct.Treatable.Forested.Area"
-      )
-      , row.numbers = FALSE
-      , feature.id = FALSE
-    )
-)
-
-
-```
-
-```{r, include=F,eval=F}
-plt_temp <- ggplot() + 
-  geom_sf(data = constrained_byftr_huc12_wide_sf, aes(fill = cnstrnt_class), lwd = 0.05) +
-  geom_sf(
-    data = USAboundaries::us_states(states = c(
-        # usfs region 1-6 states
-        "MT","WY","CO","NM","AZ","UT","ID","WA","OR","CA","NV"
-        # , "KS","NE","SD","ND"
-      )) |> 
-      sf::st_transform(sf::st_crs(constrained_byftr_huc12_wide_sf))
-    , fill = NA
-    , color = "gray55"
-  ) +
-  geom_sf(data = wf_landscapes, fill = NA, color = "gray22", lwd = 0.2) +
-  ggrepel::geom_text_repel(data = wf_landscapes
-    , aes(label = stringr::str_wrap(
-        dplyr::case_when(
-          stringr::str_count(name, "\\w+")<2
-            ~ stringr::word(name,1,stringr::str_count(name, "\\w+"))
-          , stringr::str_starts(name,"Sierra and Elko") ~ stringr::word(name,1,3)
-          , TRUE ~ stringr::word(name,1,2)
-        )
-        , 7)
-        , geometry = geometry
-      )
-    , stat = "sf_coordinates"
-    , size = 2
-    # , min.segment.length = 0
-  ) +
-  scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
-  scale_x_continuous(expand = c(0, 0)) +
-  scale_y_continuous(expand = c(0, 0)) +
-  labs(
-    fill = ""
-    , x = ""
-    , y =""
-  ) +
-  theme_light() +
-  theme(
-    legend.position = c(0.9,0.9) # "top"
-    , legend.text = element_text(size = 7)
-    , axis.text = element_text(size=7)
-  )
-plt_temp
-ggsave("../data/map_sws2.png", plt_temp, height = 6, width = 5, dpi = 500)
-## area of low sws
-xx_temp <- constrained_byftr_huc12_wide |> 
-  dplyr::group_by(state,name, cnstrnt_class) |> 
-  dplyr::summarise(
-    dplyr::across(
-      dplyr::ends_with("area_ha")
-      , sum
-    )
-  ) |> 
-  dplyr::group_by(state,name) |>
-  dplyr::mutate(
-    total_covertype_area_ha = sum(covertype_area_ha)
-    , pct_treatable_tot =  rmn5_roads_area_ha/total_covertype_area_ha
-  ) |> 
-  dplyr::select(state,name,cnstrnt_class,rmn5_roads_area_ha,pct_treatable_tot) |>
-  dplyr::filter(cnstrnt_class!="high constraint") |> 
-  dplyr::mutate(cnstrnt_class=substr(cnstrnt_class,1,3)) |> 
-  dplyr::rename(
-        remaining_pct=pct_treatable_tot
-        ,remaining_ha=rmn5_roads_area_ha
-      ) |> 
-      tidyr::pivot_wider(
-        names_from = cnstrnt_class
-        , values_from = c(tidyselect::starts_with("remaining_"))
-        , names_glue = "{cnstrnt_class}_{.value}"
-        , values_fill = 0
-      )  |> 
-  dplyr::mutate(
-    tot_remaining_ha = low_remaining_ha+med_remaining_ha
-    ,tot_remaining_pct = low_remaining_pct+med_remaining_pct
-  ) |> 
-  dplyr::relocate(tot_remaining_ha,.after = med_remaining_ha) |> 
-  dplyr::mutate(
-    dplyr::across(
-      ends_with("_ha")
-      , ~ scales::comma(.x,accuracy=1)
-    )
-    , dplyr::across(
-      ends_with("_pct")
-      , ~ scales::percent(.x,accuracy=.1)
-    )
-  ) |> 
-  dplyr::ungroup()
-  
-  kableExtra::kable(
-    xx_temp |> dplyr::select(-c(state))
-    , caption = "Subwatershed forested area of each Wildfire Crisis Strategy Priority Landscape<br>available for treatment in lightly and moderately constrained subwatersheds"
-    , col.names = c(
-      ""
-      , "Lightly Constrained", "Moderately Constrained"
-      , "Total"
-      , "Lightly Constrained", "Moderately Constrained"
-      , "Total"
+    , axis.text.x = element_blank()
     
-    )
-  ) |>  
-  add_header_above(c(" " = 1, "Treatable Forested Area (ha)"=3, "Percent of Total\nSubwatershed Forested Area" = 3)) |>
-  kable_classic(full_width=T) |> 
-  pack_rows(index = table(forcats::fct_inorder(xx_temp$state))) |>
-  kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE) |>  
-  kableExtra::scroll_box(width = "740px")
-  
+  )
 ```
 
-
-## Example code to split larger polygons
-
-Split large polygons into equal area shapes for potential improvement of GEE processing
-
-```{r, eval=FALSE, include=T}
-# split polygons equal area
-fire_landscapes <- sf::st_read("../data/Wildfire_Crisis_Strategy_Landscapes/Wildfire_Crisis_Strategy_Landscapes_(Feature_Layer).shp") |> 
-  sf::st_make_valid() |> 
-  dplyr::mutate(area_ha = as.numeric(sf::st_area(geometry))/10000)
-fire_landscapes |> 
-  sf::st_drop_geometry() |> 
-  dplyr::group_by(STATE) |> 
-  dplyr::summarise(area_ha=sum(area_ha)) |> 
-  dplyr::arrange(desc(area_ha))
-
-# map
-mapview::mapview(fire_landscapes, zcol = "NAME", legend = F)
-## split poly
-# https://gis.stackexchange.com/questions/375345/dividing-polygon-into-parts-which-have-equal-area-using-r
-split_poly_fn <- function(sf_poly, n_areas){
-  # create random points
-  points_rnd <- sf::st_sample(sf_poly, size = 10000)
-  #k-means clustering
-  points <- do.call(rbind, sf::st_geometry(points_rnd)) |> 
-    dplyr::as_tibble() |>  
-    setNames(c("lon","lat"))
-  k_means <- kmeans(points, centers = n_areas)
-  # create voronoi polygons
-  voronoi_polys <- dismo::voronoi(k_means$centers, ext = sf_poly |> sf::as_Spatial())
-  # clip to sf_poly
-  crs(voronoi_polys) <- crs(sf_poly)
-  voronoi_sf <- sf::st_as_sf(voronoi_polys)
-  equal_areas <- sf::st_intersection(voronoi_sf, sf_poly)
-  equal_areas$split_area_ha <- as.numeric(sf::st_area(equal_areas))/10000
-  return(equal_areas)
-}
-# map function over all
-fire_landscapes_split <- 1:nrow(fire_landscapes) |> 
-  purrr::map(function(x){
-    sf_temp <- fire_landscapes |> 
-      dplyr::filter(dplyr::row_number()==x) |> 
-      sf::st_geometry()
-    n_areas_temp <- ceiling(
-        (fire_landscapes |> 
-          dplyr::filter(dplyr::row_number()==x) |> 
-          sf::st_drop_geometry() |> 
-          dplyr::pull(area_ha)
-        )/600000
-      )
-    # split
-    split_temp <- split_poly_fn(sf_poly = sf_temp, n_areas = max(2,n_areas_temp)) |> 
-      dplyr::bind_cols(
-        fire_landscapes |> 
-          dplyr::filter(dplyr::row_number()==x) |> 
-          sf::st_drop_geometry()
-      )
-    return(split_temp)
-  }) |> 
-  dplyr::bind_rows()
-mapview::mapview(fire_landscapes_split, zcol = "NAME", legend = F)
-sf::st_write(fire_landscapes_split
-             , "../data/Wildfire_Crisis_Strategy_Landscapes/Wildfire_Crisis_Strategy_Landscapes_split.shp"
-             , append = F
-            )
-sf::st_crs(fire_landscapes_split)
-fire_landscapes_split$split_area_ha |> summary()
-```
