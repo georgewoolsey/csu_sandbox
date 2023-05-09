@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="en-US" xml:lang="en-US">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Section 10 Scenario Analysis: WCS Priority Landscapes | Sandbox</title>
+  <meta name="description" content="Using the bookdown package to write a book of data exploration. The output format for this example is bookdown::gitbook." />
+  <meta name="generator" content="bookdown 0.32 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Section 10 Scenario Analysis: WCS Priority Landscapes | Sandbox" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="Using the bookdown package to write a book of data exploration. The output format for this example is bookdown::gitbook." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Section 10 Scenario Analysis: WCS Priority Landscapes | Sandbox" />
+  
+  <meta name="twitter:description" content="Using the bookdown package to write a book of data exploration. The output format for this example is bookdown::gitbook." />
+  
+
+<meta name="author" content="George Woolsey" />
+
+
+<meta name="date" content="2023-05-08" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="fsheds.html"/>
+
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<script src="libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+<script src="libs/htmlwidgets-1.6.1/htmlwidgets.js"></script>
+<link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-1.3.1/leaflet.js"></script>
+<link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
+<script src="libs/proj4-2.6.2/proj4.min.js"></script>
+<script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+<link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-binding-2.1.1/leaflet.js"></script>
+<script src="libs/leaflet-providers-1.9.0/leaflet-providers_1.9.0.js"></script>
+<script src="libs/leaflet-providers-plugin-2.1.1/leaflet-providers-plugin.js"></script>
+<script src="libs/clipboard-0.0.1/setClipboardText.js"></script>
+<link href="libs/mapviewCSS-0.0.1/mapview-popup.css" rel="stylesheet" />
+<link href="libs/mapviewCSS-0.0.1/mapview.css" rel="stylesheet" />
+<script type="text/javascript">
+
+// toggle visibility of R source blocks in R Markdown output
+function toggle_R() {
+  var x = document.getElementsByClassName('r');
+  if (x.length == 0) return;
+  function toggle_vis(o) {
+    var d = o.style.display;
+    o.style.display = (d == 'block' || d == '') ? 'none':'block';
+  }
+
+  for (i = 0; i < x.length; i++) {
+    var y = x[i];
+    if (y.tagName.toLowerCase() === 'pre') toggle_vis(y);
+  }
+
+    var elem = document.getElementById("myButton1");
+    if (elem.value === "Hide Code") elem.value = "Show Code";
+    else elem.value = "Hide Code";
+}
+
+document.write('<input onclick="toggle_R();" type="button" value="Hide Code" id="myButton1" style="position: absolute; top: 10%; right: 2%; z-index: 200"></input>')
+
+</script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Caution</a></li>
+<li class="chapter" data-level="2" data-path="objective.html"><a href="objective.html"><i class="fa fa-check"></i><b>2</b> Objective</a></li>
+<li class="chapter" data-level="3" data-path="data-sources.html"><a href="data-sources.html"><i class="fa fa-check"></i><b>3</b> Data Sources</a></li>
+<li class="chapter" data-level="4" data-path="treatable-area-scenario.html"><a href="treatable-area-scenario.html"><i class="fa fa-check"></i><b>4</b> Treatable Area Scenario</a></li>
+<li class="chapter" data-level="5" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html"><i class="fa fa-check"></i><b>5</b> USFS National Forests</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#load-forest-level-data"><i class="fa fa-check"></i><b>5.1</b> Load forest-level data</a></li>
+<li class="chapter" data-level="5.2" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#reduction-treatable-area-table"><i class="fa fa-check"></i><b>5.2</b> Reduction Treatable Area Table</a></li>
+<li class="chapter" data-level="5.3" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#remaining-treatable-by-forest"><i class="fa fa-check"></i><b>5.3</b> Remaining Treatable by Forest</a></li>
+<li class="chapter" data-level="5.4" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#remaining-treatable-by-region"><i class="fa fa-check"></i><b>5.4</b> Remaining Treatable by Region</a></li>
+<li class="chapter" data-level="5.5" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#reduction-by-constraint-by-forest"><i class="fa fa-check"></i><b>5.5</b> Reduction by Constraint by Forest</a></li>
+<li class="chapter" data-level="5.6" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#reduction-by-constraint-by-region"><i class="fa fa-check"></i><b>5.6</b> Reduction by Constraint by Region</a></li>
+<li class="chapter" data-level="5.7" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#treatable-area-reduction-by-constraint"><i class="fa fa-check"></i><b>5.7</b> Treatable Area Reduction by Constraint</a></li>
+<li class="chapter" data-level="5.8" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#map-of-treatableconstrained"><i class="fa fa-check"></i><b>5.8</b> Map of Treatable/Constrained</a></li>
+<li class="chapter" data-level="5.9" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#usfs-national-forests-subwatershed-level"><i class="fa fa-check"></i><b>5.9</b> USFS National Forests Subwatershed Level</a>
+<ul>
+<li class="chapter" data-level="5.9.1" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#load-subwatershed-level-data"><i class="fa fa-check"></i><b>5.9.1</b> Load subwatershed-level data</a></li>
+<li class="chapter" data-level="5.9.2" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#distribution-of-subwatershed-area"><i class="fa fa-check"></i><b>5.9.2</b> Distribution of Subwatershed Area</a></li>
+<li class="chapter" data-level="5.9.3" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#distribution-of-subwatershed-constraint"><i class="fa fa-check"></i><b>5.9.3</b> Distribution of Subwatershed Constraint</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="wcs_intro.html"><a href="wcs_intro.html"><i class="fa fa-check"></i><b>6</b> Wildfire Crisis Strategy Priority Landscapes</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="wcs_intro.html"><a href="wcs_intro.html#map-of-priority-landscapes"><i class="fa fa-check"></i><b>6.1</b> Map of Priority Landscapes</a></li>
+<li class="chapter" data-level="6.2" data-path="wcs_intro.html"><a href="wcs_intro.html#wflndscp"><i class="fa fa-check"></i><b>6.2</b> Load landscape-level data</a></li>
+<li class="chapter" data-level="6.3" data-path="wcs_intro.html"><a href="wcs_intro.html#reduction-treatable-area-table-1"><i class="fa fa-check"></i><b>6.3</b> Reduction Treatable Area Table</a></li>
+<li class="chapter" data-level="6.4" data-path="wcs_intro.html"><a href="wcs_intro.html#forested-area-plot"><i class="fa fa-check"></i><b>6.4</b> Forested Area Plot</a></li>
+<li class="chapter" data-level="6.5" data-path="wcs_intro.html"><a href="wcs_intro.html#landcover-class-area"><i class="fa fa-check"></i><b>6.5</b> Landcover Class Area</a></li>
+<li class="chapter" data-level="6.6" data-path="wcs_intro.html"><a href="wcs_intro.html#remaining-treatable-forest-plot"><i class="fa fa-check"></i><b>6.6</b> Remaining Treatable Forest Plot</a></li>
+<li class="chapter" data-level="6.7" data-path="wcs_intro.html"><a href="wcs_intro.html#reduction-by-constraint-plot"><i class="fa fa-check"></i><b>6.7</b> Reduction by Constraint Plot</a></li>
+<li class="chapter" data-level="6.8" data-path="wcs_intro.html"><a href="wcs_intro.html#reduction-treatable-area-plot"><i class="fa fa-check"></i><b>6.8</b> Reduction Treatable Area Plot</a></li>
+<li class="chapter" data-level="6.9" data-path="wcs_intro.html"><a href="wcs_intro.html#wildfire-crisis-strategy-priority-landscapes-subwatershed-level"><i class="fa fa-check"></i><b>6.9</b> Wildfire Crisis Strategy Priority Landscapes Subwatershed Level</a>
+<ul>
+<li class="chapter" data-level="6.9.1" data-path="wcs_intro.html"><a href="wcs_intro.html#load-subwatershed-level-data-1"><i class="fa fa-check"></i><b>6.9.1</b> Load subwatershed-level data</a></li>
+<li class="chapter" data-level="6.9.2" data-path="wcs_intro.html"><a href="wcs_intro.html#distribution-of-subwatershed-area-1"><i class="fa fa-check"></i><b>6.9.2</b> Distribution of Subwatershed Area</a></li>
+<li class="chapter" data-level="6.9.3" data-path="wcs_intro.html"><a href="wcs_intro.html#distribution-of-subwatershed-constraint-1"><i class="fa fa-check"></i><b>6.9.3</b> Distribution of Subwatershed Constraint</a></li>
+<li class="chapter" data-level="6.9.4" data-path="wcs_intro.html"><a href="wcs_intro.html#forested-area-by-level-of-constraint"><i class="fa fa-check"></i><b>6.9.4</b> Forested Area by Level of Constraint</a></li>
+<li class="chapter" data-level="6.9.5" data-path="wcs_intro.html"><a href="wcs_intro.html#constraint-reduction-by-level-of-constraint"><i class="fa fa-check"></i><b>6.9.5</b> Constraint Reduction by Level of Constraint</a></li>
+<li class="chapter" data-level="6.9.6" data-path="wcs_intro.html"><a href="wcs_intro.html#area-available-for-mechanical-treatment"><i class="fa fa-check"></i><b>6.9.6</b> Area Available for Mechanical Treatment</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="a-tibble-2-8.html"><a href="a-tibble-2-8.html"><i class="fa fa-check"></i><b>7</b> A tibble: 2 × 8</a>
+<ul>
+<li class="chapter" data-level="7.0.1" data-path="a-tibble-2-8.html"><a href="a-tibble-2-8.html#wf_read_sw"><i class="fa fa-check"></i><b>7.0.1</b> Map of Subwatersheds by Level of Constraint</a></li>
+<li class="chapter" data-level="7.1" data-path="a-tibble-2-8.html"><a href="a-tibble-2-8.html#example-code-to-split-larger-polygons"><i class="fa fa-check"></i><b>7.1</b> Example code to split larger polygons</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html"><i class="fa fa-check"></i><b>8</b> Constrained Area vs. Treated Area</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html#read-in-constraint-and-aoi-bounds"><i class="fa fa-check"></i><b>8.1</b> Read in Constraint and AOI Bounds</a></li>
+<li class="chapter" data-level="8.2" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html#forest-management-activities-facts"><i class="fa fa-check"></i><b>8.2</b> Forest Management Activities (FACTS)</a></li>
+<li class="chapter" data-level="8.3" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html#treatment-acres-by-year-table"><i class="fa fa-check"></i><b>8.3</b> Treatment acres by year table</a></li>
+<li class="chapter" data-level="8.4" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html#treatment-area-versus-mechanically-available-area"><i class="fa fa-check"></i><b>8.4</b> Treatment area versus Mechanically Available Area</a></li>
+<li class="chapter" data-level="8.5" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html#treatment-in-subwatersheds-by-level-of-constraint"><i class="fa fa-check"></i><b>8.5</b> Treatment in Subwatersheds by Level of Constraint</a></li>
+<li class="chapter" data-level="8.6" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html#total-area-treated-by-level-of-constraint"><i class="fa fa-check"></i><b>8.6</b> Total Area Treated by Level of Constraint</a></li>
+<li class="chapter" data-level="8.7" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html#treatment-by-cover-type"><i class="fa fa-check"></i><b>8.7</b> Treatment by Cover Type</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="fsheds.html"><a href="fsheds.html"><i class="fa fa-check"></i><b>9</b> Exploring the Fireshed Registry</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="fsheds.html"><a href="fsheds.html#read-in-firesheds"><i class="fa fa-check"></i><b>9.1</b> Read in Firesheds</a></li>
+<li class="chapter" data-level="9.2" data-path="fsheds.html"><a href="fsheds.html#area-of-firesheds"><i class="fa fa-check"></i><b>9.2</b> Area of firesheds</a></li>
+<li class="chapter" data-level="9.3" data-path="fsheds.html"><a href="fsheds.html#national-fireshed-map"><i class="fa fa-check"></i><b>9.3</b> National Fireshed Map</a></li>
+<li class="chapter" data-level="9.4" data-path="fsheds.html"><a href="fsheds.html#fireshed-project-area-map"><i class="fa fa-check"></i><b>9.4</b> Fireshed Project Area Map</a></li>
+<li class="chapter" data-level="9.5" data-path="fsheds.html"><a href="fsheds.html#firsheds-in-landscapes"><i class="fa fa-check"></i><b>9.5</b> Firsheds in landscapes</a></li>
+<li class="chapter" data-level="9.6" data-path="fsheds.html"><a href="fsheds.html#firsheds-with-wcs-flag"><i class="fa fa-check"></i><b>9.6</b> Firsheds with WCS flag</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="scenario-analysis-wcs-priority-landscapes.html"><a href="scenario-analysis-wcs-priority-landscapes.html"><i class="fa fa-check"></i><b>10</b> Scenario Analysis: WCS Priority Landscapes</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="scenario-analysis-wcs-priority-landscapes.html"><a href="scenario-analysis-wcs-priority-landscapes.html#scenarios-considered"><i class="fa fa-check"></i><b>10.1</b> Scenarios Considered</a></li>
+<li class="chapter" data-level="10.2" data-path="scenario-analysis-wcs-priority-landscapes.html"><a href="scenario-analysis-wcs-priority-landscapes.html#data-preparation"><i class="fa fa-check"></i><b>10.2</b> Data Preparation</a>
+<ul>
+<li class="chapter" data-level="10.2.1" data-path="scenario-analysis-wcs-priority-landscapes.html"><a href="scenario-analysis-wcs-priority-landscapes.html#load-landscape-level-data"><i class="fa fa-check"></i><b>10.2.1</b> Load landscape-level data</a></li>
+</ul></li>
+<li class="chapter" data-level="10.3" data-path="scenario-analysis-wcs-priority-landscapes.html"><a href="scenario-analysis-wcs-priority-landscapes.html#load-fireshed-project-area-data"><i class="fa fa-check"></i><b>10.3</b> Load fireshed project area data</a></li>
+<li class="chapter" data-level="10.4" data-path="scenario-analysis-wcs-priority-landscapes.html"><a href="scenario-analysis-wcs-priority-landscapes.html#landscape-level-analysis"><i class="fa fa-check"></i><b>10.4</b> Landscape-level analysis</a>
+<ul>
+<li class="chapter" data-level="10.4.1" data-path="scenario-analysis-wcs-priority-landscapes.html"><a href="scenario-analysis-wcs-priority-landscapes.html#reduction-treatable-area-table-2"><i class="fa fa-check"></i><b>10.4.1</b> Reduction Treatable Area Table</a></li>
+<li class="chapter" data-level="10.4.2" data-path="scenario-analysis-wcs-priority-landscapes.html"><a href="scenario-analysis-wcs-priority-landscapes.html#change-in-available-by-scenario"><i class="fa fa-check"></i><b>10.4.2</b> Change in Available by Scenario</a></li>
+<li class="chapter" data-level="10.4.3" data-path="scenario-analysis-wcs-priority-landscapes.html"><a href="scenario-analysis-wcs-priority-landscapes.html#reduction-by-constraint"><i class="fa fa-check"></i><b>10.4.3</b> Reduction by Constraint</a></li>
+</ul></li>
+</ul></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Sandbox</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="scenario-analysis-wcs-priority-landscapes" class="section level1 hasAnchor" number="10">
+<h1><span class="header-section-number">Section 10</span> Scenario Analysis: WCS Priority Landscapes<a href="scenario-analysis-wcs-priority-landscapes.html#scenario-analysis-wcs-priority-landscapes" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>See <a href="wcs_intro.html#wcs_intro">this prior section</a> for initial <a href="(https://www.fs.usda.gov/managing-land/wildfire-crisis)">Wildfire Crisis Strategy</a> (WCS) analysis and background information.</p>
+<div id="scenarios-considered" class="section level2 hasAnchor" number="10.1">
+<h2><span class="header-section-number">10.1</span> Scenarios Considered<a href="scenario-analysis-wcs-priority-landscapes.html#scenarios-considered" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>There are three scenarios considered in this analysis of the constraints to mechanical forest health and fuel reduction treatments:</p>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="co"># mechanical mgmt allowed if:</span></span>
+<span id="cb54-2"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-2" aria-hidden="true" tabindex="-1"></a>n_sc_temp <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb54-3"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb54-4"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">scenario =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span></span>
+<span id="cb54-5"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-5" aria-hidden="true" tabindex="-1"></a>  , <span class="at">cover =</span> <span class="fu">rep</span>(<span class="st">&quot;Forest or Shrubland&quot;</span>,n_sc_temp)</span>
+<span id="cb54-6"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-6" aria-hidden="true" tabindex="-1"></a>  , <span class="at">protected =</span> <span class="fu">rep</span>(<span class="st">&quot;Not Protected&quot;</span>,n_sc_temp)</span>
+<span id="cb54-7"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-7" aria-hidden="true" tabindex="-1"></a>  , <span class="at">slope =</span> <span class="fu">c</span>(<span class="st">&quot;&lt;35%&quot;</span>,<span class="st">&quot;&lt;50%&quot;</span>,<span class="st">&quot;&lt;50%&quot;</span>)</span>
+<span id="cb54-8"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-8" aria-hidden="true" tabindex="-1"></a>  , <span class="at">admin =</span> <span class="fu">c</span>(<span class="st">&quot;No Designation&quot;</span>,<span class="st">&quot;No Designation&quot;</span>,<span class="st">&quot;Any Designation&quot;</span>)</span>
+<span id="cb54-9"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-9" aria-hidden="true" tabindex="-1"></a>  , <span class="at">riparian =</span> <span class="fu">c</span>(<span class="st">&quot;&gt;100ft&quot;</span>,<span class="st">&quot;&gt;100ft&quot;</span>,<span class="st">&quot;&gt;50ft&quot;</span>)</span>
+<span id="cb54-10"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-10" aria-hidden="true" tabindex="-1"></a>  , <span class="at">road =</span> <span class="fu">c</span>(<span class="st">&quot;&lt;1,000ft&quot;</span>,<span class="st">&quot;&lt;2,000ft&quot;</span>,<span class="st">&quot;&lt;2,000ft&quot;</span>)</span>
+<span id="cb54-11"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-11" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> </span>
+<span id="cb54-12"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-12" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(</span>
+<span id="cb54-13"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> <span class="sc">-</span><span class="fu">c</span>(scenario)</span>
+<span id="cb54-14"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb54-15"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-15" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(</span>
+<span id="cb54-16"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_from =</span> scenario</span>
+<span id="cb54-17"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-17" aria-hidden="true" tabindex="-1"></a>    , <span class="at">values_from =</span> value</span>
+<span id="cb54-18"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-18" aria-hidden="true" tabindex="-1"></a>    , <span class="at">names_prefix =</span> <span class="st">&quot;scenario_&quot;</span></span>
+<span id="cb54-19"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-19" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb54-20"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-20" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb54-21"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="fu">factor</span>(</span>
+<span id="cb54-22"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-22" aria-hidden="true" tabindex="-1"></a>      name</span>
+<span id="cb54-23"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-23" aria-hidden="true" tabindex="-1"></a>      , <span class="at">levels =</span> <span class="fu">c</span>(</span>
+<span id="cb54-24"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;cover&quot;</span></span>
+<span id="cb54-25"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-25" aria-hidden="true" tabindex="-1"></a>        , <span class="st">&quot;protected&quot;</span></span>
+<span id="cb54-26"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-26" aria-hidden="true" tabindex="-1"></a>        , <span class="st">&quot;slope&quot;</span></span>
+<span id="cb54-27"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-27" aria-hidden="true" tabindex="-1"></a>        , <span class="st">&quot;admin&quot;</span></span>
+<span id="cb54-28"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-28" aria-hidden="true" tabindex="-1"></a>        , <span class="st">&quot;riparian&quot;</span></span>
+<span id="cb54-29"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-29" aria-hidden="true" tabindex="-1"></a>        , <span class="st">&quot;road&quot;</span></span>
+<span id="cb54-30"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-30" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb54-31"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-31" aria-hidden="true" tabindex="-1"></a>      , <span class="at">labels =</span> <span class="fu">c</span>(</span>
+<span id="cb54-32"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-32" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;NLCD Cover Type&quot;</span></span>
+<span id="cb54-33"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-33" aria-hidden="true" tabindex="-1"></a>        , <span class="st">&quot;Protected or&lt;br&gt;IRA Status&quot;</span></span>
+<span id="cb54-34"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-34" aria-hidden="true" tabindex="-1"></a>        , <span class="st">&quot;Slope&quot;</span></span>
+<span id="cb54-35"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-35" aria-hidden="true" tabindex="-1"></a>        , <span class="st">&quot;Administrative&lt;br&gt;Designation&quot;</span></span>
+<span id="cb54-36"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-36" aria-hidden="true" tabindex="-1"></a>        , <span class="st">&quot;Riparian&lt;br&gt;Buffer&quot;</span></span>
+<span id="cb54-37"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-37" aria-hidden="true" tabindex="-1"></a>        , <span class="st">&quot;Distance to&lt;br&gt;Nearest Road&quot;</span></span>
+<span id="cb54-38"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-38" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb54-39"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-39" aria-hidden="true" tabindex="-1"></a>      , <span class="at">ordered =</span> T</span>
+<span id="cb54-40"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-40" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb54-41"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-41" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb54-42"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-42" aria-hidden="true" tabindex="-1"></a><span class="co"># make table</span></span>
+<span id="cb54-43"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-43" aria-hidden="true" tabindex="-1"></a>kableExtra<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb54-44"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">&quot;Scenarios Considered for Determining Mechanical Treatment Operability&lt;br&gt;Mechanical treatment allowed if:&quot;</span></span>
+<span id="cb54-45"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-45" aria-hidden="true" tabindex="-1"></a>    , <span class="at">col.names =</span> <span class="fu">c</span>(</span>
+<span id="cb54-46"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-46" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;&quot;</span></span>
+<span id="cb54-47"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-47" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;Scenario 1&lt;br&gt;Most Constrained&quot;</span></span>
+<span id="cb54-48"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-48" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;Scenario 2&lt;br&gt;Moderate&quot;</span></span>
+<span id="cb54-49"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-49" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;Scenario 3&lt;br&gt;Least Constrained&quot;</span></span>
+<span id="cb54-50"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-50" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb54-51"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-51" aria-hidden="true" tabindex="-1"></a>    , <span class="at">escape =</span> F</span>
+<span id="cb54-52"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-52" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span>  </span>
+<span id="cb54-53"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_classic</span>(<span class="at">full_width=</span>T) <span class="sc">|&gt;</span> </span>
+<span id="cb54-54"><a href="scenario-analysis-wcs-priority-landscapes.html#cb54-54" aria-hidden="true" tabindex="-1"></a>  kableExtra<span class="sc">::</span><span class="fu">kable_styling</span>(<span class="at">font_size =</span> <span class="dv">11</span>,<span class="at">fixed_thead =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<table class=" lightable-classic table" style="font-family: &quot;Arial Narrow&quot;, &quot;Source Sans Pro&quot;, sans-serif; margin-left: auto; margin-right: auto; font-size: 11px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+<span id="tab:sc-tab">Table 10.1: </span>Scenarios Considered for Determining Mechanical Treatment Operability<br>Mechanical treatment allowed if:
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Scenario 1<br>Most Constrained
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Scenario 2<br>Moderate
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Scenario 3<br>Least Constrained
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+NLCD Cover Type
+</td>
+<td style="text-align:left;">
+Forest or Shrubland
+</td>
+<td style="text-align:left;">
+Forest or Shrubland
+</td>
+<td style="text-align:left;">
+Forest or Shrubland
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Protected or<br>IRA Status
+</td>
+<td style="text-align:left;">
+Not Protected
+</td>
+<td style="text-align:left;">
+Not Protected
+</td>
+<td style="text-align:left;">
+Not Protected
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Slope
+</td>
+<td style="text-align:left;">
+&lt;35%
+</td>
+<td style="text-align:left;">
+&lt;50%
+</td>
+<td style="text-align:left;">
+&lt;50%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Administrative<br>Designation
+</td>
+<td style="text-align:left;">
+No Designation
+</td>
+<td style="text-align:left;">
+No Designation
+</td>
+<td style="text-align:left;">
+Any Designation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Riparian<br>Buffer
+</td>
+<td style="text-align:left;">
+&gt;100ft
+</td>
+<td style="text-align:left;">
+&gt;100ft
+</td>
+<td style="text-align:left;">
+&gt;50ft
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Distance to<br>Nearest Road
+</td>
+<td style="text-align:left;">
+&lt;1,000ft
+</td>
+<td style="text-align:left;">
+&lt;2,000ft
+</td>
+<td style="text-align:left;">
+&lt;2,000ft
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="data-preparation" class="section level2 hasAnchor" number="10.2">
+<h2><span class="header-section-number">10.2</span> Data Preparation<a href="scenario-analysis-wcs-priority-landscapes.html#data-preparation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="load-landscape-level-data" class="section level3 hasAnchor" number="10.2.1">
+<h3><span class="header-section-number">10.2.1</span> Load landscape-level data<a href="scenario-analysis-wcs-priority-landscapes.html#load-landscape-level-data" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Landscape-level constraint analysis data was created via this <a href="https://code.earthengine.google.com/2b330779ad5c813bdd40bde765c4b079?noload=true">Google Earth Engine script</a>; WCS priority landscape spatial data was created in this <a href="wcs_intro.html#wflndscp">prior section</a>.</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load wcs priority landscapes</span></span>
+<span id="cb55-2"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-2" aria-hidden="true" tabindex="-1"></a>wf_landscapes <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_read</span>(<span class="st">&quot;../data/constrained_by_wflndscp_wide_sf.gpkg&quot;</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb55-3"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)</span>
+<span id="cb55-4"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">#rename sf geom column</span></span>
+<span id="cb55-5"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(wf_landscapes)[<span class="fu">names</span>(wf_landscapes)<span class="sc">==</span><span class="fu">tolower</span>(<span class="fu">attr</span>(wf_landscapes, <span class="st">&quot;sf_column&quot;</span>))] <span class="ot">=</span> <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb55-6"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-6" aria-hidden="true" tabindex="-1"></a>    sf<span class="sc">::</span><span class="fu">st_geometry</span>(wf_landscapes) <span class="ot">=</span> <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb55-7"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-7" aria-hidden="true" tabindex="-1"></a><span class="co"># set crs</span></span>
+<span id="cb55-8"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-8" aria-hidden="true" tabindex="-1"></a>transform_crs <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_crs</span>(wf_landscapes)</span>
+<span id="cb55-9"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-9" aria-hidden="true" tabindex="-1"></a><span class="co"># load landscape constraint scenario data</span></span>
+<span id="cb55-10"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-10" aria-hidden="true" tabindex="-1"></a>constrained_by_scnro_ls <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">&quot;../data/wildfirepriority/all/&quot;</span>,<span class="at">pattern =</span> <span class="st">&quot;</span><span class="sc">\\</span><span class="st">.csv$&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb55-11"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-11" aria-hidden="true" tabindex="-1"></a>  purrr<span class="sc">::</span><span class="fu">keep</span>(stringr<span class="sc">::</span><span class="fu">str_starts</span>(.,<span class="st">&quot;wfpriority_all_sc&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb55-12"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-12" aria-hidden="true" tabindex="-1"></a>  purrr<span class="sc">::</span><span class="fu">map</span>(<span class="cf">function</span>(x){</span>
+<span id="cb55-13"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-13" aria-hidden="true" tabindex="-1"></a>    readr<span class="sc">::</span><span class="fu">read_csv</span>(</span>
+<span id="cb55-14"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste0</span>(<span class="st">&quot;../data/wildfirepriority/all/&quot;</span>,x)</span>
+<span id="cb55-15"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-15" aria-hidden="true" tabindex="-1"></a>      , <span class="at">name_repair =</span> <span class="st">&quot;universal&quot;</span></span>
+<span id="cb55-16"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-16" aria-hidden="true" tabindex="-1"></a>      , <span class="at">col_types =</span> <span class="fu">cols</span>(<span class="at">.default =</span> <span class="st">&quot;c&quot;</span>)</span>
+<span id="cb55-17"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-17" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span> </span>
+<span id="cb55-18"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-18" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">rename_with</span>(tolower) <span class="sc">%&gt;%</span> </span>
+<span id="cb55-19"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-19" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">rename_with</span>(make.names) <span class="sc">%&gt;%</span> </span>
+<span id="cb55-20"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-20" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(state,name,tidyselect<span class="sc">::</span><span class="fu">ends_with</span>(<span class="st">&quot;_m2&quot;</span>),tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;pct_&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb55-21"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-21" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">scenario_id =</span> stringr<span class="sc">::</span><span class="fu">word</span>(x,<span class="dv">3</span>,<span class="at">sep=</span><span class="st">&quot;_&quot;</span>) <span class="sc">%&gt;%</span> readr<span class="sc">::</span><span class="fu">parse_number</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb55-22"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-22" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">relocate</span>(scenario_id)</span>
+<span id="cb55-23"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-23" aria-hidden="true" tabindex="-1"></a>  }) <span class="sc">%&gt;%</span></span>
+<span id="cb55-24"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-24" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">bind_rows</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb55-25"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-25" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
+<span id="cb55-26"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-26" aria-hidden="true" tabindex="-1"></a>    wf_landscapes <span class="sc">%&gt;%</span></span>
+<span id="cb55-27"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-27" aria-hidden="true" tabindex="-1"></a>      sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb55-28"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-28" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(state,name,area_name)</span>
+<span id="cb55-29"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-29" aria-hidden="true" tabindex="-1"></a>    , <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(state,name)</span>
+<span id="cb55-30"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-30" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb55-31"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-31" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">relocate</span>(area_name,<span class="at">.after =</span> <span class="st">&quot;scenario_id&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb55-32"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-32" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(area_name,scenario_id) <span class="sc">%&gt;%</span></span>
+<span id="cb55-33"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-33" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(dplyr<span class="sc">::</span><span class="fu">row_number</span>()<span class="sc">==</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb55-34"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-34" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb55-35"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-35" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb55-36"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-36" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">across</span>(</span>
+<span id="cb55-37"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-37" aria-hidden="true" tabindex="-1"></a>      tidyselect<span class="sc">::</span><span class="fu">ends_with</span>(<span class="st">&quot;_m2&quot;</span>)</span>
+<span id="cb55-38"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-38" aria-hidden="true" tabindex="-1"></a>      , <span class="sc">~</span> <span class="fu">as.numeric</span>(.x) <span class="sc">/</span> <span class="dv">10000</span></span>
+<span id="cb55-39"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-39" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb55-40"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-40" aria-hidden="true" tabindex="-1"></a>    , dplyr<span class="sc">::</span><span class="fu">across</span>(</span>
+<span id="cb55-41"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-41" aria-hidden="true" tabindex="-1"></a>      tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;pct_&quot;</span>)</span>
+<span id="cb55-42"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-42" aria-hidden="true" tabindex="-1"></a>      , <span class="sc">~</span> <span class="fu">as.numeric</span>(.x)</span>
+<span id="cb55-43"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-43" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb55-44"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-44" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb55-45"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-45" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename_with</span>(</span>
+<span id="cb55-46"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-46" aria-hidden="true" tabindex="-1"></a>    <span class="sc">~</span> <span class="fu">gsub</span>(<span class="st">&quot;_m2&quot;</span>, <span class="st">&quot;_ha&quot;</span>, .x)</span>
+<span id="cb55-47"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-47" aria-hidden="true" tabindex="-1"></a>    , tidyselect<span class="sc">::</span><span class="fu">ends_with</span>(<span class="st">&quot;_m2&quot;</span>)</span>
+<span id="cb55-48"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-48" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb55-49"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-49" aria-hidden="true" tabindex="-1"></a>  <span class="co"># calculate pct reduction</span></span>
+<span id="cb55-50"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-50" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb55-51"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-51" aria-hidden="true" tabindex="-1"></a>    <span class="at">pct_rdctn1_protected =</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">*</span>(<span class="dv">1</span> <span class="sc">-</span> pct_rmn1_protected)</span>
+<span id="cb55-52"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-52" aria-hidden="true" tabindex="-1"></a>    , <span class="at">pct_rdctn2_slope =</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">*</span>(pct_rmn1_protected <span class="sc">-</span> pct_rmn2_slope)</span>
+<span id="cb55-53"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-53" aria-hidden="true" tabindex="-1"></a>    , <span class="at">pct_rdctn3_administrative =</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">*</span>(pct_rmn2_slope <span class="sc">-</span> pct_rmn3_administrative)</span>
+<span id="cb55-54"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-54" aria-hidden="true" tabindex="-1"></a>    , <span class="at">pct_rdctn4_riparian =</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">*</span>(pct_rmn3_administrative <span class="sc">-</span> pct_rmn4_riparian)</span>
+<span id="cb55-55"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-55" aria-hidden="true" tabindex="-1"></a>    , <span class="at">pct_rdctn5_roads =</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">*</span>(pct_rmn4_riparian <span class="sc">-</span> pct_rmn5_roads)</span>
+<span id="cb55-56"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-56" aria-hidden="true" tabindex="-1"></a>    , <span class="at">pct_rdctn_total =</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">*</span>(<span class="dv">1</span> <span class="sc">-</span> pct_rmn5_roads)</span>
+<span id="cb55-57"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-57" aria-hidden="true" tabindex="-1"></a>    , <span class="at">pct_covertype_area =</span> covertype_area_ha<span class="sc">/</span>feature_area_ha</span>
+<span id="cb55-58"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-58" aria-hidden="true" tabindex="-1"></a>    <span class="co"># scenario description</span></span>
+<span id="cb55-59"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-59" aria-hidden="true" tabindex="-1"></a>    , <span class="at">scenario_lab =</span> <span class="fu">factor</span>(</span>
+<span id="cb55-60"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-60" aria-hidden="true" tabindex="-1"></a>      scenario_id</span>
+<span id="cb55-61"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-61" aria-hidden="true" tabindex="-1"></a>      , <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span></span>
+<span id="cb55-62"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-62" aria-hidden="true" tabindex="-1"></a>      , <span class="at">labels =</span> <span class="fu">paste0</span>(<span class="st">&quot;Scenario &quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)</span>
+<span id="cb55-63"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-63" aria-hidden="true" tabindex="-1"></a>      , <span class="at">ordered =</span> T</span>
+<span id="cb55-64"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-64" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> forcats<span class="sc">::</span><span class="fu">fct_rev</span>()</span>
+<span id="cb55-65"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-65" aria-hidden="true" tabindex="-1"></a>    , <span class="at">scenario_desc =</span> <span class="fu">factor</span>(</span>
+<span id="cb55-66"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-66" aria-hidden="true" tabindex="-1"></a>      scenario_id</span>
+<span id="cb55-67"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-67" aria-hidden="true" tabindex="-1"></a>      , <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span></span>
+<span id="cb55-68"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-68" aria-hidden="true" tabindex="-1"></a>      , <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Scenario 1</span><span class="sc">\n</span><span class="st">(status quo)&quot;</span>, <span class="st">&quot;Scenario 2</span><span class="sc">\n</span><span class="st">(slopes+roads)&quot;</span>, <span class="st">&quot;Scenario 3</span><span class="sc">\n</span><span class="st">(slopes+roads+admin)&quot;</span>)</span>
+<span id="cb55-69"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-69" aria-hidden="true" tabindex="-1"></a>      , <span class="at">ordered =</span> T</span>
+<span id="cb55-70"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-70" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb55-71"><a href="scenario-analysis-wcs-priority-landscapes.html#cb55-71" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+</div>
+</div>
+<div id="load-fireshed-project-area-data" class="section level2 hasAnchor" number="10.3">
+<h2><span class="header-section-number">10.3</span> Load fireshed project area data<a href="scenario-analysis-wcs-priority-landscapes.html#load-fireshed-project-area-data" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Data created via this <a href="https://code.earthengine.google.com/003e3994cfc4c469d52d224225a4b109?noload=true">Google Earth Engine script</a></p>
+<p>See <a href="fsheds.html#fsheds">this section</a> for exploration of fireshed and project area spatial data</p>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load firesheds</span></span>
+<span id="cb56-2"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-2" aria-hidden="true" tabindex="-1"></a>fireshed <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_read</span>(<span class="st">&quot;../data/firesheds/fireshed.gpkg&quot;</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb56-3"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-3" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_transform</span>(transform_crs)</span>
+<span id="cb56-4"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">#rename sf geom column</span></span>
+<span id="cb56-5"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(fireshed)[<span class="fu">names</span>(fireshed)<span class="sc">==</span><span class="fu">tolower</span>(<span class="fu">attr</span>(fireshed, <span class="st">&quot;sf_column&quot;</span>))] <span class="ot">=</span> <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb56-6"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-6" aria-hidden="true" tabindex="-1"></a>    sf<span class="sc">::</span><span class="fu">st_geometry</span>(fireshed) <span class="ot">=</span> <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb56-7"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-7" aria-hidden="true" tabindex="-1"></a><span class="co"># load fireshed project areas</span></span>
+<span id="cb56-8"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-8" aria-hidden="true" tabindex="-1"></a>fireshed_proj_area <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_read</span>(<span class="st">&quot;../data/firesheds/fireshed_proj_area.gpkg&quot;</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb56-9"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-9" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_transform</span>(transform_crs)</span>
+<span id="cb56-10"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">#rename sf geom column</span></span>
+<span id="cb56-11"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(fireshed_proj_area)[<span class="fu">names</span>(fireshed_proj_area)<span class="sc">==</span><span class="fu">tolower</span>(<span class="fu">attr</span>(fireshed_proj_area, <span class="st">&quot;sf_column&quot;</span>))] <span class="ot">=</span> <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb56-12"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-12" aria-hidden="true" tabindex="-1"></a>    sf<span class="sc">::</span><span class="fu">st_geometry</span>(fireshed_proj_area) <span class="ot">=</span> <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb56-13"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-13" aria-hidden="true" tabindex="-1"></a><span class="co"># load landscape constraint scenario data</span></span>
+<span id="cb56-14"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-14" aria-hidden="true" tabindex="-1"></a>constrained_by_scnro_ls_pa <span class="ot">&lt;-</span></span>
+<span id="cb56-15"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list.files</span>(<span class="st">&quot;../data/wildfirepriority/fireshed/&quot;</span>,<span class="at">pattern =</span> <span class="st">&quot;</span><span class="sc">\\</span><span class="st">.csv$&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb56-16"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-16" aria-hidden="true" tabindex="-1"></a>  purrr<span class="sc">::</span><span class="fu">keep</span>(stringr<span class="sc">::</span><span class="fu">str_starts</span>(.,<span class="st">&quot;wfpriority_fireshed_sc&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb56-17"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-17" aria-hidden="true" tabindex="-1"></a>  purrr<span class="sc">::</span><span class="fu">map</span>(<span class="cf">function</span>(x){</span>
+<span id="cb56-18"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-18" aria-hidden="true" tabindex="-1"></a>    readr<span class="sc">::</span><span class="fu">read_csv</span>(</span>
+<span id="cb56-19"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-19" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste0</span>(<span class="st">&quot;../data/wildfirepriority/fireshed/&quot;</span>,x)</span>
+<span id="cb56-20"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-20" aria-hidden="true" tabindex="-1"></a>      , <span class="at">name_repair =</span> <span class="st">&quot;universal&quot;</span></span>
+<span id="cb56-21"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-21" aria-hidden="true" tabindex="-1"></a>      , <span class="at">col_types =</span> <span class="fu">cols</span>(<span class="at">.default =</span> <span class="st">&quot;c&quot;</span>)</span>
+<span id="cb56-22"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-22" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span> </span>
+<span id="cb56-23"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-23" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">rename_with</span>(tolower) <span class="sc">%&gt;%</span> </span>
+<span id="cb56-24"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-24" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">rename_with</span>(make.names) <span class="sc">%&gt;%</span> </span>
+<span id="cb56-25"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-25" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(state,name,pa_id,tidyselect<span class="sc">::</span><span class="fu">ends_with</span>(<span class="st">&quot;_m2&quot;</span>),tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;pct_&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb56-26"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-26" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">scenario_id =</span> stringr<span class="sc">::</span><span class="fu">word</span>(x,<span class="dv">3</span>,<span class="at">sep=</span><span class="st">&quot;_&quot;</span>) <span class="sc">%&gt;%</span> readr<span class="sc">::</span><span class="fu">parse_number</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb56-27"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-27" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">relocate</span>(scenario_id)</span>
+<span id="cb56-28"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-28" aria-hidden="true" tabindex="-1"></a>  }) <span class="sc">%&gt;%</span></span>
+<span id="cb56-29"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-29" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">bind_rows</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb56-30"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-30" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
+<span id="cb56-31"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-31" aria-hidden="true" tabindex="-1"></a>    wf_landscapes <span class="sc">%&gt;%</span></span>
+<span id="cb56-32"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-32" aria-hidden="true" tabindex="-1"></a>      sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb56-33"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-33" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(state,name,area_name)</span>
+<span id="cb56-34"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-34" aria-hidden="true" tabindex="-1"></a>    , <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(state,name)</span>
+<span id="cb56-35"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-35" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb56-36"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-36" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">relocate</span>(area_name,<span class="at">.after =</span> <span class="st">&quot;scenario_id&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb56-37"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-37" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb56-38"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-38" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">across</span>(</span>
+<span id="cb56-39"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-39" aria-hidden="true" tabindex="-1"></a>      tidyselect<span class="sc">::</span><span class="fu">ends_with</span>(<span class="st">&quot;_m2&quot;</span>)</span>
+<span id="cb56-40"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-40" aria-hidden="true" tabindex="-1"></a>      , <span class="sc">~</span> <span class="fu">as.numeric</span>(.x) <span class="sc">/</span> <span class="dv">10000</span></span>
+<span id="cb56-41"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-41" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb56-42"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-42" aria-hidden="true" tabindex="-1"></a>    , dplyr<span class="sc">::</span><span class="fu">across</span>(</span>
+<span id="cb56-43"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-43" aria-hidden="true" tabindex="-1"></a>      tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;pct_&quot;</span>)</span>
+<span id="cb56-44"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-44" aria-hidden="true" tabindex="-1"></a>      , <span class="sc">~</span> <span class="fu">as.numeric</span>(.x)</span>
+<span id="cb56-45"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-45" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb56-46"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-46" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb56-47"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-47" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename_with</span>(</span>
+<span id="cb56-48"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-48" aria-hidden="true" tabindex="-1"></a>    <span class="sc">~</span> <span class="fu">gsub</span>(<span class="st">&quot;_m2&quot;</span>, <span class="st">&quot;_ha&quot;</span>, .x)</span>
+<span id="cb56-49"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-49" aria-hidden="true" tabindex="-1"></a>    , tidyselect<span class="sc">::</span><span class="fu">ends_with</span>(<span class="st">&quot;_m2&quot;</span>)</span>
+<span id="cb56-50"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-50" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb56-51"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-51" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(area_name,pa_id,scenario_id) <span class="sc">%&gt;%</span></span>
+<span id="cb56-52"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-52" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(<span class="fu">desc</span>(pct_pa_intrsct)) <span class="sc">%&gt;%</span></span>
+<span id="cb56-53"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-53" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(dplyr<span class="sc">::</span><span class="fu">row_number</span>()<span class="sc">==</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb56-54"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-54" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb56-55"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-55" aria-hidden="true" tabindex="-1"></a>  <span class="co"># calculate pct reduction</span></span>
+<span id="cb56-56"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-56" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb56-57"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-57" aria-hidden="true" tabindex="-1"></a>    <span class="at">pct_rdctn1_protected =</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">*</span>(<span class="dv">1</span> <span class="sc">-</span> pct_rmn1_protected)</span>
+<span id="cb56-58"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-58" aria-hidden="true" tabindex="-1"></a>    , <span class="at">pct_rdctn2_slope =</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">*</span>(pct_rmn1_protected <span class="sc">-</span> pct_rmn2_slope)</span>
+<span id="cb56-59"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-59" aria-hidden="true" tabindex="-1"></a>    , <span class="at">pct_rdctn3_administrative =</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">*</span>(pct_rmn2_slope <span class="sc">-</span> pct_rmn3_administrative)</span>
+<span id="cb56-60"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-60" aria-hidden="true" tabindex="-1"></a>    , <span class="at">pct_rdctn4_riparian =</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">*</span>(pct_rmn3_administrative <span class="sc">-</span> pct_rmn4_riparian)</span>
+<span id="cb56-61"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-61" aria-hidden="true" tabindex="-1"></a>    , <span class="at">pct_rdctn5_roads =</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">*</span>(pct_rmn4_riparian <span class="sc">-</span> pct_rmn5_roads)</span>
+<span id="cb56-62"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-62" aria-hidden="true" tabindex="-1"></a>    , <span class="at">pct_rdctn_total =</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">*</span>(<span class="dv">1</span> <span class="sc">-</span> pct_rmn5_roads)</span>
+<span id="cb56-63"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-63" aria-hidden="true" tabindex="-1"></a>    , <span class="at">pct_covertype_area =</span> covertype_area_ha<span class="sc">/</span>feature_area_ha</span>
+<span id="cb56-64"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-64" aria-hidden="true" tabindex="-1"></a>    <span class="co"># calculate level of constraint</span></span>
+<span id="cb56-65"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-65" aria-hidden="true" tabindex="-1"></a>      , <span class="at">cnstrnt_lvl =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb56-66"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-66" aria-hidden="true" tabindex="-1"></a>          <span class="sc">-</span>pct_rdctn_total <span class="sc">&gt;=</span> <span class="fl">0.85</span> <span class="sc">~</span> <span class="dv">1</span></span>
+<span id="cb56-67"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-67" aria-hidden="true" tabindex="-1"></a>          , <span class="sc">-</span>pct_rdctn_total <span class="sc">&gt;=</span> <span class="fl">0.65</span> <span class="sc">~</span> <span class="dv">2</span></span>
+<span id="cb56-68"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-68" aria-hidden="true" tabindex="-1"></a>          , <span class="sc">-</span>pct_rdctn_total <span class="sc">&gt;=</span> <span class="fl">0.0</span> <span class="sc">~</span> <span class="dv">3</span></span>
+<span id="cb56-69"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-69" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb56-70"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-70" aria-hidden="true" tabindex="-1"></a>      , <span class="at">cnstrnt_class =</span> <span class="fu">factor</span>(</span>
+<span id="cb56-71"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-71" aria-hidden="true" tabindex="-1"></a>          cnstrnt_lvl </span>
+<span id="cb56-72"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-72" aria-hidden="true" tabindex="-1"></a>          , <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span></span>
+<span id="cb56-73"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-73" aria-hidden="true" tabindex="-1"></a>          , <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;high constraint&quot;</span>, <span class="st">&quot;med. constraint&quot;</span>, <span class="st">&quot;low constraint&quot;</span>)</span>
+<span id="cb56-74"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-74" aria-hidden="true" tabindex="-1"></a>          , <span class="at">ordered =</span> T</span>
+<span id="cb56-75"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-75" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">%&gt;%</span> forcats<span class="sc">::</span><span class="fu">fct_rev</span>()</span>
+<span id="cb56-76"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-76" aria-hidden="true" tabindex="-1"></a>      , <span class="at">rmn_cnstrnt_class =</span> <span class="fu">factor</span>(</span>
+<span id="cb56-77"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-77" aria-hidden="true" tabindex="-1"></a>          cnstrnt_lvl </span>
+<span id="cb56-78"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-78" aria-hidden="true" tabindex="-1"></a>          , <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span></span>
+<span id="cb56-79"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-79" aria-hidden="true" tabindex="-1"></a>          , <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;0–15% treatable&quot;</span>, <span class="st">&quot;16–35% treatable&quot;</span>, <span class="st">&quot;&gt;35% treatable&quot;</span>)</span>
+<span id="cb56-80"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-80" aria-hidden="true" tabindex="-1"></a>          , <span class="at">ordered =</span> T</span>
+<span id="cb56-81"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-81" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">%&gt;%</span> forcats<span class="sc">::</span><span class="fu">fct_rev</span>()</span>
+<span id="cb56-82"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-82" aria-hidden="true" tabindex="-1"></a>      <span class="co"># scenario description</span></span>
+<span id="cb56-83"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-83" aria-hidden="true" tabindex="-1"></a>      , <span class="at">scenario_lab =</span> <span class="fu">factor</span>(</span>
+<span id="cb56-84"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-84" aria-hidden="true" tabindex="-1"></a>          scenario_id</span>
+<span id="cb56-85"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-85" aria-hidden="true" tabindex="-1"></a>          , <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span></span>
+<span id="cb56-86"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-86" aria-hidden="true" tabindex="-1"></a>          , <span class="at">labels =</span> <span class="fu">paste0</span>(<span class="st">&quot;Scenario &quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)</span>
+<span id="cb56-87"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-87" aria-hidden="true" tabindex="-1"></a>          , <span class="at">ordered =</span> T</span>
+<span id="cb56-88"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-88" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">|&gt;</span> forcats<span class="sc">::</span><span class="fu">fct_rev</span>()</span>
+<span id="cb56-89"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-89" aria-hidden="true" tabindex="-1"></a>      , <span class="at">scenario_desc =</span> <span class="fu">factor</span>(</span>
+<span id="cb56-90"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-90" aria-hidden="true" tabindex="-1"></a>        scenario_id</span>
+<span id="cb56-91"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-91" aria-hidden="true" tabindex="-1"></a>        , <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span></span>
+<span id="cb56-92"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-92" aria-hidden="true" tabindex="-1"></a>        , <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Scenario 1</span><span class="sc">\n</span><span class="st">(status quo)&quot;</span>, <span class="st">&quot;Scenario 2</span><span class="sc">\n</span><span class="st">(slopes+roads)&quot;</span>, <span class="st">&quot;Scenario 3</span><span class="sc">\n</span><span class="st">(slopes+roads+admin)&quot;</span>)</span>
+<span id="cb56-93"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-93" aria-hidden="true" tabindex="-1"></a>        , <span class="at">ordered =</span> T</span>
+<span id="cb56-94"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-94" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb56-95"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-95" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb56-96"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-96" aria-hidden="true" tabindex="-1"></a>  <span class="co"># join with fireshed data</span></span>
+<span id="cb56-97"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-97" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
+<span id="cb56-98"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-98" aria-hidden="true" tabindex="-1"></a>    fireshed_proj_area <span class="sc">%&gt;%</span></span>
+<span id="cb56-99"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-99" aria-hidden="true" tabindex="-1"></a>      sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb56-100"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-100" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(pa_id, tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;pa_exposure&quot;</span>), tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;fireshed_&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb56-101"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-101" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">pa_id=</span><span class="fu">as.character</span>(pa_id))</span>
+<span id="cb56-102"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-102" aria-hidden="true" tabindex="-1"></a>    , <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(pa_id)</span>
+<span id="cb56-103"><a href="scenario-analysis-wcs-priority-landscapes.html#cb56-103" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+</div>
+<div id="landscape-level-analysis" class="section level2 hasAnchor" number="10.4">
+<h2><span class="header-section-number">10.4</span> Landscape-level analysis<a href="scenario-analysis-wcs-priority-landscapes.html#landscape-level-analysis" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="reduction-treatable-area-table-2" class="section level3 hasAnchor" number="10.4.1">
+<h3><span class="header-section-number">10.4.1</span> Reduction Treatable Area Table<a href="scenario-analysis-wcs-priority-landscapes.html#reduction-treatable-area-table-2" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-1" aria-hidden="true" tabindex="-1"></a>scnum_temp<span class="ot">&lt;-</span><span class="dv">2</span></span>
+<span id="cb57-2"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-2" aria-hidden="true" tabindex="-1"></a>  tbl_temp <span class="ot">&lt;-</span> constrained_by_scnro_ls <span class="sc">|&gt;</span> </span>
+<span id="cb57-3"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-3" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(scenario_id<span class="sc">==</span>scnum_temp) <span class="sc">|&gt;</span> </span>
+<span id="cb57-4"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-4" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb57-5"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-5" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">across</span>(</span>
+<span id="cb57-6"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-6" aria-hidden="true" tabindex="-1"></a>        tidyselect<span class="sc">::</span><span class="fu">ends_with</span>(<span class="st">&quot;_ha&quot;</span>)</span>
+<span id="cb57-7"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-7" aria-hidden="true" tabindex="-1"></a>        , <span class="sc">~</span> scales<span class="sc">::</span><span class="fu">comma</span>(.x, <span class="at">accuracy =</span> <span class="dv">1</span>)</span>
+<span id="cb57-8"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-8" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb57-9"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-9" aria-hidden="true" tabindex="-1"></a>      , dplyr<span class="sc">::</span><span class="fu">across</span>(</span>
+<span id="cb57-10"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-10" aria-hidden="true" tabindex="-1"></a>        tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;pct_&quot;</span>)</span>
+<span id="cb57-11"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-11" aria-hidden="true" tabindex="-1"></a>        , <span class="sc">~</span> scales<span class="sc">::</span><span class="fu">percent</span>(.x, <span class="at">accuracy =</span> <span class="fl">0.1</span>)</span>
+<span id="cb57-12"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-12" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb57-13"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-13" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb57-14"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-14" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="cb57-15"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-15" aria-hidden="true" tabindex="-1"></a>      state</span>
+<span id="cb57-16"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-16" aria-hidden="true" tabindex="-1"></a>      , name</span>
+<span id="cb57-17"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-17" aria-hidden="true" tabindex="-1"></a>      , covertype_area_ha</span>
+<span id="cb57-18"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-18" aria-hidden="true" tabindex="-1"></a>      , pct_covertype_area</span>
+<span id="cb57-19"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-19" aria-hidden="true" tabindex="-1"></a>      , pct_rdctn1_protected</span>
+<span id="cb57-20"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-20" aria-hidden="true" tabindex="-1"></a>      , pct_rdctn2_slope</span>
+<span id="cb57-21"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-21" aria-hidden="true" tabindex="-1"></a>      , pct_rdctn3_administrative</span>
+<span id="cb57-22"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-22" aria-hidden="true" tabindex="-1"></a>      , pct_rdctn4_riparian</span>
+<span id="cb57-23"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-23" aria-hidden="true" tabindex="-1"></a>      , pct_rdctn5_roads</span>
+<span id="cb57-24"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-24" aria-hidden="true" tabindex="-1"></a>      , rmn5_roads_area_ha</span>
+<span id="cb57-25"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-25" aria-hidden="true" tabindex="-1"></a>      , pct_rmn5_roads</span>
+<span id="cb57-26"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-26" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb57-27"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-27" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">arrange</span>(state,name)</span>
+<span id="cb57-28"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-28" aria-hidden="true" tabindex="-1"></a>  <span class="co"># make table </span></span>
+<span id="cb57-29"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-29" aria-hidden="true" tabindex="-1"></a>  kableExtra<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb57-30"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-30" aria-hidden="true" tabindex="-1"></a>      tbl_temp <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(state))</span>
+<span id="cb57-31"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-31" aria-hidden="true" tabindex="-1"></a>      , <span class="at">caption =</span> <span class="fu">paste0</span>(<span class="st">&quot;&lt;b&gt;&lt;font color=navy&gt;Scenario &quot;</span>,scnum_temp,<span class="st">&quot;&lt;/font&gt;&lt;/b&gt;&lt;br&gt;percent reduction of different types of constraints on mechanical treatment&quot;</span>)</span>
+<span id="cb57-32"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-32" aria-hidden="true" tabindex="-1"></a>      , <span class="at">col.names =</span> <span class="fu">c</span>(</span>
+<span id="cb57-33"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-33" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;&quot;</span></span>
+<span id="cb57-34"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-34" aria-hidden="true" tabindex="-1"></a>        , <span class="st">&quot;Forest+Shrub</span><span class="sc">\n</span><span class="st">(ha)&quot;</span>, <span class="st">&quot;Forest+Shrub</span><span class="sc">\n</span><span class="st">%&quot;</span></span>
+<span id="cb57-35"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-35" aria-hidden="true" tabindex="-1"></a>        , <span class="st">&quot;Protected&quot;</span></span>
+<span id="cb57-36"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-36" aria-hidden="true" tabindex="-1"></a>        , <span class="st">&quot;Slope</span><span class="sc">\n</span><span class="st">Steepness&quot;</span></span>
+<span id="cb57-37"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-37" aria-hidden="true" tabindex="-1"></a>        , <span class="st">&quot;Administrative&quot;</span></span>
+<span id="cb57-38"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-38" aria-hidden="true" tabindex="-1"></a>        , <span class="st">&quot;Riparian</span><span class="sc">\n</span><span class="st">Buffer&quot;</span></span>
+<span id="cb57-39"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-39" aria-hidden="true" tabindex="-1"></a>        , <span class="st">&quot;Road</span><span class="sc">\n</span><span class="st">Distance&quot;</span></span>
+<span id="cb57-40"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-40" aria-hidden="true" tabindex="-1"></a>        , <span class="st">&quot;Remaining (ha)&quot;</span></span>
+<span id="cb57-41"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-41" aria-hidden="true" tabindex="-1"></a>        , <span class="st">&quot;Remaining (%)&quot;</span></span>
+<span id="cb57-42"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-42" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb57-43"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-43" aria-hidden="true" tabindex="-1"></a>      , <span class="at">escape =</span> F</span>
+<span id="cb57-44"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-44" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span>  </span>
+<span id="cb57-45"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-45" aria-hidden="true" tabindex="-1"></a>    <span class="fu">add_header_above</span>(<span class="fu">c</span>(<span class="st">&quot; &quot;</span> <span class="ot">=</span> <span class="dv">1</span>, <span class="st">&quot;Area of</span><span class="sc">\n</span><span class="st">Priority Landscape&quot;</span><span class="ot">=</span><span class="dv">2</span>, <span class="st">&quot;Constraint</span><span class="sc">\n</span><span class="st">Least Flexible to Most Flexible&quot;</span> <span class="ot">=</span> <span class="dv">5</span>, <span class="st">&quot; &quot;</span> <span class="ot">=</span> <span class="dv">2</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb57-46"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kable_classic</span>(<span class="at">full_width=</span>T) <span class="sc">|&gt;</span> </span>
+<span id="cb57-47"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pack_rows</span>(<span class="at">index =</span> <span class="fu">table</span>(forcats<span class="sc">::</span><span class="fu">fct_inorder</span>(tbl_temp<span class="sc">$</span>state))) <span class="sc">|&gt;</span> </span>
+<span id="cb57-48"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-48" aria-hidden="true" tabindex="-1"></a>    kableExtra<span class="sc">::</span><span class="fu">kable_styling</span>(<span class="at">font_size =</span> <span class="dv">11</span>,<span class="at">fixed_thead =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span>  </span>
+<span id="cb57-49"><a href="scenario-analysis-wcs-priority-landscapes.html#cb57-49" aria-hidden="true" tabindex="-1"></a>    kableExtra<span class="sc">::</span><span class="fu">scroll_box</span>(<span class="at">width =</span> <span class="st">&quot;740px&quot;</span>)</span></code></pre></div>
+<div style="border: 1px solid #ddd; padding: 5px; overflow-x: scroll; width:740px; ">
+<table class=" lightable-classic table" style="font-family: &quot;Arial Narrow&quot;, &quot;Source Sans Pro&quot;, sans-serif; margin-left: auto; margin-right: auto; font-size: 11px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+<span id="tab:ls-tab1">Table 10.2: </span><b><font color="navy">Scenario 2</font></b><br>percent reduction of different types of constraints on mechanical treatment
+</caption>
+<thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;position: sticky; top:0; background-color: #FFFFFF;" colspan="1">
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; position: sticky; top:0; background-color: #FFFFFF;" colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Area of<br>Priority Landscape
+</div>
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; position: sticky; top:0; background-color: #FFFFFF;" colspan="5">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Constraint<br>Least Flexible to Most Flexible
+</div>
+</th>
+<th style="empty-cells: hide;border-bottom:hidden;position: sticky; top:0; background-color: #FFFFFF;" colspan="2">
+</th>
+</tr>
+<tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Forest+Shrub
+(ha)
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Forest+Shrub
+%
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Protected
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Slope
+Steepness
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Administrative
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Riparian
+Buffer
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Road
+Distance
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Remaining (ha)
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Remaining (%)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr grouplength="3">
+<td colspan="10" style="border-bottom: 0;">
+<strong>Arizona</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+4FRI
+</td>
+<td style="text-align:left;">
+2,190,804
+</td>
+<td style="text-align:left;">
+90.6%
+</td>
+<td style="text-align:left;">
+-13.8%
+</td>
+<td style="text-align:left;">
+-4.1%
+</td>
+<td style="text-align:left;">
+-27.5%
+</td>
+<td style="text-align:left;">
+-10.0%
+</td>
+<td style="text-align:left;">
+-7.5%
+</td>
+<td style="text-align:left;">
+811,975
+</td>
+<td style="text-align:left;">
+37.1%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+Prescott
+</td>
+<td style="text-align:left;">
+219,110
+</td>
+<td style="text-align:left;">
+86.4%
+</td>
+<td style="text-align:left;">
+-12.1%
+</td>
+<td style="text-align:left;">
+-7.9%
+</td>
+<td style="text-align:left;">
+-11.0%
+</td>
+<td style="text-align:left;">
+-17.9%
+</td>
+<td style="text-align:left;">
+-7.7%
+</td>
+<td style="text-align:left;">
+95,155
+</td>
+<td style="text-align:left;">
+43.4%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+San Carlos Apache Tribal Forest Protection
+</td>
+<td style="text-align:left;">
+1,056,065
+</td>
+<td style="text-align:left;">
+91.4%
+</td>
+<td style="text-align:left;">
+-6.1%
+</td>
+<td style="text-align:left;">
+-11.0%
+</td>
+<td style="text-align:left;">
+-2.5%
+</td>
+<td style="text-align:left;">
+-19.0%
+</td>
+<td style="text-align:left;">
+-34.6%
+</td>
+<td style="text-align:left;">
+282,658
+</td>
+<td style="text-align:left;">
+26.8%
+</td>
+</tr>
+<tr grouplength="5">
+<td colspan="10" style="border-bottom: 0;">
+<strong>California</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+North Yuba
+</td>
+<td style="text-align:left;">
+139,202
+</td>
+<td style="text-align:left;">
+96.5%
+</td>
+<td style="text-align:left;">
+-11.6%
+</td>
+<td style="text-align:left;">
+-22.6%
+</td>
+<td style="text-align:left;">
+-5.0%
+</td>
+<td style="text-align:left;">
+-19.4%
+</td>
+<td style="text-align:left;">
+-1.3%
+</td>
+<td style="text-align:left;">
+55,989
+</td>
+<td style="text-align:left;">
+40.2%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+Plumas Community Protection
+</td>
+<td style="text-align:left;">
+100,872
+</td>
+<td style="text-align:left;">
+93.3%
+</td>
+<td style="text-align:left;">
+0.0%
+</td>
+<td style="text-align:left;">
+-11.4%
+</td>
+<td style="text-align:left;">
+-6.0%
+</td>
+<td style="text-align:left;">
+-31.6%
+</td>
+<td style="text-align:left;">
+-3.7%
+</td>
+<td style="text-align:left;">
+47,658
+</td>
+<td style="text-align:left;">
+47.2%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+Southern California Fireshed Risk Reduction Strategy
+</td>
+<td style="text-align:left;">
+1,408,168
+</td>
+<td style="text-align:left;">
+86.0%
+</td>
+<td style="text-align:left;">
+-57.0%
+</td>
+<td style="text-align:left;">
+-14.8%
+</td>
+<td style="text-align:left;">
+-3.9%
+</td>
+<td style="text-align:left;">
+-3.7%
+</td>
+<td style="text-align:left;">
+-3.8%
+</td>
+<td style="text-align:left;">
+236,325
+</td>
+<td style="text-align:left;">
+16.8%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+Stanislaus
+</td>
+<td style="text-align:left;">
+116,139
+</td>
+<td style="text-align:left;">
+94.3%
+</td>
+<td style="text-align:left;">
+-2.9%
+</td>
+<td style="text-align:left;">
+-16.7%
+</td>
+<td style="text-align:left;">
+-1.8%
+</td>
+<td style="text-align:left;">
+-33.6%
+</td>
+<td style="text-align:left;">
+-1.4%
+</td>
+<td style="text-align:left;">
+50,559
+</td>
+<td style="text-align:left;">
+43.5%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+Trinity Forest Health and Fire-Resilient Rural Communities
+</td>
+<td style="text-align:left;">
+295,916
+</td>
+<td style="text-align:left;">
+80.4%
+</td>
+<td style="text-align:left;">
+-12.9%
+</td>
+<td style="text-align:left;">
+-23.4%
+</td>
+<td style="text-align:left;">
+-31.3%
+</td>
+<td style="text-align:left;">
+-9.4%
+</td>
+<td style="text-align:left;">
+-1.6%
+</td>
+<td style="text-align:left;">
+63,217
+</td>
+<td style="text-align:left;">
+21.4%
+</td>
+</tr>
+<tr grouplength="1">
+<td colspan="10" style="border-bottom: 0;">
+<strong>Colorado</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+Colorado Front Range
+</td>
+<td style="text-align:left;">
+1,051,540
+</td>
+<td style="text-align:left;">
+72.6%
+</td>
+<td style="text-align:left;">
+-20.4%
+</td>
+<td style="text-align:left;">
+-11.1%
+</td>
+<td style="text-align:left;">
+-6.8%
+</td>
+<td style="text-align:left;">
+-16.8%
+</td>
+<td style="text-align:left;">
+-6.0%
+</td>
+<td style="text-align:left;">
+408,302
+</td>
+<td style="text-align:left;">
+38.8%
+</td>
+</tr>
+<tr grouplength="2">
+<td colspan="10" style="border-bottom: 0;">
+<strong>Idaho</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+Nez Perce-Clearwater-Lower Salmon
+</td>
+<td style="text-align:left;">
+699,884
+</td>
+<td style="text-align:left;">
+89.0%
+</td>
+<td style="text-align:left;">
+-43.0%
+</td>
+<td style="text-align:left;">
+-11.8%
+</td>
+<td style="text-align:left;">
+-0.7%
+</td>
+<td style="text-align:left;">
+-2.2%
+</td>
+<td style="text-align:left;">
+-4.2%
+</td>
+<td style="text-align:left;">
+266,295
+</td>
+<td style="text-align:left;">
+38.0%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+Southwest Idaho
+</td>
+<td style="text-align:left;">
+608,338
+</td>
+<td style="text-align:left;">
+87.6%
+</td>
+<td style="text-align:left;">
+-13.3%
+</td>
+<td style="text-align:left;">
+-15.3%
+</td>
+<td style="text-align:left;">
+-1.5%
+</td>
+<td style="text-align:left;">
+-2.7%
+</td>
+<td style="text-align:left;">
+-4.4%
+</td>
+<td style="text-align:left;">
+381,579
+</td>
+<td style="text-align:left;">
+62.7%
+</td>
+</tr>
+<tr grouplength="1">
+<td colspan="10" style="border-bottom: 0;">
+<strong>Montana</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+Kootenai Complex
+</td>
+<td style="text-align:left;">
+372,345
+</td>
+<td style="text-align:left;">
+91.4%
+</td>
+<td style="text-align:left;">
+-21.4%
+</td>
+<td style="text-align:left;">
+-7.8%
+</td>
+<td style="text-align:left;">
+-15.1%
+</td>
+<td style="text-align:left;">
+-6.9%
+</td>
+<td style="text-align:left;">
+-1.2%
+</td>
+<td style="text-align:left;">
+177,160
+</td>
+<td style="text-align:left;">
+47.6%
+</td>
+</tr>
+<tr grouplength="1">
+<td colspan="10" style="border-bottom: 0;">
+<strong>Nevada</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+Sierra and Elko Fronts
+</td>
+<td style="text-align:left;">
+1,003,525
+</td>
+<td style="text-align:left;">
+73.2%
+</td>
+<td style="text-align:left;">
+-26.6%
+</td>
+<td style="text-align:left;">
+-4.8%
+</td>
+<td style="text-align:left;">
+-2.6%
+</td>
+<td style="text-align:left;">
+-10.2%
+</td>
+<td style="text-align:left;">
+-12.0%
+</td>
+<td style="text-align:left;">
+439,369
+</td>
+<td style="text-align:left;">
+43.8%
+</td>
+</tr>
+<tr grouplength="1">
+<td colspan="10" style="border-bottom: 0;">
+<strong>New Mexico</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+Enchanted Circle
+</td>
+<td style="text-align:left;">
+506,460
+</td>
+<td style="text-align:left;">
+85.6%
+</td>
+<td style="text-align:left;">
+-8.5%
+</td>
+<td style="text-align:left;">
+-11.6%
+</td>
+<td style="text-align:left;">
+-5.1%
+</td>
+<td style="text-align:left;">
+-13.7%
+</td>
+<td style="text-align:left;">
+-18.5%
+</td>
+<td style="text-align:left;">
+215,496
+</td>
+<td style="text-align:left;">
+42.5%
+</td>
+</tr>
+<tr grouplength="3">
+<td colspan="10" style="border-bottom: 0;">
+<strong>Oregon</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+Central Oregon
+</td>
+<td style="text-align:left;">
+937,977
+</td>
+<td style="text-align:left;">
+88.8%
+</td>
+<td style="text-align:left;">
+-7.2%
+</td>
+<td style="text-align:left;">
+-1.2%
+</td>
+<td style="text-align:left;">
+-12.9%
+</td>
+<td style="text-align:left;">
+-5.2%
+</td>
+<td style="text-align:left;">
+-3.8%
+</td>
+<td style="text-align:left;">
+652,634
+</td>
+<td style="text-align:left;">
+69.6%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+Klamath River Basin
+</td>
+<td style="text-align:left;">
+2,900,530
+</td>
+<td style="text-align:left;">
+77.7%
+</td>
+<td style="text-align:left;">
+-20.5%
+</td>
+<td style="text-align:left;">
+-10.5%
+</td>
+<td style="text-align:left;">
+-9.9%
+</td>
+<td style="text-align:left;">
+-6.8%
+</td>
+<td style="text-align:left;">
+-5.4%
+</td>
+<td style="text-align:left;">
+1,362,076
+</td>
+<td style="text-align:left;">
+47.0%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+Mount Hood Forest Health and Fire-Resilient Communities
+</td>
+<td style="text-align:left;">
+334,397
+</td>
+<td style="text-align:left;">
+76.7%
+</td>
+<td style="text-align:left;">
+-19.6%
+</td>
+<td style="text-align:left;">
+-8.1%
+</td>
+<td style="text-align:left;">
+-26.4%
+</td>
+<td style="text-align:left;">
+-8.8%
+</td>
+<td style="text-align:left;">
+-4.2%
+</td>
+<td style="text-align:left;">
+110,395
+</td>
+<td style="text-align:left;">
+33.0%
+</td>
+</tr>
+<tr grouplength="2">
+<td colspan="10" style="border-bottom: 0;">
+<strong>Utah</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+Pine Valley
+</td>
+<td style="text-align:left;">
+153,246
+</td>
+<td style="text-align:left;">
+94.2%
+</td>
+<td style="text-align:left;">
+-37.2%
+</td>
+<td style="text-align:left;">
+-3.4%
+</td>
+<td style="text-align:left;">
+0.0%
+</td>
+<td style="text-align:left;">
+-10.6%
+</td>
+<td style="text-align:left;">
+-8.2%
+</td>
+<td style="text-align:left;">
+62,385
+</td>
+<td style="text-align:left;">
+40.7%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+Wasatch
+</td>
+<td style="text-align:left;">
+381,429
+</td>
+<td style="text-align:left;">
+89.5%
+</td>
+<td style="text-align:left;">
+-43.0%
+</td>
+<td style="text-align:left;">
+-7.1%
+</td>
+<td style="text-align:left;">
+-0.6%
+</td>
+<td style="text-align:left;">
+-7.3%
+</td>
+<td style="text-align:left;">
+-5.8%
+</td>
+<td style="text-align:left;">
+137,670
+</td>
+<td style="text-align:left;">
+36.1%
+</td>
+</tr>
+<tr grouplength="2">
+<td colspan="10" style="border-bottom: 0;">
+<strong>Washington</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+Central Washington Initiative
+</td>
+<td style="text-align:left;">
+670,440
+</td>
+<td style="text-align:left;">
+68.1%
+</td>
+<td style="text-align:left;">
+-20.6%
+</td>
+<td style="text-align:left;">
+-19.8%
+</td>
+<td style="text-align:left;">
+-25.1%
+</td>
+<td style="text-align:left;">
+-9.0%
+</td>
+<td style="text-align:left;">
+-3.4%
+</td>
+<td style="text-align:left;">
+148,732
+</td>
+<td style="text-align:left;">
+22.2%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+Colville Northeast Washington Vision
+</td>
+<td style="text-align:left;">
+655,989
+</td>
+<td style="text-align:left;">
+92.8%
+</td>
+<td style="text-align:left;">
+-20.1%
+</td>
+<td style="text-align:left;">
+-8.9%
+</td>
+<td style="text-align:left;">
+-2.5%
+</td>
+<td style="text-align:left;">
+-14.7%
+</td>
+<td style="text-align:left;">
+-5.0%
+</td>
+<td style="text-align:left;">
+320,175
+</td>
+<td style="text-align:left;">
+48.8%
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="change-in-available-by-scenario" class="section level3 hasAnchor" number="10.4.2">
+<h3><span class="header-section-number">10.4.2</span> Change in Available by Scenario<a href="scenario-analysis-wcs-priority-landscapes.html#change-in-available-by-scenario" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb58-2"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> constrained_by_scnro_ls</span>
+<span id="cb58-3"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-3" aria-hidden="true" tabindex="-1"></a>    , <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x=</span>scenario_desc,<span class="at">y=</span>pct_rmn5_roads,<span class="at">group=</span>area_name)</span>
+<span id="cb58-4"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-4" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb58-5"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="at">mapping=</span><span class="fu">aes</span>(<span class="at">color =</span> area_name), <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb58-6"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_label</span>(</span>
+<span id="cb58-7"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">mapping=</span><span class="fu">aes</span>(<span class="at">label =</span> scales<span class="sc">::</span><span class="fu">percent</span>(pct_rmn5_roads, <span class="at">scale =</span> <span class="dv">100</span>, <span class="at">accuracy =</span> <span class="dv">1</span>))</span>
+<span id="cb58-8"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-8" aria-hidden="true" tabindex="-1"></a>      , <span class="at">color =</span> <span class="st">&quot;black&quot;</span></span>
+<span id="cb58-9"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-9" aria-hidden="true" tabindex="-1"></a>      , <span class="at">size =</span> <span class="dv">3</span></span>
+<span id="cb58-10"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-10" aria-hidden="true" tabindex="-1"></a>      , <span class="at">label.padding =</span> <span class="fu">unit</span>(<span class="fl">0.15</span>, <span class="st">&quot;lines&quot;</span>)</span>
+<span id="cb58-11"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-11" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb58-12"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="at">facets =</span> <span class="fu">vars</span>(area_name)</span>
+<span id="cb58-13"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-13" aria-hidden="true" tabindex="-1"></a>      , <span class="at">ncol =</span> <span class="dv">3</span></span>
+<span id="cb58-14"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-14" aria-hidden="true" tabindex="-1"></a>      , <span class="at">labeller =</span> <span class="fu">label_wrap_gen</span>(<span class="at">width =</span> <span class="dv">35</span>, <span class="at">multi_line =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb58-15"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-15" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb58-16"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_viridis_d</span>(<span class="at">option =</span> <span class="st">&quot;turbo&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb58-17"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_continuous</span>(<span class="at">expand =</span> <span class="fu">expansion</span>(<span class="at">mult =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.1</span>)), <span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">percent_format</span>(), <span class="at">breaks =</span> scales<span class="sc">::</span><span class="fu">extended_breaks</span>(<span class="dv">6</span>)) <span class="sc">+</span></span>
+<span id="cb58-18"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># scale_x_discrete(labels = scales::label_wrap(20)) +</span></span>
+<span id="cb58-19"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(</span>
+<span id="cb58-20"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> <span class="st">&quot;Most Restrictive \U2192 Least Restrictive&quot;</span></span>
+<span id="cb58-21"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-21" aria-hidden="true" tabindex="-1"></a>      , <span class="at">y =</span> <span class="st">&quot;Percent Treatable Area Remaining&quot;</span></span>
+<span id="cb58-22"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-22" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb58-23"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_light</span>() <span class="sc">+</span></span>
+<span id="cb58-24"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(</span>
+<span id="cb58-25"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span></span>
+<span id="cb58-26"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-26" aria-hidden="true" tabindex="-1"></a>      , <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">7</span>)</span>
+<span id="cb58-27"><a href="scenario-analysis-wcs-priority-landscapes.html#cb58-27" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div>
+<p><img src="csu_sandbox_files/figure-html/ls-chg-avai-1.png" width="960" /></p>
+</div>
+<div id="reduction-by-constraint" class="section level3 hasAnchor" number="10.4.3">
+<h3><span class="header-section-number">10.4.3</span> Reduction by Constraint<a href="scenario-analysis-wcs-priority-landscapes.html#reduction-by-constraint" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="co"># reshape</span></span>
+<span id="cb59-2"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-2" aria-hidden="true" tabindex="-1"></a>constrained_by_scnro_ls_long <span class="ot">&lt;-</span> constrained_by_scnro_ls <span class="sc">|&gt;</span></span>
+<span id="cb59-3"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(state, name, area_name, tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;scenario_&quot;</span>), tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;pct_rdctn&quot;</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb59-4"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-4" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(</span>
+<span id="cb59-5"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;pct_rdctn&quot;</span>)</span>
+<span id="cb59-6"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-6" aria-hidden="true" tabindex="-1"></a>    , <span class="at">names_to =</span> <span class="st">&quot;constraint&quot;</span></span>
+<span id="cb59-7"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-7" aria-hidden="true" tabindex="-1"></a>    , <span class="at">values_to =</span> <span class="st">&quot;pct_rdctn&quot;</span></span>
+<span id="cb59-8"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-8" aria-hidden="true" tabindex="-1"></a>    , <span class="at">names_prefix =</span> <span class="st">&quot;pct_rdctn&quot;</span></span>
+<span id="cb59-9"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-9" aria-hidden="true" tabindex="-1"></a>    , <span class="at">values_drop_na =</span> F</span>
+<span id="cb59-10"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb59-11"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-11" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">separate_wider_delim</span>(constraint, <span class="st">&quot;_&quot;</span>, <span class="at">names =</span> <span class="fu">c</span>(<span class="st">&quot;constraint_lvl&quot;</span>, <span class="st">&quot;constraint&quot;</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb59-12"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb59-13"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">constraint_lvl =</span> <span class="fu">as.numeric</span>(constraint_lvl)</span>
+<span id="cb59-14"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-14" aria-hidden="true" tabindex="-1"></a>    , <span class="at">constraint =</span> <span class="fu">factor</span>(</span>
+<span id="cb59-15"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-15" aria-hidden="true" tabindex="-1"></a>        constraint</span>
+<span id="cb59-16"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-16" aria-hidden="true" tabindex="-1"></a>        , <span class="at">ordered =</span> <span class="cn">TRUE</span></span>
+<span id="cb59-17"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-17" aria-hidden="true" tabindex="-1"></a>        , <span class="at">levels =</span> <span class="fu">c</span>(</span>
+<span id="cb59-18"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-18" aria-hidden="true" tabindex="-1"></a>          <span class="st">&quot;protected&quot;</span></span>
+<span id="cb59-19"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-19" aria-hidden="true" tabindex="-1"></a>          , <span class="st">&quot;slope&quot;</span></span>
+<span id="cb59-20"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-20" aria-hidden="true" tabindex="-1"></a>          , <span class="st">&quot;administrative&quot;</span></span>
+<span id="cb59-21"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-21" aria-hidden="true" tabindex="-1"></a>          , <span class="st">&quot;riparian&quot;</span></span>
+<span id="cb59-22"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-22" aria-hidden="true" tabindex="-1"></a>          , <span class="st">&quot;roads&quot;</span></span>
+<span id="cb59-23"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-23" aria-hidden="true" tabindex="-1"></a>          , <span class="st">&quot;total&quot;</span>   </span>
+<span id="cb59-24"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-24" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb59-25"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-25" aria-hidden="true" tabindex="-1"></a>        , <span class="at">labels =</span> <span class="fu">c</span>(</span>
+<span id="cb59-26"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-26" aria-hidden="true" tabindex="-1"></a>          <span class="st">&quot;Protected&quot;</span></span>
+<span id="cb59-27"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-27" aria-hidden="true" tabindex="-1"></a>          , <span class="st">&quot;Slope</span><span class="sc">\n</span><span class="st">Steepness&quot;</span></span>
+<span id="cb59-28"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-28" aria-hidden="true" tabindex="-1"></a>          , <span class="st">&quot;Administrative&quot;</span></span>
+<span id="cb59-29"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-29" aria-hidden="true" tabindex="-1"></a>          , <span class="st">&quot;Riparian</span><span class="sc">\n</span><span class="st">Buffer&quot;</span></span>
+<span id="cb59-30"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-30" aria-hidden="true" tabindex="-1"></a>          , <span class="st">&quot;Road</span><span class="sc">\n</span><span class="st">Distance&quot;</span></span>
+<span id="cb59-31"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-31" aria-hidden="true" tabindex="-1"></a>          , <span class="st">&quot;Total&quot;</span></span>
+<span id="cb59-32"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-32" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb59-33"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-33" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">|&gt;</span> forcats<span class="sc">::</span><span class="fu">fct_rev</span>()</span>
+<span id="cb59-34"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-34" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb59-35"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-35" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="cb59-36"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-36" aria-hidden="true" tabindex="-1"></a>    constrained_by_scnro_ls <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(state,name,scenario_id,pct_rdctn_total)</span>
+<span id="cb59-37"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-37" aria-hidden="true" tabindex="-1"></a>    , <span class="at">by =</span> <span class="fu">join_by</span>(state,name,scenario_id)</span>
+<span id="cb59-38"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-38" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb59-39"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-39" aria-hidden="true" tabindex="-1"></a><span class="co"># plot</span></span>
+<span id="cb59-40"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-40" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb59-41"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(</span>
+<span id="cb59-42"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> constrained_by_scnro_ls_long <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(constraint<span class="sc">!=</span><span class="st">&quot;Total&quot;</span>)</span>
+<span id="cb59-43"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-43" aria-hidden="true" tabindex="-1"></a>    , <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">y =</span> scenario_lab, <span class="at">x =</span> pct_rdctn, <span class="at">fill =</span> constraint)</span>
+<span id="cb59-44"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-44" aria-hidden="true" tabindex="-1"></a>    , <span class="at">color =</span> <span class="cn">NA</span>, <span class="at">width =</span> <span class="fl">0.7</span></span>
+<span id="cb59-45"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-45" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb59-46"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(</span>
+<span id="cb59-47"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> constrained_by_scnro_ls_long <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(constraint<span class="sc">!=</span><span class="st">&quot;Total&quot;</span>)</span>
+<span id="cb59-48"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-48" aria-hidden="true" tabindex="-1"></a>    , <span class="at">mapping =</span> <span class="fu">aes</span>(</span>
+<span id="cb59-49"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-49" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> scenario_lab, <span class="at">x =</span> pct_rdctn</span>
+<span id="cb59-50"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-50" aria-hidden="true" tabindex="-1"></a>      , <span class="at">label =</span> scales<span class="sc">::</span><span class="fu">percent</span>(<span class="fu">ifelse</span>(pct_rdctn<span class="sc">&lt;</span>.<span class="dv">06</span><span class="sc">*-</span><span class="dv">1</span>,pct_rdctn,<span class="cn">NA</span>), <span class="at">accuracy =</span> <span class="dv">1</span>)</span>
+<span id="cb59-51"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-51" aria-hidden="true" tabindex="-1"></a>      , <span class="at">fontface =</span> <span class="st">&quot;bold&quot;</span></span>
+<span id="cb59-52"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-52" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb59-53"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-53" aria-hidden="true" tabindex="-1"></a>    , <span class="at">position =</span> <span class="fu">position_stack</span>(<span class="at">vjust =</span> <span class="fl">0.5</span>)</span>
+<span id="cb59-54"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-54" aria-hidden="true" tabindex="-1"></a>    , <span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">size =</span> <span class="dv">3</span></span>
+<span id="cb59-55"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-55" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb59-56"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(</span>
+<span id="cb59-57"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-57" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> constrained_by_scnro_ls_long <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(constraint<span class="sc">==</span><span class="st">&quot;Total&quot;</span>)</span>
+<span id="cb59-58"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-58" aria-hidden="true" tabindex="-1"></a>    , <span class="at">mapping =</span> <span class="fu">aes</span>(</span>
+<span id="cb59-59"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-59" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> scenario_lab, <span class="at">x =</span> pct_rdctn_total</span>
+<span id="cb59-60"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-60" aria-hidden="true" tabindex="-1"></a>      , <span class="at">label =</span> scales<span class="sc">::</span><span class="fu">percent</span>(pct_rdctn_total, <span class="at">accuracy =</span> <span class="dv">1</span>)</span>
+<span id="cb59-61"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-61" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb59-62"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-62" aria-hidden="true" tabindex="-1"></a>    , <span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">size =</span> <span class="fl">3.5</span></span>
+<span id="cb59-63"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-63" aria-hidden="true" tabindex="-1"></a>    , <span class="at">hjust =</span> <span class="sc">-</span><span class="fl">0.1</span></span>
+<span id="cb59-64"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-64" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb59-65"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-65" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="at">facets =</span> <span class="fu">vars</span>(area_name)</span>
+<span id="cb59-66"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-66" aria-hidden="true" tabindex="-1"></a>      , <span class="at">ncol =</span> <span class="dv">3</span></span>
+<span id="cb59-67"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-67" aria-hidden="true" tabindex="-1"></a>      , <span class="at">labeller =</span> <span class="fu">label_wrap_gen</span>(<span class="at">width =</span> <span class="dv">35</span>, <span class="at">multi_line =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb59-68"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-68" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb59-69"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-69" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_d</span>(<span class="at">option =</span> <span class="st">&quot;plasma&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb59-70"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-70" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_reverse</span>(<span class="at">expand =</span> <span class="fu">expansion</span>(<span class="at">mult =</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">1</span>)),<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">percent_format</span>()) <span class="sc">+</span></span>
+<span id="cb59-71"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-71" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb59-72"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-72" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb59-73"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-73" aria-hidden="true" tabindex="-1"></a>    , <span class="at">y =</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb59-74"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-74" aria-hidden="true" tabindex="-1"></a>    , <span class="at">x =</span> <span class="st">&quot;Constraint Reduction in Treatable Area (%)&quot;</span></span>
+<span id="cb59-75"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-75" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb59-76"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-76" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_light</span>() <span class="sc">+</span></span>
+<span id="cb59-77"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-77" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb59-78"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-78" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">&quot;top&quot;</span></span>
+<span id="cb59-79"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-79" aria-hidden="true" tabindex="-1"></a>    , <span class="at">legend.direction  =</span> <span class="st">&quot;horizontal&quot;</span></span>
+<span id="cb59-80"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-80" aria-hidden="true" tabindex="-1"></a>    , <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">7</span>)</span>
+<span id="cb59-81"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-81" aria-hidden="true" tabindex="-1"></a>    , <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">9</span>)</span>
+<span id="cb59-82"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-82" aria-hidden="true" tabindex="-1"></a>    , <span class="at">axis.text.x =</span> <span class="fu">element_blank</span>()</span>
+<span id="cb59-83"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-83" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb59-84"><a href="scenario-analysis-wcs-priority-landscapes.html#cb59-84" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<p><img src="csu_sandbox_files/figure-html/ls-rdctn-1.png" width="960" /></p>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="fsheds.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

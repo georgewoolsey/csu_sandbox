@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en-US" xml:lang="en-US">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Section 9 Exploring the Fireshed Registry | Sandbox</title>
+  <meta name="description" content="Using the bookdown package to write a book of data exploration. The output format for this example is bookdown::gitbook." />
+  <meta name="generator" content="bookdown 0.32 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Section 9 Exploring the Fireshed Registry | Sandbox" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="Using the bookdown package to write a book of data exploration. The output format for this example is bookdown::gitbook." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Section 9 Exploring the Fireshed Registry | Sandbox" />
+  
+  <meta name="twitter:description" content="Using the bookdown package to write a book of data exploration. The output format for this example is bookdown::gitbook." />
+  
+
+<meta name="author" content="George Woolsey" />
+
+
+<meta name="date" content="2023-05-08" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="constrained-area-vs.-treated-area.html"/>
+<link rel="next" href="scenario-analysis-wcs-priority-landscapes.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<script src="libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+<script src="libs/htmlwidgets-1.6.1/htmlwidgets.js"></script>
+<link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-1.3.1/leaflet.js"></script>
+<link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
+<script src="libs/proj4-2.6.2/proj4.min.js"></script>
+<script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+<link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-binding-2.1.1/leaflet.js"></script>
+<script src="libs/leaflet-providers-1.9.0/leaflet-providers_1.9.0.js"></script>
+<script src="libs/leaflet-providers-plugin-2.1.1/leaflet-providers-plugin.js"></script>
+<script src="libs/clipboard-0.0.1/setClipboardText.js"></script>
+<link href="libs/mapviewCSS-0.0.1/mapview-popup.css" rel="stylesheet" />
+<link href="libs/mapviewCSS-0.0.1/mapview.css" rel="stylesheet" />
+<script type="text/javascript">
+
+// toggle visibility of R source blocks in R Markdown output
+function toggle_R() {
+  var x = document.getElementsByClassName('r');
+  if (x.length == 0) return;
+  function toggle_vis(o) {
+    var d = o.style.display;
+    o.style.display = (d == 'block' || d == '') ? 'none':'block';
+  }
+
+  for (i = 0; i < x.length; i++) {
+    var y = x[i];
+    if (y.tagName.toLowerCase() === 'pre') toggle_vis(y);
+  }
+
+    var elem = document.getElementById("myButton1");
+    if (elem.value === "Hide Code") elem.value = "Show Code";
+    else elem.value = "Hide Code";
+}
+
+document.write('<input onclick="toggle_R();" type="button" value="Hide Code" id="myButton1" style="position: absolute; top: 10%; right: 2%; z-index: 200"></input>')
+
+</script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Caution</a></li>
+<li class="chapter" data-level="2" data-path="objective.html"><a href="objective.html"><i class="fa fa-check"></i><b>2</b> Objective</a></li>
+<li class="chapter" data-level="3" data-path="data-sources.html"><a href="data-sources.html"><i class="fa fa-check"></i><b>3</b> Data Sources</a></li>
+<li class="chapter" data-level="4" data-path="treatable-area-scenario.html"><a href="treatable-area-scenario.html"><i class="fa fa-check"></i><b>4</b> Treatable Area Scenario</a></li>
+<li class="chapter" data-level="5" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html"><i class="fa fa-check"></i><b>5</b> USFS National Forests</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#load-forest-level-data"><i class="fa fa-check"></i><b>5.1</b> Load forest-level data</a></li>
+<li class="chapter" data-level="5.2" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#reduction-treatable-area-table"><i class="fa fa-check"></i><b>5.2</b> Reduction Treatable Area Table</a></li>
+<li class="chapter" data-level="5.3" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#remaining-treatable-by-forest"><i class="fa fa-check"></i><b>5.3</b> Remaining Treatable by Forest</a></li>
+<li class="chapter" data-level="5.4" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#remaining-treatable-by-region"><i class="fa fa-check"></i><b>5.4</b> Remaining Treatable by Region</a></li>
+<li class="chapter" data-level="5.5" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#reduction-by-constraint-by-forest"><i class="fa fa-check"></i><b>5.5</b> Reduction by Constraint by Forest</a></li>
+<li class="chapter" data-level="5.6" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#reduction-by-constraint-by-region"><i class="fa fa-check"></i><b>5.6</b> Reduction by Constraint by Region</a></li>
+<li class="chapter" data-level="5.7" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#treatable-area-reduction-by-constraint"><i class="fa fa-check"></i><b>5.7</b> Treatable Area Reduction by Constraint</a></li>
+<li class="chapter" data-level="5.8" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#map-of-treatableconstrained"><i class="fa fa-check"></i><b>5.8</b> Map of Treatable/Constrained</a></li>
+<li class="chapter" data-level="5.9" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#usfs-national-forests-subwatershed-level"><i class="fa fa-check"></i><b>5.9</b> USFS National Forests Subwatershed Level</a>
+<ul>
+<li class="chapter" data-level="5.9.1" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#load-subwatershed-level-data"><i class="fa fa-check"></i><b>5.9.1</b> Load subwatershed-level data</a></li>
+<li class="chapter" data-level="5.9.2" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#distribution-of-subwatershed-area"><i class="fa fa-check"></i><b>5.9.2</b> Distribution of Subwatershed Area</a></li>
+<li class="chapter" data-level="5.9.3" data-path="usfs-national-forests.html"><a href="usfs-national-forests.html#distribution-of-subwatershed-constraint"><i class="fa fa-check"></i><b>5.9.3</b> Distribution of Subwatershed Constraint</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="wcs_intro.html"><a href="wcs_intro.html"><i class="fa fa-check"></i><b>6</b> Wildfire Crisis Strategy Priority Landscapes</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="wcs_intro.html"><a href="wcs_intro.html#map-of-priority-landscapes"><i class="fa fa-check"></i><b>6.1</b> Map of Priority Landscapes</a></li>
+<li class="chapter" data-level="6.2" data-path="wcs_intro.html"><a href="wcs_intro.html#wflndscp"><i class="fa fa-check"></i><b>6.2</b> Load landscape-level data</a></li>
+<li class="chapter" data-level="6.3" data-path="wcs_intro.html"><a href="wcs_intro.html#reduction-treatable-area-table-1"><i class="fa fa-check"></i><b>6.3</b> Reduction Treatable Area Table</a></li>
+<li class="chapter" data-level="6.4" data-path="wcs_intro.html"><a href="wcs_intro.html#forested-area-plot"><i class="fa fa-check"></i><b>6.4</b> Forested Area Plot</a></li>
+<li class="chapter" data-level="6.5" data-path="wcs_intro.html"><a href="wcs_intro.html#landcover-class-area"><i class="fa fa-check"></i><b>6.5</b> Landcover Class Area</a></li>
+<li class="chapter" data-level="6.6" data-path="wcs_intro.html"><a href="wcs_intro.html#remaining-treatable-forest-plot"><i class="fa fa-check"></i><b>6.6</b> Remaining Treatable Forest Plot</a></li>
+<li class="chapter" data-level="6.7" data-path="wcs_intro.html"><a href="wcs_intro.html#reduction-by-constraint-plot"><i class="fa fa-check"></i><b>6.7</b> Reduction by Constraint Plot</a></li>
+<li class="chapter" data-level="6.8" data-path="wcs_intro.html"><a href="wcs_intro.html#reduction-treatable-area-plot"><i class="fa fa-check"></i><b>6.8</b> Reduction Treatable Area Plot</a></li>
+<li class="chapter" data-level="6.9" data-path="wcs_intro.html"><a href="wcs_intro.html#wildfire-crisis-strategy-priority-landscapes-subwatershed-level"><i class="fa fa-check"></i><b>6.9</b> Wildfire Crisis Strategy Priority Landscapes Subwatershed Level</a>
+<ul>
+<li class="chapter" data-level="6.9.1" data-path="wcs_intro.html"><a href="wcs_intro.html#load-subwatershed-level-data-1"><i class="fa fa-check"></i><b>6.9.1</b> Load subwatershed-level data</a></li>
+<li class="chapter" data-level="6.9.2" data-path="wcs_intro.html"><a href="wcs_intro.html#distribution-of-subwatershed-area-1"><i class="fa fa-check"></i><b>6.9.2</b> Distribution of Subwatershed Area</a></li>
+<li class="chapter" data-level="6.9.3" data-path="wcs_intro.html"><a href="wcs_intro.html#distribution-of-subwatershed-constraint-1"><i class="fa fa-check"></i><b>6.9.3</b> Distribution of Subwatershed Constraint</a></li>
+<li class="chapter" data-level="6.9.4" data-path="wcs_intro.html"><a href="wcs_intro.html#forested-area-by-level-of-constraint"><i class="fa fa-check"></i><b>6.9.4</b> Forested Area by Level of Constraint</a></li>
+<li class="chapter" data-level="6.9.5" data-path="wcs_intro.html"><a href="wcs_intro.html#constraint-reduction-by-level-of-constraint"><i class="fa fa-check"></i><b>6.9.5</b> Constraint Reduction by Level of Constraint</a></li>
+<li class="chapter" data-level="6.9.6" data-path="wcs_intro.html"><a href="wcs_intro.html#area-available-for-mechanical-treatment"><i class="fa fa-check"></i><b>6.9.6</b> Area Available for Mechanical Treatment</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="a-tibble-2-8.html"><a href="a-tibble-2-8.html"><i class="fa fa-check"></i><b>7</b> A tibble: 2 × 8</a>
+<ul>
+<li class="chapter" data-level="7.0.1" data-path="a-tibble-2-8.html"><a href="a-tibble-2-8.html#wf_read_sw"><i class="fa fa-check"></i><b>7.0.1</b> Map of Subwatersheds by Level of Constraint</a></li>
+<li class="chapter" data-level="7.1" data-path="a-tibble-2-8.html"><a href="a-tibble-2-8.html#example-code-to-split-larger-polygons"><i class="fa fa-check"></i><b>7.1</b> Example code to split larger polygons</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html"><i class="fa fa-check"></i><b>8</b> Constrained Area vs. Treated Area</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html#read-in-constraint-and-aoi-bounds"><i class="fa fa-check"></i><b>8.1</b> Read in Constraint and AOI Bounds</a></li>
+<li class="chapter" data-level="8.2" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html#forest-management-activities-facts"><i class="fa fa-check"></i><b>8.2</b> Forest Management Activities (FACTS)</a></li>
+<li class="chapter" data-level="8.3" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html#treatment-acres-by-year-table"><i class="fa fa-check"></i><b>8.3</b> Treatment acres by year table</a></li>
+<li class="chapter" data-level="8.4" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html#treatment-area-versus-mechanically-available-area"><i class="fa fa-check"></i><b>8.4</b> Treatment area versus Mechanically Available Area</a></li>
+<li class="chapter" data-level="8.5" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html#treatment-in-subwatersheds-by-level-of-constraint"><i class="fa fa-check"></i><b>8.5</b> Treatment in Subwatersheds by Level of Constraint</a></li>
+<li class="chapter" data-level="8.6" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html#total-area-treated-by-level-of-constraint"><i class="fa fa-check"></i><b>8.6</b> Total Area Treated by Level of Constraint</a></li>
+<li class="chapter" data-level="8.7" data-path="constrained-area-vs.-treated-area.html"><a href="constrained-area-vs.-treated-area.html#treatment-by-cover-type"><i class="fa fa-check"></i><b>8.7</b> Treatment by Cover Type</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="fsheds.html"><a href="fsheds.html"><i class="fa fa-check"></i><b>9</b> Exploring the Fireshed Registry</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="fsheds.html"><a href="fsheds.html#read-in-firesheds"><i class="fa fa-check"></i><b>9.1</b> Read in Firesheds</a></li>
+<li class="chapter" data-level="9.2" data-path="fsheds.html"><a href="fsheds.html#area-of-firesheds"><i class="fa fa-check"></i><b>9.2</b> Area of firesheds</a></li>
+<li class="chapter" data-level="9.3" data-path="fsheds.html"><a href="fsheds.html#national-fireshed-map"><i class="fa fa-check"></i><b>9.3</b> National Fireshed Map</a></li>
+<li class="chapter" data-level="9.4" data-path="fsheds.html"><a href="fsheds.html#fireshed-project-area-map"><i class="fa fa-check"></i><b>9.4</b> Fireshed Project Area Map</a></li>
+<li class="chapter" data-level="9.5" data-path="fsheds.html"><a href="fsheds.html#firsheds-in-landscapes"><i class="fa fa-check"></i><b>9.5</b> Firsheds in landscapes</a></li>
+<li class="chapter" data-level="9.6" data-path="fsheds.html"><a href="fsheds.html#firsheds-with-wcs-flag"><i class="fa fa-check"></i><b>9.6</b> Firsheds with WCS flag</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="scenario-analysis-wcs-priority-landscapes.html"><a href="scenario-analysis-wcs-priority-landscapes.html"><i class="fa fa-check"></i><b>10</b> Scenario Analysis: WCS Priority Landscapes</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="scenario-analysis-wcs-priority-landscapes.html"><a href="scenario-analysis-wcs-priority-landscapes.html#scenarios-considered"><i class="fa fa-check"></i><b>10.1</b> Scenarios Considered</a></li>
+<li class="chapter" data-level="10.2" data-path="scenario-analysis-wcs-priority-landscapes.html"><a href="scenario-analysis-wcs-priority-landscapes.html#data-preparation"><i class="fa fa-check"></i><b>10.2</b> Data Preparation</a>
+<ul>
+<li class="chapter" data-level="10.2.1" data-path="scenario-analysis-wcs-priority-landscapes.html"><a href="scenario-analysis-wcs-priority-landscapes.html#load-landscape-level-data"><i class="fa fa-check"></i><b>10.2.1</b> Load landscape-level data</a></li>
+</ul></li>
+<li class="chapter" data-level="10.3" data-path="scenario-analysis-wcs-priority-landscapes.html"><a href="scenario-analysis-wcs-priority-landscapes.html#load-fireshed-project-area-data"><i class="fa fa-check"></i><b>10.3</b> Load fireshed project area data</a></li>
+<li class="chapter" data-level="10.4" data-path="scenario-analysis-wcs-priority-landscapes.html"><a href="scenario-analysis-wcs-priority-landscapes.html#landscape-level-analysis"><i class="fa fa-check"></i><b>10.4</b> Landscape-level analysis</a>
+<ul>
+<li class="chapter" data-level="10.4.1" data-path="scenario-analysis-wcs-priority-landscapes.html"><a href="scenario-analysis-wcs-priority-landscapes.html#reduction-treatable-area-table-2"><i class="fa fa-check"></i><b>10.4.1</b> Reduction Treatable Area Table</a></li>
+<li class="chapter" data-level="10.4.2" data-path="scenario-analysis-wcs-priority-landscapes.html"><a href="scenario-analysis-wcs-priority-landscapes.html#change-in-available-by-scenario"><i class="fa fa-check"></i><b>10.4.2</b> Change in Available by Scenario</a></li>
+<li class="chapter" data-level="10.4.3" data-path="scenario-analysis-wcs-priority-landscapes.html"><a href="scenario-analysis-wcs-priority-landscapes.html#reduction-by-constraint"><i class="fa fa-check"></i><b>10.4.3</b> Reduction by Constraint</a></li>
+</ul></li>
+</ul></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Sandbox</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="fsheds" class="section level1 hasAnchor" number="9">
+<h1><span class="header-section-number">Section 9</span> Exploring the Fireshed Registry<a href="fsheds.html#fsheds" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>The fireshed registry employs a nested spatial framework that organizes landscape variation in wildfire risk to developed areas into containers or “firesheds” and displays these data on a background of maps on management and disturbances, including past and predicted wildfire events and their potential impacts (<a href="https://scholar.google.com/scholar?cluster=7852635540589253195&amp;hl=en&amp;as_sdt=0,6">Ager et al. 2021</a>). Also, see <a href="https://scholar.google.com/scholar?cluster=735871002853083947&amp;hl=en&amp;as_sdt=0,6">Ager et al. (2021b)</a>.</p>
+<p>Each stand belongs to a single planning area, and each planning area belongs to a single fireshed, with the unit area of each scale centered at the desired sizes of 100 ha, 10,000 ha, and 100,000 ha respectively. The delineation process resulted in 7,688 fireshed polygons for the continental United States (fig. 2), 77,112 planning areas, and 9,726,460 stands (stands ranged in size from 5 ha to 117 ha; mean = 80 ha) (<a href="https://www.fs.usda.gov/rds/archive/Catalog/RDS-2020-0054">Evers et al. 2020</a>). The average area is 101,325 ha for the firesheds and 10,102 ha for the planning areas.</p>
+<p><em>Data was downloaded from the <a href="https://data-usfs.hub.arcgis.com/">USFS Geospatial Data Discovery Portal</a> on 2023-05-03</em></p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:unnamed-chunk-26"></span>
+<img src="https://www.fs.usda.gov/research/sites/default/files/styles/700px_wide/public/2023-02/rmrs-fireshed.png?itok=HjfCKaIM" alt="—National map of the 7,688 firesheds created from community wildfire transmission data" width="70%" height="70%" />
+<p class="caption">
+Figure 9.1: —National map of the 7,688 firesheds created from community wildfire transmission data
+</p>
+</div>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="fsheds.html#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># turn off the s2 processing </span></span>
+<span id="cb45-2"><a href="fsheds.html#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="do">## https://stackoverflow.com/questions/68478179/how-to-resolve-spherical-geometry-failures-when-joining-spatial-data</span></span>
+<span id="cb45-3"><a href="fsheds.html#cb45-3" aria-hidden="true" tabindex="-1"></a>sf<span class="sc">::</span><span class="fu">sf_use_s2</span>(<span class="cn">FALSE</span>)</span></code></pre></div>
+<div id="read-in-firesheds" class="section level2 hasAnchor" number="9.1">
+<h2><span class="header-section-number">9.1</span> Read in Firesheds<a href="fsheds.html#read-in-firesheds" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="fsheds.html#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># constraint by wf landscape</span></span>
+<span id="cb46-2"><a href="fsheds.html#cb46-2" aria-hidden="true" tabindex="-1"></a>constrained_by_wflndscp_wide_sf <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_read</span>(<span class="st">&quot;../data/constrained_by_wflndscp_wide_sf.gpkg&quot;</span>)</span>
+<span id="cb46-3"><a href="fsheds.html#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="co"># set crs</span></span>
+<span id="cb46-4"><a href="fsheds.html#cb46-4" aria-hidden="true" tabindex="-1"></a>transform_crs <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_crs</span>(constrained_by_wflndscp_wide_sf)</span>
+<span id="cb46-5"><a href="fsheds.html#cb46-5" aria-hidden="true" tabindex="-1"></a>  <span class="co">#rename sf geom column</span></span>
+<span id="cb46-6"><a href="fsheds.html#cb46-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(constrained_by_wflndscp_wide_sf)[<span class="fu">names</span>(constrained_by_wflndscp_wide_sf)<span class="sc">==</span><span class="fu">tolower</span>(<span class="fu">attr</span>(constrained_by_wflndscp_wide_sf, <span class="st">&quot;sf_column&quot;</span>))] <span class="ot">=</span> <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb46-7"><a href="fsheds.html#cb46-7" aria-hidden="true" tabindex="-1"></a>    sf<span class="sc">::</span><span class="fu">st_geometry</span>(constrained_by_wflndscp_wide_sf) <span class="ot">=</span> <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb46-8"><a href="fsheds.html#cb46-8" aria-hidden="true" tabindex="-1"></a><span class="do">### firesheds</span></span>
+<span id="cb46-9"><a href="fsheds.html#cb46-9" aria-hidden="true" tabindex="-1"></a>fireshed <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_read</span>(<span class="st">&quot;../data/firesheds/Fireshed_Registry3A_Fireshed/Fireshed_Registry%3A_Fireshed_(Feature_Layer).shp&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb46-10"><a href="fsheds.html#cb46-10" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_transform</span>(transform_crs) <span class="sc">|&gt;</span> </span>
+<span id="cb46-11"><a href="fsheds.html#cb46-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">setNames</span>(<span class="fu">c</span>(</span>
+<span id="cb46-12"><a href="fsheds.html#cb46-12" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;shape_id&quot;</span></span>
+<span id="cb46-13"><a href="fsheds.html#cb46-13" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;area_ha&quot;</span></span>
+<span id="cb46-14"><a href="fsheds.html#cb46-14" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;fireshed_id&quot;</span></span>
+<span id="cb46-15"><a href="fsheds.html#cb46-15" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;fireshed_name&quot;</span></span>
+<span id="cb46-16"><a href="fsheds.html#cb46-16" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;fireshed_code&quot;</span></span>
+<span id="cb46-17"><a href="fsheds.html#cb46-17" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;fireshed_state&quot;</span></span>
+<span id="cb46-18"><a href="fsheds.html#cb46-18" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;nopas&quot;</span></span>
+<span id="cb46-19"><a href="fsheds.html#cb46-19" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;objectid&quot;</span></span>
+<span id="cb46-20"><a href="fsheds.html#cb46-20" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;fshed_id&quot;</span></span>
+<span id="cb46-21"><a href="fsheds.html#cb46-21" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_total&quot;</span></span>
+<span id="cb46-22"><a href="fsheds.html#cb46-22" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_usfs&quot;</span></span>
+<span id="cb46-23"><a href="fsheds.html#cb46-23" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_nonfs&quot;</span></span>
+<span id="cb46-24"><a href="fsheds.html#cb46-24" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_usfs_protected&quot;</span></span>
+<span id="cb46-25"><a href="fsheds.html#cb46-25" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_nonfs_protected&quot;</span></span>
+<span id="cb46-26"><a href="fsheds.html#cb46-26" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_usfs_managed&quot;</span></span>
+<span id="cb46-27"><a href="fsheds.html#cb46-27" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_nonfs_managed&quot;</span></span>
+<span id="cb46-28"><a href="fsheds.html#cb46-28" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_usfs_forest&quot;</span></span>
+<span id="cb46-29"><a href="fsheds.html#cb46-29" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_nonfs_forest&quot;</span></span>
+<span id="cb46-30"><a href="fsheds.html#cb46-30" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_usfs_nonforest&quot;</span></span>
+<span id="cb46-31"><a href="fsheds.html#cb46-31" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_nonfs_nonforest&quot;</span></span>
+<span id="cb46-32"><a href="fsheds.html#cb46-32" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_usfs_conifer&quot;</span></span>
+<span id="cb46-33"><a href="fsheds.html#cb46-33" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_nonfs_conifer&quot;</span></span>
+<span id="cb46-34"><a href="fsheds.html#cb46-34" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_usfs_managedforest&quot;</span></span>
+<span id="cb46-35"><a href="fsheds.html#cb46-35" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_nonfs_managedforest&quot;</span></span>
+<span id="cb46-36"><a href="fsheds.html#cb46-36" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_usfs_managedconifer&quot;</span></span>
+<span id="cb46-37"><a href="fsheds.html#cb46-37" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_nonfs_managedconifer&quot;</span></span>
+<span id="cb46-38"><a href="fsheds.html#cb46-38" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_nonfs_nonconifer_hihaz&quot;</span></span>
+<span id="cb46-39"><a href="fsheds.html#cb46-39" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;dist_vs&quot;</span></span>
+<span id="cb46-40"><a href="fsheds.html#cb46-40" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;crisis_strategy&quot;</span></span>
+<span id="cb46-41"><a href="fsheds.html#cb46-41" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;key_preformance_indicator&quot;</span></span>
+<span id="cb46-42"><a href="fsheds.html#cb46-42" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;national_usfs_rank&quot;</span></span>
+<span id="cb46-43"><a href="fsheds.html#cb46-43" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;national_all_land_rank&quot;</span></span>
+<span id="cb46-44"><a href="fsheds.html#cb46-44" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;regional_usfs_rank&quot;</span></span>
+<span id="cb46-45"><a href="fsheds.html#cb46-45" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;regional_all_land_rank&quot;</span></span>
+<span id="cb46-46"><a href="fsheds.html#cb46-46" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;start_date&quot;</span></span>
+<span id="cb46-47"><a href="fsheds.html#cb46-47" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;end_date&quot;</span></span>
+<span id="cb46-48"><a href="fsheds.html#cb46-48" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb46-49"><a href="fsheds.html#cb46-49" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">|&gt;</span> </span>
+<span id="cb46-50"><a href="fsheds.html#cb46-50" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb46-51"><a href="fsheds.html#cb46-51" aria-hidden="true" tabindex="-1"></a>    <span class="at">exposure_pct_rank =</span> dplyr<span class="sc">::</span><span class="fu">percent_rank</span>(exp_total)</span>
+<span id="cb46-52"><a href="fsheds.html#cb46-52" aria-hidden="true" tabindex="-1"></a>    , <span class="at">exposure_pct_rank_grp =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb46-53"><a href="fsheds.html#cb46-53" aria-hidden="true" tabindex="-1"></a>      exposure_pct_rank <span class="sc">&gt;=</span> <span class="dv">1</span><span class="fl">-0.01</span> <span class="sc">~</span> <span class="st">&quot;Top 1%&quot;</span></span>
+<span id="cb46-54"><a href="fsheds.html#cb46-54" aria-hidden="true" tabindex="-1"></a>      , exposure_pct_rank <span class="sc">&gt;=</span> <span class="dv">1</span><span class="fl">-0.05</span> <span class="sc">~</span> <span class="st">&quot;Top 5%&quot;</span></span>
+<span id="cb46-55"><a href="fsheds.html#cb46-55" aria-hidden="true" tabindex="-1"></a>      , exposure_pct_rank <span class="sc">&gt;=</span> <span class="dv">1</span><span class="fl">-0.10</span> <span class="sc">~</span> <span class="st">&quot;Top 10%&quot;</span></span>
+<span id="cb46-56"><a href="fsheds.html#cb46-56" aria-hidden="true" tabindex="-1"></a>      , exposure_pct_rank <span class="sc">&gt;=</span> <span class="dv">1</span><span class="fl">-0.25</span> <span class="sc">~</span> <span class="st">&quot;Top 25%&quot;</span></span>
+<span id="cb46-57"><a href="fsheds.html#cb46-57" aria-hidden="true" tabindex="-1"></a>      , <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">&quot;Bottom 75%&quot;</span></span>
+<span id="cb46-58"><a href="fsheds.html#cb46-58" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb46-59"><a href="fsheds.html#cb46-59" aria-hidden="true" tabindex="-1"></a>    <span class="fu">factor</span>(</span>
+<span id="cb46-60"><a href="fsheds.html#cb46-60" aria-hidden="true" tabindex="-1"></a>      <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;Top 1%&quot;</span>,<span class="st">&quot;Top 5%&quot;</span>,<span class="st">&quot;Top 10%&quot;</span>,<span class="st">&quot;Top 25%&quot;</span>,<span class="st">&quot;Bottom 75%&quot;</span>)</span>
+<span id="cb46-61"><a href="fsheds.html#cb46-61" aria-hidden="true" tabindex="-1"></a>      , <span class="at">ordered =</span> T</span>
+<span id="cb46-62"><a href="fsheds.html#cb46-62" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb46-63"><a href="fsheds.html#cb46-63" aria-hidden="true" tabindex="-1"></a>    <span class="co"># there is also a national_all_land_rank column</span></span>
+<span id="cb46-64"><a href="fsheds.html#cb46-64" aria-hidden="true" tabindex="-1"></a>    , <span class="at">ntllandrank_pct_rank =</span> dplyr<span class="sc">::</span><span class="fu">percent_rank</span>(<span class="sc">-</span>national_all_land_rank)</span>
+<span id="cb46-65"><a href="fsheds.html#cb46-65" aria-hidden="true" tabindex="-1"></a>    , <span class="at">ntllandrank_pct_rank_grp =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb46-66"><a href="fsheds.html#cb46-66" aria-hidden="true" tabindex="-1"></a>      ntllandrank_pct_rank <span class="sc">&gt;=</span> <span class="dv">1</span><span class="fl">-0.01</span> <span class="sc">~</span> <span class="st">&quot;Top 1%&quot;</span></span>
+<span id="cb46-67"><a href="fsheds.html#cb46-67" aria-hidden="true" tabindex="-1"></a>      , ntllandrank_pct_rank <span class="sc">&gt;=</span> <span class="dv">1</span><span class="fl">-0.05</span> <span class="sc">~</span> <span class="st">&quot;Top 5%&quot;</span></span>
+<span id="cb46-68"><a href="fsheds.html#cb46-68" aria-hidden="true" tabindex="-1"></a>      , ntllandrank_pct_rank <span class="sc">&gt;=</span> <span class="dv">1</span><span class="fl">-0.10</span> <span class="sc">~</span> <span class="st">&quot;Top 10%&quot;</span></span>
+<span id="cb46-69"><a href="fsheds.html#cb46-69" aria-hidden="true" tabindex="-1"></a>      , ntllandrank_pct_rank <span class="sc">&gt;=</span> <span class="dv">1</span><span class="fl">-0.25</span> <span class="sc">~</span> <span class="st">&quot;Top 25%&quot;</span></span>
+<span id="cb46-70"><a href="fsheds.html#cb46-70" aria-hidden="true" tabindex="-1"></a>      , <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">&quot;Bottom 75%&quot;</span></span>
+<span id="cb46-71"><a href="fsheds.html#cb46-71" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb46-72"><a href="fsheds.html#cb46-72" aria-hidden="true" tabindex="-1"></a>    <span class="fu">factor</span>(</span>
+<span id="cb46-73"><a href="fsheds.html#cb46-73" aria-hidden="true" tabindex="-1"></a>      <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;Top 1%&quot;</span>,<span class="st">&quot;Top 5%&quot;</span>,<span class="st">&quot;Top 10%&quot;</span>,<span class="st">&quot;Top 25%&quot;</span>,<span class="st">&quot;Bottom 75%&quot;</span>)</span>
+<span id="cb46-74"><a href="fsheds.html#cb46-74" aria-hidden="true" tabindex="-1"></a>      , <span class="at">ordered =</span> T</span>
+<span id="cb46-75"><a href="fsheds.html#cb46-75" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb46-76"><a href="fsheds.html#cb46-76" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb46-77"><a href="fsheds.html#cb46-77" aria-hidden="true" tabindex="-1"></a>  <span class="co">#rename sf geom column</span></span>
+<span id="cb46-78"><a href="fsheds.html#cb46-78" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(fireshed)[<span class="fu">names</span>(fireshed)<span class="sc">==</span><span class="fu">tolower</span>(<span class="fu">attr</span>(fireshed, <span class="st">&quot;sf_column&quot;</span>))] <span class="ot">=</span> <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb46-79"><a href="fsheds.html#cb46-79" aria-hidden="true" tabindex="-1"></a>    sf<span class="sc">::</span><span class="fu">st_geometry</span>(fireshed) <span class="ot">=</span> <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb46-80"><a href="fsheds.html#cb46-80" aria-hidden="true" tabindex="-1"></a>    <span class="co"># calculate area</span></span>
+<span id="cb46-81"><a href="fsheds.html#cb46-81" aria-hidden="true" tabindex="-1"></a>    fireshed <span class="ot">&lt;-</span> fireshed <span class="sc">|&gt;</span> </span>
+<span id="cb46-82"><a href="fsheds.html#cb46-82" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb46-83"><a href="fsheds.html#cb46-83" aria-hidden="true" tabindex="-1"></a>        <span class="at">fireshed_area_ha =</span> <span class="fu">as.numeric</span>(sf<span class="sc">::</span><span class="fu">st_area</span>(geometry))<span class="sc">/</span><span class="dv">10000</span></span>
+<span id="cb46-84"><a href="fsheds.html#cb46-84" aria-hidden="true" tabindex="-1"></a>        , <span class="at">fireshed_area_acres =</span> (fireshed_area_ha<span class="sc">*</span><span class="dv">10000</span>)<span class="sc">/</span><span class="fl">4046.85642</span></span>
+<span id="cb46-85"><a href="fsheds.html#cb46-85" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb46-86"><a href="fsheds.html#cb46-86" aria-hidden="true" tabindex="-1"></a>  <span class="co"># save for reading later</span></span>
+<span id="cb46-87"><a href="fsheds.html#cb46-87" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_write</span>(fireshed,<span class="st">&quot;../data/firesheds/fireshed.gpkg&quot;</span>,<span class="at">append=</span>F)</span>
+<span id="cb46-88"><a href="fsheds.html#cb46-88" aria-hidden="true" tabindex="-1"></a><span class="do">### fireshed_proj_area</span></span>
+<span id="cb46-89"><a href="fsheds.html#cb46-89" aria-hidden="true" tabindex="-1"></a>fireshed_proj_area <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_read</span>(<span class="st">&quot;../data/firesheds/Fireshed_Registry3A_Project_Area/Fireshed_Registry%3A_Project_Area_(Feature_Layer).shp&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb46-90"><a href="fsheds.html#cb46-90" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_transform</span>(transform_crs) <span class="sc">|&gt;</span> </span>
+<span id="cb46-91"><a href="fsheds.html#cb46-91" aria-hidden="true" tabindex="-1"></a>  <span class="fu">setNames</span>(<span class="fu">c</span>(</span>
+<span id="cb46-92"><a href="fsheds.html#cb46-92" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;shape_id&quot;</span></span>
+<span id="cb46-93"><a href="fsheds.html#cb46-93" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;fireshed_id&quot;</span></span>
+<span id="cb46-94"><a href="fsheds.html#cb46-94" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;pa_id&quot;</span></span>
+<span id="cb46-95"><a href="fsheds.html#cb46-95" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;pa_area_ha&quot;</span></span>
+<span id="cb46-96"><a href="fsheds.html#cb46-96" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;objectid&quot;</span></span>
+<span id="cb46-97"><a href="fsheds.html#cb46-97" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;pa_id2&quot;</span></span>
+<span id="cb46-98"><a href="fsheds.html#cb46-98" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;fshed_id&quot;</span></span>
+<span id="cb46-99"><a href="fsheds.html#cb46-99" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_total&quot;</span></span>
+<span id="cb46-100"><a href="fsheds.html#cb46-100" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_usfs&quot;</span></span>
+<span id="cb46-101"><a href="fsheds.html#cb46-101" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_nonfs&quot;</span></span>
+<span id="cb46-102"><a href="fsheds.html#cb46-102" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_usfs_protected&quot;</span></span>
+<span id="cb46-103"><a href="fsheds.html#cb46-103" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_nonfs_protected&quot;</span></span>
+<span id="cb46-104"><a href="fsheds.html#cb46-104" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_usfs_managed&quot;</span></span>
+<span id="cb46-105"><a href="fsheds.html#cb46-105" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_nonfs_managed&quot;</span></span>
+<span id="cb46-106"><a href="fsheds.html#cb46-106" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_usfs_forest&quot;</span></span>
+<span id="cb46-107"><a href="fsheds.html#cb46-107" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_nonfs_forest&quot;</span></span>
+<span id="cb46-108"><a href="fsheds.html#cb46-108" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_usfs_nonforest&quot;</span></span>
+<span id="cb46-109"><a href="fsheds.html#cb46-109" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_nonfs_nonforest&quot;</span></span>
+<span id="cb46-110"><a href="fsheds.html#cb46-110" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_usfs_conifer&quot;</span></span>
+<span id="cb46-111"><a href="fsheds.html#cb46-111" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_nonfs_conifer&quot;</span></span>
+<span id="cb46-112"><a href="fsheds.html#cb46-112" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_usfs_managedforest&quot;</span></span>
+<span id="cb46-113"><a href="fsheds.html#cb46-113" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_nonfs_managedforest&quot;</span></span>
+<span id="cb46-114"><a href="fsheds.html#cb46-114" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_usfs_managedconifer&quot;</span></span>
+<span id="cb46-115"><a href="fsheds.html#cb46-115" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_nonfs_managedconifer&quot;</span></span>
+<span id="cb46-116"><a href="fsheds.html#cb46-116" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;exp_nonfs_nonconifer_hihaz&quot;</span></span>
+<span id="cb46-117"><a href="fsheds.html#cb46-117" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;dist_vs&quot;</span></span>
+<span id="cb46-118"><a href="fsheds.html#cb46-118" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;pctrecentlydisturbed&quot;</span></span>
+<span id="cb46-119"><a href="fsheds.html#cb46-119" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;start_date&quot;</span></span>
+<span id="cb46-120"><a href="fsheds.html#cb46-120" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;end_date&quot;</span></span>
+<span id="cb46-121"><a href="fsheds.html#cb46-121" aria-hidden="true" tabindex="-1"></a>      , <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb46-122"><a href="fsheds.html#cb46-122" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">|&gt;</span> </span>
+<span id="cb46-123"><a href="fsheds.html#cb46-123" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb46-124"><a href="fsheds.html#cb46-124" aria-hidden="true" tabindex="-1"></a>    <span class="at">exposure_pct_rank =</span> dplyr<span class="sc">::</span><span class="fu">percent_rank</span>(exp_total)</span>
+<span id="cb46-125"><a href="fsheds.html#cb46-125" aria-hidden="true" tabindex="-1"></a>    , <span class="at">exposure_pct_rank_grp =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb46-126"><a href="fsheds.html#cb46-126" aria-hidden="true" tabindex="-1"></a>      exposure_pct_rank <span class="sc">&gt;=</span> <span class="dv">1</span><span class="fl">-0.01</span> <span class="sc">~</span> <span class="st">&quot;Top 1%&quot;</span></span>
+<span id="cb46-127"><a href="fsheds.html#cb46-127" aria-hidden="true" tabindex="-1"></a>      , exposure_pct_rank <span class="sc">&gt;=</span> <span class="dv">1</span><span class="fl">-0.05</span> <span class="sc">~</span> <span class="st">&quot;Top 5%&quot;</span></span>
+<span id="cb46-128"><a href="fsheds.html#cb46-128" aria-hidden="true" tabindex="-1"></a>      , exposure_pct_rank <span class="sc">&gt;=</span> <span class="dv">1</span><span class="fl">-0.10</span> <span class="sc">~</span> <span class="st">&quot;Top 10%&quot;</span></span>
+<span id="cb46-129"><a href="fsheds.html#cb46-129" aria-hidden="true" tabindex="-1"></a>      , exposure_pct_rank <span class="sc">&gt;=</span> <span class="dv">1</span><span class="fl">-0.25</span> <span class="sc">~</span> <span class="st">&quot;Top 25%&quot;</span></span>
+<span id="cb46-130"><a href="fsheds.html#cb46-130" aria-hidden="true" tabindex="-1"></a>      , <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">&quot;Bottom 75%&quot;</span></span>
+<span id="cb46-131"><a href="fsheds.html#cb46-131" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb46-132"><a href="fsheds.html#cb46-132" aria-hidden="true" tabindex="-1"></a>    <span class="fu">factor</span>(</span>
+<span id="cb46-133"><a href="fsheds.html#cb46-133" aria-hidden="true" tabindex="-1"></a>      <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;Top 1%&quot;</span>,<span class="st">&quot;Top 5%&quot;</span>,<span class="st">&quot;Top 10%&quot;</span>,<span class="st">&quot;Top 25%&quot;</span>,<span class="st">&quot;Bottom 75%&quot;</span>)</span>
+<span id="cb46-134"><a href="fsheds.html#cb46-134" aria-hidden="true" tabindex="-1"></a>      , <span class="at">ordered =</span> T</span>
+<span id="cb46-135"><a href="fsheds.html#cb46-135" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb46-136"><a href="fsheds.html#cb46-136" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb46-137"><a href="fsheds.html#cb46-137" aria-hidden="true" tabindex="-1"></a>  <span class="co">#rename sf geom column</span></span>
+<span id="cb46-138"><a href="fsheds.html#cb46-138" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(fireshed_proj_area)[<span class="fu">names</span>(fireshed_proj_area)<span class="sc">==</span><span class="fu">tolower</span>(<span class="fu">attr</span>(fireshed_proj_area, <span class="st">&quot;sf_column&quot;</span>))] <span class="ot">=</span> <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb46-139"><a href="fsheds.html#cb46-139" aria-hidden="true" tabindex="-1"></a>    sf<span class="sc">::</span><span class="fu">st_geometry</span>(fireshed_proj_area) <span class="ot">=</span> <span class="st">&quot;geometry&quot;</span></span>
+<span id="cb46-140"><a href="fsheds.html#cb46-140" aria-hidden="true" tabindex="-1"></a>    <span class="co"># calculate area</span></span>
+<span id="cb46-141"><a href="fsheds.html#cb46-141" aria-hidden="true" tabindex="-1"></a>    fireshed_proj_area <span class="ot">&lt;-</span> fireshed_proj_area <span class="sc">|&gt;</span> </span>
+<span id="cb46-142"><a href="fsheds.html#cb46-142" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb46-143"><a href="fsheds.html#cb46-143" aria-hidden="true" tabindex="-1"></a>        <span class="at">pa_area_ha =</span> <span class="fu">as.numeric</span>(sf<span class="sc">::</span><span class="fu">st_area</span>(geometry))<span class="sc">/</span><span class="dv">10000</span></span>
+<span id="cb46-144"><a href="fsheds.html#cb46-144" aria-hidden="true" tabindex="-1"></a>        , <span class="at">pa_area_acres =</span> (pa_area_ha<span class="sc">*</span><span class="dv">10000</span>)<span class="sc">/</span><span class="fl">4046.85642</span></span>
+<span id="cb46-145"><a href="fsheds.html#cb46-145" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">|&gt;</span> </span>
+<span id="cb46-146"><a href="fsheds.html#cb46-146" aria-hidden="true" tabindex="-1"></a>      <span class="co"># JOIN WITH FIRESHED DATA</span></span>
+<span id="cb46-147"><a href="fsheds.html#cb46-147" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
+<span id="cb46-148"><a href="fsheds.html#cb46-148" aria-hidden="true" tabindex="-1"></a>        fireshed <span class="sc">|&gt;</span></span>
+<span id="cb46-149"><a href="fsheds.html#cb46-149" aria-hidden="true" tabindex="-1"></a>          sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span></span>
+<span id="cb46-150"><a href="fsheds.html#cb46-150" aria-hidden="true" tabindex="-1"></a>          dplyr<span class="sc">::</span><span class="fu">select</span>(fireshed_id, crisis_strategy, exp_total</span>
+<span id="cb46-151"><a href="fsheds.html#cb46-151" aria-hidden="true" tabindex="-1"></a>                        , exposure_pct_rank, exposure_pct_rank_grp</span>
+<span id="cb46-152"><a href="fsheds.html#cb46-152" aria-hidden="true" tabindex="-1"></a>          ) <span class="sc">|&gt;</span> </span>
+<span id="cb46-153"><a href="fsheds.html#cb46-153" aria-hidden="true" tabindex="-1"></a>          dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">exposure_total=</span>exp_total) <span class="sc">|&gt;</span> </span>
+<span id="cb46-154"><a href="fsheds.html#cb46-154" aria-hidden="true" tabindex="-1"></a>          dplyr<span class="sc">::</span><span class="fu">rename_with</span>(</span>
+<span id="cb46-155"><a href="fsheds.html#cb46-155" aria-hidden="true" tabindex="-1"></a>            <span class="sc">~</span> <span class="fu">paste0</span>(<span class="st">&quot;fireshed_&quot;</span>,.x)</span>
+<span id="cb46-156"><a href="fsheds.html#cb46-156" aria-hidden="true" tabindex="-1"></a>            , <span class="sc">-</span><span class="fu">c</span>(fireshed_id)</span>
+<span id="cb46-157"><a href="fsheds.html#cb46-157" aria-hidden="true" tabindex="-1"></a>          )</span>
+<span id="cb46-158"><a href="fsheds.html#cb46-158" aria-hidden="true" tabindex="-1"></a>        , <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(fireshed_id)</span>
+<span id="cb46-159"><a href="fsheds.html#cb46-159" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">|&gt;</span></span>
+<span id="cb46-160"><a href="fsheds.html#cb46-160" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(pa_id,pa_area_ha,exp_total,exposure_pct_rank,exposure_pct_rank_grp</span>
+<span id="cb46-161"><a href="fsheds.html#cb46-161" aria-hidden="true" tabindex="-1"></a>                    , tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;fireshed_&quot;</span>)</span>
+<span id="cb46-162"><a href="fsheds.html#cb46-162" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">|&gt;</span> </span>
+<span id="cb46-163"><a href="fsheds.html#cb46-163" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">exposure_total=</span>exp_total) <span class="sc">|&gt;</span> </span>
+<span id="cb46-164"><a href="fsheds.html#cb46-164" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">rename_with</span>(</span>
+<span id="cb46-165"><a href="fsheds.html#cb46-165" aria-hidden="true" tabindex="-1"></a>        <span class="sc">~</span> <span class="fu">paste0</span>(<span class="st">&quot;pa_&quot;</span>,.x)</span>
+<span id="cb46-166"><a href="fsheds.html#cb46-166" aria-hidden="true" tabindex="-1"></a>        , <span class="sc">-</span><span class="fu">c</span>(geometry,tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;fireshed_&quot;</span>),tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;pa_&quot;</span>))</span>
+<span id="cb46-167"><a href="fsheds.html#cb46-167" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb46-168"><a href="fsheds.html#cb46-168" aria-hidden="true" tabindex="-1"></a>  <span class="co"># save for reading later</span></span>
+<span id="cb46-169"><a href="fsheds.html#cb46-169" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_write</span>(fireshed_proj_area,<span class="st">&quot;../data/firesheds/fireshed_proj_area.gpkg&quot;</span>,<span class="at">append=</span>F)</span></code></pre></div>
+</div>
+<div id="area-of-firesheds" class="section level2 hasAnchor" number="9.2">
+<h2><span class="header-section-number">9.2</span> Area of firesheds<a href="fsheds.html#area-of-firesheds" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>what is the area of firesheds that intersect priority landscapes?</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="fsheds.html#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># what is the area of firesheds that intersect priority landscapes?</span></span>
+<span id="cb47-2"><a href="fsheds.html#cb47-2" aria-hidden="true" tabindex="-1"></a>fireshed <span class="sc">|&gt;</span> </span>
+<span id="cb47-3"><a href="fsheds.html#cb47-3" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_filter</span>(</span>
+<span id="cb47-4"><a href="fsheds.html#cb47-4" aria-hidden="true" tabindex="-1"></a>    constrained_by_wflndscp_wide_sf <span class="sc">|&gt;</span> </span>
+<span id="cb47-5"><a href="fsheds.html#cb47-5" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(area_name)</span>
+<span id="cb47-6"><a href="fsheds.html#cb47-6" aria-hidden="true" tabindex="-1"></a>    , <span class="at">.predicate=</span>st_intersects</span>
+<span id="cb47-7"><a href="fsheds.html#cb47-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb47-8"><a href="fsheds.html#cb47-8" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb47-9"><a href="fsheds.html#cb47-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb47-10"><a href="fsheds.html#cb47-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">crisis_strategy =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(crisis_strategy),<span class="st">&quot;Not Listed&quot;</span>,crisis_strategy)</span>
+<span id="cb47-11"><a href="fsheds.html#cb47-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb47-12"><a href="fsheds.html#cb47-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(crisis_strategy) <span class="sc">|&gt;</span> </span>
+<span id="cb47-13"><a href="fsheds.html#cb47-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
+<span id="cb47-14"><a href="fsheds.html#cb47-14" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">across</span>(</span>
+<span id="cb47-15"><a href="fsheds.html#cb47-15" aria-hidden="true" tabindex="-1"></a>      tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;fireshed_area_&quot;</span>)</span>
+<span id="cb47-16"><a href="fsheds.html#cb47-16" aria-hidden="true" tabindex="-1"></a>      , <span class="fu">list</span>(<span class="at">sum=</span>sum,<span class="at">mean=</span>mean)</span>
+<span id="cb47-17"><a href="fsheds.html#cb47-17" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb47-18"><a href="fsheds.html#cb47-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb47-19"><a href="fsheds.html#cb47-19" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb47-20"><a href="fsheds.html#cb47-20" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">across</span>(</span>
+<span id="cb47-21"><a href="fsheds.html#cb47-21" aria-hidden="true" tabindex="-1"></a>      tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;fireshed_area_&quot;</span>)</span>
+<span id="cb47-22"><a href="fsheds.html#cb47-22" aria-hidden="true" tabindex="-1"></a>      , <span class="sc">~</span> scales<span class="sc">::</span><span class="fu">comma</span>(.x, <span class="at">suffix =</span> <span class="st">&quot; M&quot;</span>, <span class="at">scale =</span> <span class="fl">1e-6</span>, <span class="at">accuracy =</span> .<span class="dv">01</span>)</span>
+<span id="cb47-23"><a href="fsheds.html#cb47-23" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb47-24"><a href="fsheds.html#cb47-24" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb47-25"><a href="fsheds.html#cb47-25" aria-hidden="true" tabindex="-1"></a>  kableExtra<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb47-26"><a href="fsheds.html#cb47-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">&quot;Area of firesheds by `crisis_strategy` column&quot;</span></span>
+<span id="cb47-27"><a href="fsheds.html#cb47-27" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb47-28"><a href="fsheds.html#cb47-28" aria-hidden="true" tabindex="-1"></a>  kableExtra<span class="sc">::</span><span class="fu">kable_classic</span>(<span class="at">full_width=</span>T)</span></code></pre></div>
+<table class=" lightable-classic" style="font-family: &quot;Arial Narrow&quot;, &quot;Source Sans Pro&quot;, sans-serif; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:unnamed-chunk-31">Table 9.1: </span>Area of firesheds by <code>crisis_strategy</code> column
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+crisis_strategy
+</th>
+<th style="text-align:left;">
+fireshed_area_ha_sum
+</th>
+<th style="text-align:left;">
+fireshed_area_ha_mean
+</th>
+<th style="text-align:left;">
+fireshed_area_acres_sum
+</th>
+<th style="text-align:left;">
+fireshed_area_acres_mean
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+All-Lands
+</td>
+<td style="text-align:left;">
+9.17 M
+</td>
+<td style="text-align:left;">
+0.11 M
+</td>
+<td style="text-align:left;">
+22.67 M
+</td>
+<td style="text-align:left;">
+0.27 M
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Not Listed
+</td>
+<td style="text-align:left;">
+31.30 M
+</td>
+<td style="text-align:left;">
+0.11 M
+</td>
+<td style="text-align:left;">
+77.35 M
+</td>
+<td style="text-align:left;">
+0.26 M
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+USFS-Only
+</td>
+<td style="text-align:left;">
+6.86 M
+</td>
+<td style="text-align:left;">
+0.11 M
+</td>
+<td style="text-align:left;">
+16.94 M
+</td>
+<td style="text-align:left;">
+0.26 M
+</td>
+</tr>
+</tbody>
+</table>
+<p>what is the area of firesheds within priority landscapes?</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="fsheds.html#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># what is the area of firesheds within priority landscapes?</span></span>
+<span id="cb48-2"><a href="fsheds.html#cb48-2" aria-hidden="true" tabindex="-1"></a>fireshed <span class="sc">|&gt;</span> </span>
+<span id="cb48-3"><a href="fsheds.html#cb48-3" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_intersection</span>(</span>
+<span id="cb48-4"><a href="fsheds.html#cb48-4" aria-hidden="true" tabindex="-1"></a>    constrained_by_wflndscp_wide_sf <span class="sc">|&gt;</span> </span>
+<span id="cb48-5"><a href="fsheds.html#cb48-5" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(area_name)</span>
+<span id="cb48-6"><a href="fsheds.html#cb48-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb48-7"><a href="fsheds.html#cb48-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb48-8"><a href="fsheds.html#cb48-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">crisis_strategy =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(crisis_strategy),<span class="st">&quot;Not Listed&quot;</span>,crisis_strategy)</span>
+<span id="cb48-9"><a href="fsheds.html#cb48-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb48-10"><a href="fsheds.html#cb48-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(crisis_strategy) <span class="sc">|&gt;</span> </span>
+<span id="cb48-11"><a href="fsheds.html#cb48-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
+<span id="cb48-12"><a href="fsheds.html#cb48-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">geometry =</span> sf<span class="sc">::</span><span class="fu">st_union</span>(geometry)</span>
+<span id="cb48-13"><a href="fsheds.html#cb48-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb48-14"><a href="fsheds.html#cb48-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb48-15"><a href="fsheds.html#cb48-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">fireshed_area_ha =</span> <span class="fu">as.numeric</span>(sf<span class="sc">::</span><span class="fu">st_area</span>(geometry))<span class="sc">/</span><span class="dv">10000</span></span>
+<span id="cb48-16"><a href="fsheds.html#cb48-16" aria-hidden="true" tabindex="-1"></a>    , <span class="at">fireshed_area_acres =</span> (fireshed_area_ha<span class="sc">*</span><span class="dv">10000</span>)<span class="sc">/</span><span class="fl">4046.85642</span></span>
+<span id="cb48-17"><a href="fsheds.html#cb48-17" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb48-18"><a href="fsheds.html#cb48-18" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb48-19"><a href="fsheds.html#cb48-19" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(crisis_strategy) <span class="sc">|&gt;</span> </span>
+<span id="cb48-20"><a href="fsheds.html#cb48-20" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
+<span id="cb48-21"><a href="fsheds.html#cb48-21" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">across</span>(</span>
+<span id="cb48-22"><a href="fsheds.html#cb48-22" aria-hidden="true" tabindex="-1"></a>      tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;fireshed_area_&quot;</span>)</span>
+<span id="cb48-23"><a href="fsheds.html#cb48-23" aria-hidden="true" tabindex="-1"></a>      , <span class="fu">list</span>(<span class="at">sum=</span>sum)</span>
+<span id="cb48-24"><a href="fsheds.html#cb48-24" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb48-25"><a href="fsheds.html#cb48-25" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb48-26"><a href="fsheds.html#cb48-26" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb48-27"><a href="fsheds.html#cb48-27" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">across</span>(</span>
+<span id="cb48-28"><a href="fsheds.html#cb48-28" aria-hidden="true" tabindex="-1"></a>      tidyselect<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">&quot;fireshed_area_&quot;</span>)</span>
+<span id="cb48-29"><a href="fsheds.html#cb48-29" aria-hidden="true" tabindex="-1"></a>      , <span class="sc">~</span> scales<span class="sc">::</span><span class="fu">comma</span>(.x, <span class="at">suffix =</span> <span class="st">&quot; M&quot;</span>, <span class="at">scale =</span> <span class="fl">1e-6</span>, <span class="at">accuracy =</span> .<span class="dv">01</span>)</span>
+<span id="cb48-30"><a href="fsheds.html#cb48-30" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb48-31"><a href="fsheds.html#cb48-31" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb48-32"><a href="fsheds.html#cb48-32" aria-hidden="true" tabindex="-1"></a>  kableExtra<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb48-33"><a href="fsheds.html#cb48-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">&quot;Area of firesheds within WCS landscape boundaries by `crisis_strategy` column&quot;</span></span>
+<span id="cb48-34"><a href="fsheds.html#cb48-34" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb48-35"><a href="fsheds.html#cb48-35" aria-hidden="true" tabindex="-1"></a>  kableExtra<span class="sc">::</span><span class="fu">kable_classic</span>(<span class="at">full_width=</span>T)</span></code></pre></div>
+<table class=" lightable-classic" style="font-family: &quot;Arial Narrow&quot;, &quot;Source Sans Pro&quot;, sans-serif; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:unnamed-chunk-32">Table 9.2: </span>Area of firesheds within WCS landscape boundaries by <code>crisis_strategy</code> column
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+crisis_strategy
+</th>
+<th style="text-align:left;">
+fireshed_area_ha_sum
+</th>
+<th style="text-align:left;">
+fireshed_area_acres_sum
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+All-Lands
+</td>
+<td style="text-align:left;">
+5.09 M
+</td>
+<td style="text-align:left;">
+12.57 M
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Not Listed
+</td>
+<td style="text-align:left;">
+9.42 M
+</td>
+<td style="text-align:left;">
+23.29 M
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+USFS-Only
+</td>
+<td style="text-align:left;">
+4.52 M
+</td>
+<td style="text-align:left;">
+11.17 M
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="national-fireshed-map" class="section level2 hasAnchor" number="9.3">
+<h2><span class="header-section-number">9.3</span> National Fireshed Map<a href="fsheds.html#national-fireshed-map" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Replicate Figure 2 from <a href="https://scholar.google.com/scholar?cluster=7852635540589253195&amp;hl=en&amp;as_sdt=0,6">Ager et al. 2021</a> (p. 7)</p>
+<p><em>National map of the 7,688 firesheds created from community wildfire transmission data (Evers et al. 2020). The fireshed boundaries were created with a process that delineates hotspots of fire transmission to buildings in adjacent or nearby communities. See the Methods section for details on delineating firesheds.</em></p>
+<p>Note, fireshed percentiles are based on the total exposure within the fireshed (i.e., number of exposed buildings per year)</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="fsheds.html#cb49-1" aria-hidden="true" tabindex="-1"></a>plt_fshed_fn <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">my_fill =</span> exposure_pct_rank_grp, <span class="at">my_title =</span> <span class="st">&quot;Exposure Percentile&quot;</span>) {</span>
+<span id="cb49-2"><a href="fsheds.html#cb49-2" aria-hidden="true" tabindex="-1"></a>  my_fill <span class="ot">&lt;-</span> <span class="fu">enquo</span>(my_fill)</span>
+<span id="cb49-3"><a href="fsheds.html#cb49-3" aria-hidden="true" tabindex="-1"></a>  plt <span class="ot">&lt;-</span> </span>
+<span id="cb49-4"><a href="fsheds.html#cb49-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb49-5"><a href="fsheds.html#cb49-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_sf</span>(</span>
+<span id="cb49-6"><a href="fsheds.html#cb49-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">data =</span> fireshed</span>
+<span id="cb49-7"><a href="fsheds.html#cb49-7" aria-hidden="true" tabindex="-1"></a>        , <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">fill=</span><span class="sc">!!</span>my_fill)</span>
+<span id="cb49-8"><a href="fsheds.html#cb49-8" aria-hidden="true" tabindex="-1"></a>        <span class="co"># , mapping = aes(fill=ntllandrank_pct_rank_grp)</span></span>
+<span id="cb49-9"><a href="fsheds.html#cb49-9" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">+</span> </span>
+<span id="cb49-10"><a href="fsheds.html#cb49-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_sf</span>(</span>
+<span id="cb49-11"><a href="fsheds.html#cb49-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">data =</span> USAboundaries<span class="sc">::</span><span class="fu">us_states</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb49-12"><a href="fsheds.html#cb49-12" aria-hidden="true" tabindex="-1"></a>          dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span>stusps <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;AK&quot;</span>,<span class="st">&quot;HI&quot;</span>,<span class="st">&quot;PR&quot;</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb49-13"><a href="fsheds.html#cb49-13" aria-hidden="true" tabindex="-1"></a>          sf<span class="sc">::</span><span class="fu">st_transform</span>(transform_crs)</span>
+<span id="cb49-14"><a href="fsheds.html#cb49-14" aria-hidden="true" tabindex="-1"></a>        , <span class="at">fill =</span> <span class="cn">NA</span></span>
+<span id="cb49-15"><a href="fsheds.html#cb49-15" aria-hidden="true" tabindex="-1"></a>        , <span class="at">color =</span> <span class="st">&quot;gray88&quot;</span></span>
+<span id="cb49-16"><a href="fsheds.html#cb49-16" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">+</span></span>
+<span id="cb49-17"><a href="fsheds.html#cb49-17" aria-hidden="true" tabindex="-1"></a>      <span class="fu">scale_fill_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">&quot;firebrick&quot;</span>,<span class="st">&quot;orange3&quot;</span>,<span class="st">&quot;khaki&quot;</span>,<span class="st">&quot;seagreen3&quot;</span>,<span class="st">&quot;royalblue&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb49-18"><a href="fsheds.html#cb49-18" aria-hidden="true" tabindex="-1"></a>      <span class="fu">labs</span>(</span>
+<span id="cb49-19"><a href="fsheds.html#cb49-19" aria-hidden="true" tabindex="-1"></a>        <span class="at">x =</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb49-20"><a href="fsheds.html#cb49-20" aria-hidden="true" tabindex="-1"></a>        , <span class="at">y =</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb49-21"><a href="fsheds.html#cb49-21" aria-hidden="true" tabindex="-1"></a>        , <span class="at">fill =</span> <span class="st">&quot;Fireshed exposure ranks&quot;</span></span>
+<span id="cb49-22"><a href="fsheds.html#cb49-22" aria-hidden="true" tabindex="-1"></a>        , <span class="at">subtitle =</span> my_title</span>
+<span id="cb49-23"><a href="fsheds.html#cb49-23" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">+</span></span>
+<span id="cb49-24"><a href="fsheds.html#cb49-24" aria-hidden="true" tabindex="-1"></a>      <span class="fu">theme_light</span>() <span class="sc">+</span> </span>
+<span id="cb49-25"><a href="fsheds.html#cb49-25" aria-hidden="true" tabindex="-1"></a>      <span class="fu">theme</span>(</span>
+<span id="cb49-26"><a href="fsheds.html#cb49-26" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">&quot;top&quot;</span></span>
+<span id="cb49-27"><a href="fsheds.html#cb49-27" aria-hidden="true" tabindex="-1"></a>        , <span class="at">legend.direction =</span> <span class="st">&quot;horizontal&quot;</span></span>
+<span id="cb49-28"><a href="fsheds.html#cb49-28" aria-hidden="true" tabindex="-1"></a>        , <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>)</span>
+<span id="cb49-29"><a href="fsheds.html#cb49-29" aria-hidden="true" tabindex="-1"></a>        , <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">7</span>)</span>
+<span id="cb49-30"><a href="fsheds.html#cb49-30" aria-hidden="true" tabindex="-1"></a>        , <span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">7</span>)</span>
+<span id="cb49-31"><a href="fsheds.html#cb49-31" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb49-32"><a href="fsheds.html#cb49-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(plt)</span>
+<span id="cb49-33"><a href="fsheds.html#cb49-33" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb49-34"><a href="fsheds.html#cb49-34" aria-hidden="true" tabindex="-1"></a><span class="co"># plot based on exposure column</span></span>
+<span id="cb49-35"><a href="fsheds.html#cb49-35" aria-hidden="true" tabindex="-1"></a><span class="fu">plt_fshed_fn</span>()</span></code></pre></div>
+<p><img src="csu_sandbox_files/figure-html/fshed-plt-rep-1.png" width="960" /></p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="fsheds.html#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># plot based on rank column</span></span>
+<span id="cb50-2"><a href="fsheds.html#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plt_fshed_fn</span>(<span class="at">my_fill =</span> ntllandrank_pct_rank_grp, <span class="at">my_title =</span> <span class="st">&quot;National Land Rank Percentile&quot;</span>)</span></code></pre></div>
+<p><img src="csu_sandbox_files/figure-html/fshed-plt-rep-2.png" width="960" /></p>
+</div>
+<div id="fireshed-project-area-map" class="section level2 hasAnchor" number="9.4">
+<h2><span class="header-section-number">9.4</span> Fireshed Project Area Map<a href="fsheds.html#fireshed-project-area-map" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Replicate Figure 1 from <a href="https://scholar.google.com/scholar?cluster=735871002853083947&amp;hl=en&amp;as_sdt=0,6">Ager et al. (2021b)</a> (p.3)</p>
+<p><em>Project areas and associated building exposure from ignitions within the project areas on priority landscape lands in the western US.</em></p>
+<p>Note, fireshed percentiles are based on the total exposure within the fireshed project area (i.e., number of exposed buildings per year)</p>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="fsheds.html#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb51-2"><a href="fsheds.html#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(</span>
+<span id="cb51-3"><a href="fsheds.html#cb51-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> USAboundaries<span class="sc">::</span><span class="fu">us_states</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb51-4"><a href="fsheds.html#cb51-4" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">filter</span>(stusps <span class="sc">%in%</span> <span class="fu">c</span>(</span>
+<span id="cb51-5"><a href="fsheds.html#cb51-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;MT&quot;</span>,<span class="st">&quot;WY&quot;</span>,<span class="st">&quot;CO&quot;</span>,<span class="st">&quot;NM&quot;</span>,<span class="st">&quot;AZ&quot;</span>,<span class="st">&quot;UT&quot;</span>,<span class="st">&quot;ID&quot;</span>,<span class="st">&quot;WA&quot;</span>,<span class="st">&quot;OR&quot;</span>,<span class="st">&quot;CA&quot;</span>,<span class="st">&quot;NV&quot;</span></span>
+<span id="cb51-6"><a href="fsheds.html#cb51-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># , &quot;KS&quot;,&quot;NE&quot;,&quot;SD&quot;,&quot;ND&quot;</span></span>
+<span id="cb51-7"><a href="fsheds.html#cb51-7" aria-hidden="true" tabindex="-1"></a>      )) <span class="sc">|&gt;</span> </span>
+<span id="cb51-8"><a href="fsheds.html#cb51-8" aria-hidden="true" tabindex="-1"></a>      sf<span class="sc">::</span><span class="fu">st_transform</span>(transform_crs)</span>
+<span id="cb51-9"><a href="fsheds.html#cb51-9" aria-hidden="true" tabindex="-1"></a>    , <span class="at">fill =</span> <span class="cn">NA</span></span>
+<span id="cb51-10"><a href="fsheds.html#cb51-10" aria-hidden="true" tabindex="-1"></a>    , <span class="at">color =</span> <span class="st">&quot;gray11&quot;</span></span>
+<span id="cb51-11"><a href="fsheds.html#cb51-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb51-12"><a href="fsheds.html#cb51-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> constrained_by_wflndscp_wide_sf, <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="st">&quot;black&quot;</span>) <span class="sc">+</span></span>
+<span id="cb51-13"><a href="fsheds.html#cb51-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(</span>
+<span id="cb51-14"><a href="fsheds.html#cb51-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> fireshed_proj_area <span class="sc">|&gt;</span> </span>
+<span id="cb51-15"><a href="fsheds.html#cb51-15" aria-hidden="true" tabindex="-1"></a>      sf<span class="sc">::</span><span class="fu">st_intersection</span>(constrained_by_wflndscp_wide_sf)</span>
+<span id="cb51-16"><a href="fsheds.html#cb51-16" aria-hidden="true" tabindex="-1"></a>    , <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">fill=</span>pa_exposure_pct_rank_grp)</span>
+<span id="cb51-17"><a href="fsheds.html#cb51-17" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span> </span>
+<span id="cb51-18"><a href="fsheds.html#cb51-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">&quot;firebrick&quot;</span>,<span class="st">&quot;orange3&quot;</span>,<span class="st">&quot;khaki&quot;</span>,<span class="st">&quot;seagreen3&quot;</span>,<span class="st">&quot;royalblue&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb51-19"><a href="fsheds.html#cb51-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb51-20"><a href="fsheds.html#cb51-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb51-21"><a href="fsheds.html#cb51-21" aria-hidden="true" tabindex="-1"></a>    , <span class="at">y =</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb51-22"><a href="fsheds.html#cb51-22" aria-hidden="true" tabindex="-1"></a>    , <span class="at">fill =</span> <span class="st">&quot;Fireshed exposure ranks&quot;</span></span>
+<span id="cb51-23"><a href="fsheds.html#cb51-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb51-24"><a href="fsheds.html#cb51-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_light</span>() <span class="sc">+</span> </span>
+<span id="cb51-25"><a href="fsheds.html#cb51-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb51-26"><a href="fsheds.html#cb51-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">&quot;top&quot;</span></span>
+<span id="cb51-27"><a href="fsheds.html#cb51-27" aria-hidden="true" tabindex="-1"></a>    , <span class="at">legend.direction =</span> <span class="st">&quot;horizontal&quot;</span></span>
+<span id="cb51-28"><a href="fsheds.html#cb51-28" aria-hidden="true" tabindex="-1"></a>    , <span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">7</span>)</span>
+<span id="cb51-29"><a href="fsheds.html#cb51-29" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<p><img src="csu_sandbox_files/figure-html/fshed-prj-plt-rep-1.png" width="960" /></p>
+</div>
+<div id="firsheds-in-landscapes" class="section level2 hasAnchor" number="9.5">
+<h2><span class="header-section-number">9.5</span> Firsheds in landscapes<a href="fsheds.html#firsheds-in-landscapes" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>plot only firsheds that intersect priority landscapes</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="fsheds.html#cb52-1" aria-hidden="true" tabindex="-1"></a>fireshed <span class="sc">|&gt;</span></span>
+<span id="cb52-2"><a href="fsheds.html#cb52-2" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_filter</span>(</span>
+<span id="cb52-3"><a href="fsheds.html#cb52-3" aria-hidden="true" tabindex="-1"></a>    constrained_by_wflndscp_wide_sf <span class="sc">|&gt;</span></span>
+<span id="cb52-4"><a href="fsheds.html#cb52-4" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(area_name)</span>
+<span id="cb52-5"><a href="fsheds.html#cb52-5" aria-hidden="true" tabindex="-1"></a>    , <span class="at">.predicate=</span>st_intersects</span>
+<span id="cb52-6"><a href="fsheds.html#cb52-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb52-7"><a href="fsheds.html#cb52-7" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_join</span>(</span>
+<span id="cb52-8"><a href="fsheds.html#cb52-8" aria-hidden="true" tabindex="-1"></a>    constrained_by_wflndscp_wide_sf <span class="sc">|&gt;</span></span>
+<span id="cb52-9"><a href="fsheds.html#cb52-9" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(area_name)</span>
+<span id="cb52-10"><a href="fsheds.html#cb52-10" aria-hidden="true" tabindex="-1"></a>    , <span class="at">join =</span> st_intersects</span>
+<span id="cb52-11"><a href="fsheds.html#cb52-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb52-12"><a href="fsheds.html#cb52-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb52-13"><a href="fsheds.html#cb52-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">crisis_strategy =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(crisis_strategy),<span class="st">&quot;Not Listed&quot;</span>,crisis_strategy)</span>
+<span id="cb52-14"><a href="fsheds.html#cb52-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb52-15"><a href="fsheds.html#cb52-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb52-16"><a href="fsheds.html#cb52-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_sf</span>(</span>
+<span id="cb52-17"><a href="fsheds.html#cb52-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> USAboundaries<span class="sc">::</span><span class="fu">us_states</span>(<span class="at">states =</span> <span class="fu">c</span>(</span>
+<span id="cb52-18"><a href="fsheds.html#cb52-18" aria-hidden="true" tabindex="-1"></a>          <span class="co"># usfs region 1-6 states</span></span>
+<span id="cb52-19"><a href="fsheds.html#cb52-19" aria-hidden="true" tabindex="-1"></a>          <span class="st">&quot;MT&quot;</span>,<span class="st">&quot;WY&quot;</span>,<span class="st">&quot;CO&quot;</span>,<span class="st">&quot;NM&quot;</span>,<span class="st">&quot;AZ&quot;</span>,<span class="st">&quot;UT&quot;</span>,<span class="st">&quot;ID&quot;</span>,<span class="st">&quot;WA&quot;</span>,<span class="st">&quot;OR&quot;</span>,<span class="st">&quot;CA&quot;</span>,<span class="st">&quot;NV&quot;</span></span>
+<span id="cb52-20"><a href="fsheds.html#cb52-20" aria-hidden="true" tabindex="-1"></a>          <span class="co"># , &quot;KS&quot;,&quot;NE&quot;,&quot;SD&quot;,&quot;ND&quot;</span></span>
+<span id="cb52-21"><a href="fsheds.html#cb52-21" aria-hidden="true" tabindex="-1"></a>        )) <span class="sc">|&gt;</span> </span>
+<span id="cb52-22"><a href="fsheds.html#cb52-22" aria-hidden="true" tabindex="-1"></a>        sf<span class="sc">::</span><span class="fu">st_transform</span>(transform_crs)</span>
+<span id="cb52-23"><a href="fsheds.html#cb52-23" aria-hidden="true" tabindex="-1"></a>      , <span class="at">fill =</span> <span class="cn">NA</span></span>
+<span id="cb52-24"><a href="fsheds.html#cb52-24" aria-hidden="true" tabindex="-1"></a>      , <span class="at">color =</span> <span class="st">&quot;gray33&quot;</span></span>
+<span id="cb52-25"><a href="fsheds.html#cb52-25" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb52-26"><a href="fsheds.html#cb52-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">fill=</span>crisis_strategy)) <span class="sc">+</span></span>
+<span id="cb52-27"><a href="fsheds.html#cb52-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_sf</span>(<span class="at">data=</span>constrained_by_wflndscp_wide_sf,<span class="at">fill=</span><span class="cn">NA</span>,<span class="at">color=</span><span class="st">&quot;black&quot;</span>,<span class="at">lwd=</span><span class="fl">0.6</span>)<span class="sc">+</span></span>
+<span id="cb52-28"><a href="fsheds.html#cb52-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;All-Lands&quot;</span><span class="ot">=</span><span class="st">&quot;firebrick&quot;</span>,<span class="st">&quot;USFS-Only&quot;</span><span class="ot">=</span><span class="st">&quot;orange3&quot;</span>,<span class="st">&quot;Not Listed&quot;</span><span class="ot">=</span><span class="st">&quot;gray&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb52-29"><a href="fsheds.html#cb52-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(</span>
+<span id="cb52-30"><a href="fsheds.html#cb52-30" aria-hidden="true" tabindex="-1"></a>      <span class="at">fill =</span> <span class="st">&quot;Crisis Strategy</span><span class="sc">\n</span><span class="st">Category&quot;</span></span>
+<span id="cb52-31"><a href="fsheds.html#cb52-31" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb52-32"><a href="fsheds.html#cb52-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_light</span>() <span class="sc">+</span></span>
+<span id="cb52-33"><a href="fsheds.html#cb52-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(</span>
+<span id="cb52-34"><a href="fsheds.html#cb52-34" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="fu">c</span>(<span class="fl">0.9</span>,<span class="fl">0.9</span>) <span class="co"># &quot;top&quot;</span></span>
+<span id="cb52-35"><a href="fsheds.html#cb52-35" aria-hidden="true" tabindex="-1"></a>        <span class="co"># , legend.direction = &quot;horizontal&quot;</span></span>
+<span id="cb52-36"><a href="fsheds.html#cb52-36" aria-hidden="true" tabindex="-1"></a>        , <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>)</span>
+<span id="cb52-37"><a href="fsheds.html#cb52-37" aria-hidden="true" tabindex="-1"></a>        , <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">7</span>)</span>
+<span id="cb52-38"><a href="fsheds.html#cb52-38" aria-hidden="true" tabindex="-1"></a>        , <span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">7</span>)</span>
+<span id="cb52-39"><a href="fsheds.html#cb52-39" aria-hidden="true" tabindex="-1"></a>      )</span></code></pre></div>
+<p><img src="csu_sandbox_files/figure-html/unnamed-chunk-35-1.png" width="960" /></p>
+</div>
+<div id="firsheds-with-wcs-flag" class="section level2 hasAnchor" number="9.6">
+<h2><span class="header-section-number">9.6</span> Firsheds with WCS flag<a href="fsheds.html#firsheds-with-wcs-flag" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>attempting to match the priority landscape map from the <a href="https://www.fs.usda.gov/sites/default/files/2023-01/wcs-landscapes2-graphics4.jpg">WCS press kit</a></p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:unnamed-chunk-36"></span>
+<img src="https://www.fs.usda.gov/sites/default/files/2023-01/wcs-landscapes2-graphics4.jpg" alt="Wildfire Crisis Strategy Priority Landscapes" width="50%" height="50%" />
+<p class="caption">
+Figure 9.2: Wildfire Crisis Strategy Priority Landscapes
+</p>
+</div>
+<p>plot only firesheds that have a non-null <code>crisis_strategy</code> value in the western US</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="fsheds.html#cb53-1" aria-hidden="true" tabindex="-1"></a>  fireshed <span class="sc">|&gt;</span> </span>
+<span id="cb53-2"><a href="fsheds.html#cb53-2" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(crisis_strategy)) <span class="sc">|&gt;</span> </span>
+<span id="cb53-3"><a href="fsheds.html#cb53-3" aria-hidden="true" tabindex="-1"></a>    sf<span class="sc">::</span><span class="fu">st_intersection</span>(</span>
+<span id="cb53-4"><a href="fsheds.html#cb53-4" aria-hidden="true" tabindex="-1"></a>      USAboundaries<span class="sc">::</span><span class="fu">us_states</span>(<span class="at">states =</span> <span class="fu">c</span>(</span>
+<span id="cb53-5"><a href="fsheds.html#cb53-5" aria-hidden="true" tabindex="-1"></a>          <span class="co"># usfs region 1-6 states</span></span>
+<span id="cb53-6"><a href="fsheds.html#cb53-6" aria-hidden="true" tabindex="-1"></a>          <span class="st">&quot;MT&quot;</span>,<span class="st">&quot;WY&quot;</span>,<span class="st">&quot;CO&quot;</span>,<span class="st">&quot;NM&quot;</span>,<span class="st">&quot;AZ&quot;</span>,<span class="st">&quot;UT&quot;</span>,<span class="st">&quot;ID&quot;</span>,<span class="st">&quot;WA&quot;</span>,<span class="st">&quot;OR&quot;</span>,<span class="st">&quot;CA&quot;</span>,<span class="st">&quot;NV&quot;</span></span>
+<span id="cb53-7"><a href="fsheds.html#cb53-7" aria-hidden="true" tabindex="-1"></a>          , <span class="st">&quot;SD&quot;</span>,<span class="st">&quot;ND&quot;</span></span>
+<span id="cb53-8"><a href="fsheds.html#cb53-8" aria-hidden="true" tabindex="-1"></a>        )) <span class="sc">|&gt;</span> </span>
+<span id="cb53-9"><a href="fsheds.html#cb53-9" aria-hidden="true" tabindex="-1"></a>        sf<span class="sc">::</span><span class="fu">st_union</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb53-10"><a href="fsheds.html#cb53-10" aria-hidden="true" tabindex="-1"></a>        sf<span class="sc">::</span><span class="fu">st_transform</span>(transform_crs)</span>
+<span id="cb53-11"><a href="fsheds.html#cb53-11" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb53-12"><a href="fsheds.html#cb53-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb53-13"><a href="fsheds.html#cb53-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_sf</span>(</span>
+<span id="cb53-14"><a href="fsheds.html#cb53-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> USAboundaries<span class="sc">::</span><span class="fu">us_states</span>(<span class="at">states =</span> <span class="fu">c</span>(</span>
+<span id="cb53-15"><a href="fsheds.html#cb53-15" aria-hidden="true" tabindex="-1"></a>          <span class="co"># usfs region 1-6 states</span></span>
+<span id="cb53-16"><a href="fsheds.html#cb53-16" aria-hidden="true" tabindex="-1"></a>          <span class="st">&quot;MT&quot;</span>,<span class="st">&quot;WY&quot;</span>,<span class="st">&quot;CO&quot;</span>,<span class="st">&quot;NM&quot;</span>,<span class="st">&quot;AZ&quot;</span>,<span class="st">&quot;UT&quot;</span>,<span class="st">&quot;ID&quot;</span>,<span class="st">&quot;WA&quot;</span>,<span class="st">&quot;OR&quot;</span>,<span class="st">&quot;CA&quot;</span>,<span class="st">&quot;NV&quot;</span></span>
+<span id="cb53-17"><a href="fsheds.html#cb53-17" aria-hidden="true" tabindex="-1"></a>          <span class="co"># , &quot;KS&quot;,&quot;NE&quot;,&quot;SD&quot;,&quot;ND&quot;</span></span>
+<span id="cb53-18"><a href="fsheds.html#cb53-18" aria-hidden="true" tabindex="-1"></a>        )) <span class="sc">|&gt;</span> </span>
+<span id="cb53-19"><a href="fsheds.html#cb53-19" aria-hidden="true" tabindex="-1"></a>        sf<span class="sc">::</span><span class="fu">st_transform</span>(transform_crs)</span>
+<span id="cb53-20"><a href="fsheds.html#cb53-20" aria-hidden="true" tabindex="-1"></a>      , <span class="at">fill =</span> <span class="cn">NA</span></span>
+<span id="cb53-21"><a href="fsheds.html#cb53-21" aria-hidden="true" tabindex="-1"></a>      , <span class="at">color =</span> <span class="st">&quot;gray33&quot;</span></span>
+<span id="cb53-22"><a href="fsheds.html#cb53-22" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb53-23"><a href="fsheds.html#cb53-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">fill=</span>crisis_strategy)) <span class="sc">+</span></span>
+<span id="cb53-24"><a href="fsheds.html#cb53-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_sf</span>(<span class="at">data=</span>constrained_by_wflndscp_wide_sf,<span class="at">fill=</span><span class="cn">NA</span>,<span class="at">color=</span><span class="st">&quot;black&quot;</span>,<span class="at">lwd=</span><span class="fl">0.6</span>)<span class="sc">+</span></span>
+<span id="cb53-25"><a href="fsheds.html#cb53-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;All-Lands&quot;</span><span class="ot">=</span><span class="st">&quot;firebrick&quot;</span>,<span class="st">&quot;USFS-Only&quot;</span><span class="ot">=</span><span class="st">&quot;orange3&quot;</span>,<span class="st">&quot;Not Listed&quot;</span><span class="ot">=</span><span class="st">&quot;gray&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb53-26"><a href="fsheds.html#cb53-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(</span>
+<span id="cb53-27"><a href="fsheds.html#cb53-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">fill =</span> <span class="st">&quot;Crisis Strategy</span><span class="sc">\n</span><span class="st">Category&quot;</span></span>
+<span id="cb53-28"><a href="fsheds.html#cb53-28" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb53-29"><a href="fsheds.html#cb53-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_light</span>() <span class="sc">+</span></span>
+<span id="cb53-30"><a href="fsheds.html#cb53-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(</span>
+<span id="cb53-31"><a href="fsheds.html#cb53-31" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="fu">c</span>(<span class="fl">0.9</span>,<span class="fl">0.9</span>) <span class="co"># &quot;top&quot;</span></span>
+<span id="cb53-32"><a href="fsheds.html#cb53-32" aria-hidden="true" tabindex="-1"></a>        , <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>)</span>
+<span id="cb53-33"><a href="fsheds.html#cb53-33" aria-hidden="true" tabindex="-1"></a>        , <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">7</span>)</span>
+<span id="cb53-34"><a href="fsheds.html#cb53-34" aria-hidden="true" tabindex="-1"></a>        , <span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">7</span>)</span>
+<span id="cb53-35"><a href="fsheds.html#cb53-35" aria-hidden="true" tabindex="-1"></a>      )</span></code></pre></div>
+<p><img src="csu_sandbox_files/figure-html/unnamed-chunk-37-1.png" width="960" /></p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="constrained-area-vs.-treated-area.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="scenario-analysis-wcs-priority-landscapes.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

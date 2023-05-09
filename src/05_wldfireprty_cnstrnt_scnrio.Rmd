@@ -398,7 +398,7 @@ ggplot(
 
 ### Reduction by Constraint
 
-```{r plt-rdctn-cnstrt2}
+```{r ls-rdctn}
 # reshape
 constrained_by_scnro_ls_long <- constrained_by_scnro_ls |>
   dplyr::select(state, name, area_name, tidyselect::starts_with("scenario_"), tidyselect::starts_with("pct_rdctn")) |> 
