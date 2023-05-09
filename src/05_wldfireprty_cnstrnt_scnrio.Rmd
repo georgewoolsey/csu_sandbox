@@ -545,3 +545,216 @@ ggplot() +
   )
 ```
 
+### Distribution of Fireshed Area
+
+```{r fs-area, fig.height=9}
+# plot
+ggplot(data = constrained_by_scnro_ls_pa |> dplyr::filter(scenario_id==1)
+         , mapping = aes(x = feature_area_ha, y = reorder(area_name,desc(area_name) ))
+    ) +
+    geom_vline(
+      xintercept = 
+        constrained_by_scnro_ls_pa |> 
+          dplyr::filter(scenario_id==1) |> 
+          dplyr::pull(feature_area_ha) |> 
+          median()
+      , linetype="dashed", color="gray66"
+    ) +
+    geom_violin(aes(fill = state)) + 
+    geom_boxplot(width = 0.15) +
+    # geom_point(size = 0.7, color = "gray33", alpha = 0.2) +
+    geom_text(
+      data = constrained_by_scnro_ls_pa |> 
+        dplyr::filter(scenario_id==1) |> 
+        dplyr::group_by(area_name) |> 
+        dplyr::summarise(n=n(), max_area=max(feature_area_ha))
+      , mapping = aes(
+          x = (
+            constrained_by_scnro_ls_pa |> 
+            dplyr::filter(scenario_id==1) |> 
+            dplyr::pull(feature_area_ha) |> 
+            min()
+          )*.9
+          ,y=reorder(area_name,desc(area_name) )
+          ,label=paste0("n=",scales::comma(n))
+        )
+      , size = 3
+      , color = "black"
+      , hjust = 0.7
+    ) +
+    scale_fill_viridis_d(option = "viridis", alpha = 0.8) +
+    scale_x_continuous(labels = scales::comma, breaks = scales::extended_breaks(n=7)) +
+    labs(
+      fill = ""
+      , y = ""
+      , x = "Fireshed Area (ha)"
+    ) +
+    theme_light() +
+    theme(
+      legend.position = "none" # c(0.9, 0.9)
+      , axis.title = element_text(size=9)
+      , axis.text.x = element_text(size=7)
+    )
+```
+
+### Map of Firesheds by Level of Constraint
+
+```{r fs-map-prep, results='hide'}
+# polish for mapping
+map_fs_temp <- fireshed_proj_area |> 
+  dplyr::select(pa_id, geometry) |> 
+  dplyr::mutate(pa_id=as.character(pa_id)) |> 
+  dplyr::inner_join(
+    constrained_by_scnro_ls_pa
+    , by = dplyr::join_by("pa_id")
+    , multiple = "all"
+  ) |> 
+  dplyr::mutate(
+    dplyr::across(
+      tidyselect::starts_with("pct_")
+      , ~ scales::percent(as.numeric(.x), accuracy = 0.1)
+    )
+    , dplyr::across(
+      tidyselect::ends_with("_ha")
+      , ~ scales::comma(as.numeric(.x), accuracy = 1)
+    )
+  ) |> 
+  dplyr::mutate(
+    Priority.Area.Name = area_name
+    , Level.of.Constraint = cnstrnt_class
+    , Pct.Treatable.Class = rmn_cnstrnt_class
+    , Fireshed.ProjArea.ID = pa_id
+    , Fireshed.ProjArea.Area.Hectares = feature_area_ha
+    , Fireshed.WCS.Status = ifelse(is.na(fireshed_crisis_strategy),"No WCS Status",fireshed_crisis_strategy)
+    , ForestShrub.Area.Hectares = covertype_area_ha
+    , Pct.Rdctn.Protected = pct_rdctn1_protected
+    , Pct.Rdctn.Slope = pct_rdctn2_slope
+    , Pct.Rdctn.Administrative = pct_rdctn3_administrative
+    , Pct.Rdctn.Riparian = pct_rdctn4_riparian
+    , Pct.Rdctn.Roads = pct_rdctn5_roads
+    , Treatable.Area.Hectares = rmn5_roads_area_ha
+    , Pct.Treatable.Area = pct_rmn5_roads
+  )
+# filter for mapview
+mapview_fs_temp <- map_fs_temp |> 
+  dplyr::filter(
+    scenario_id == 2
+  )
+# ## filter for high priority only
+# hi_map_fs_temp <- map_fs_temp |> 
+#   dplyr::filter(!is.na(fireshed_crisis_strategy))
+```
+
+```{r mapview-fs, results='asis'}
+# mapview
+mapview::mapviewOptions(homebutton = FALSE, basemaps = c("OpenStreetMap","Esri.WorldImagery"))
+mapview::mapview(wf_landscapes
+        , color = "black"
+        , lwd = 1
+        , alpha.regions = 0
+        , label = FALSE
+        , legend = FALSE
+        , popup = FALSE
+        , layer.name = "WCS Landscapes"
+        , hide = TRUE
+  ) +
+mapview::mapview(
+  mapview_fs_temp
+  , zcol = "cnstrnt_class"
+  , col.regions = RColorBrewer::brewer.pal(n=3,name="RdYlBu") |> rev()
+  , alpha.regions = 0.6
+  , lwd = 0.2
+  , label = FALSE
+  , legend = FALSE
+  , layer.name = "Fireshed Constraints"
+  , popup = leafpop::popupTable(
+      mapview_fs_temp
+      , zcol = c(
+        "Priority.Area.Name"
+        , "Level.of.Constraint"
+        , "Pct.Treatable.Class"
+        , "Fireshed.ProjArea.ID"
+        , "Fireshed.ProjArea.Area.Hectares"
+        , "Fireshed.WCS.Status"
+        , "ForestShrub.Area.Hectares"
+        , "Pct.Rdctn.Protected"
+        , "Pct.Rdctn.Slope"
+        , "Pct.Rdctn.Administrative"
+        , "Pct.Rdctn.Riparian"
+        , "Pct.Rdctn.Roads"
+        , "Treatable.Area.Hectares"
+        , "Pct.Treatable.Area"
+      )
+      , row.numbers = FALSE
+      , feature.id = FALSE
+    )
+)
+
+```
+
+**Scenario 2 used for map above**
+
+### Map of High Priority Fireshed Project Areas
+
+Plot only 
+
+```{r map-hi-pri, fig.height=8, warning=F,results='hide'}
+plt_fn_temp <- function(scnum=1) {
+  ggplot() + 
+    geom_sf(data = map_fs_temp |> dplyr::filter(scenario_id==scnum & !is.na(fireshed_crisis_strategy))
+            , aes(fill = cnstrnt_class), lwd = 0.05) +
+    geom_sf(
+      data = USAboundaries::us_states(states = c(
+          # usfs region 1-6 states
+          "MT","WY","CO","NM","AZ","UT","ID","WA","OR","CA","NV"
+          # , "KS","NE","SD","ND"
+        )) |> 
+        sf::st_transform(sf::st_crs(map_fs_temp))
+      , fill = NA
+      , color = "gray55"
+    ) +
+    geom_sf(data = wf_landscapes, fill = NA, color = "gray22", lwd = 0.2) +
+    ggrepel::geom_text_repel(data = wf_landscapes
+      , aes(label = stringr::str_wrap(
+          dplyr::case_when(
+            stringr::str_count(name, "\\w+")<2
+              ~ stringr::word(name,1,stringr::str_count(name, "\\w+"))
+            , stringr::str_starts(name,"Sierra and Elko") ~ stringr::word(name,1,3)
+            , TRUE ~ stringr::word(name,1,2)
+          )
+          , 7)
+          , geometry = geometry
+        )
+      , stat = "sf_coordinates"
+      , size = 2
+      , seed = 11
+      # , min.segment.length = 0
+    ) +
+    scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0)) +
+    labs(
+      fill = ""
+      , x = ""
+      , y =""
+      , subtitle = map_fs_temp |> dplyr::filter(scenario_id==scnum) |> 
+        dplyr::pull(scenario_desc) |> unique()
+    ) +
+    theme_light() +
+    theme(
+      legend.position = c(0.9,0.9) # "top"
+      , legend.text = element_text(size = 7)
+      , axis.text = element_text(size=7)
+    )
+}
+# plot
+map_fs_temp |> dplyr::pull(scenario_id) |> unique() |> 
+ purrr::map(plt_fn_temp)
+```
+
+**Only fireshed project areas with a high priority WCS Status shown above.**  Some fireshed project areas are within the bounds of the priority landscapes but are not within a "high priority" fireshed.
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
+remove(list = ls()[grep("_temp",ls())])
+gc()
+```

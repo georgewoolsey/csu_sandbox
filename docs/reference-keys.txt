@@ -4,6 +4,7 @@ fig:unnamed-chunk-12
 tab:est-table2
 tab:area-table-wfp
 tab:area-table-tot
+tab:lt-mod-cnstrnt-tab
 tab:trt-yr-tbl
 fig:unnamed-chunk-26
 tab:unnamed-chunk-31
@@ -44,7 +45,6 @@ distribution-of-subwatershed-constraint-1
 forested-area-by-level-of-constraint
 constraint-reduction-by-level-of-constraint
 area-available-for-mechanical-treatment
-a-tibble-2-8
 wf_read_sw
 example-code-to-split-larger-polygons
 constrained-area-vs.-treated-area
@@ -71,3 +71,8 @@ landscape-level-analysis
 reduction-treatable-area-table-2
 change-in-available-by-scenario
 reduction-by-constraint
+fireshed-level-analysis
+distribution-of-fireshed-constraint
+distribution-of-fireshed-area
+map-of-firesheds-by-level-of-constraint
+map-of-high-priority-fireshed-project-areas
