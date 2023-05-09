@@ -203,7 +203,7 @@ fireshed_proj_area <- sf::st_read("../data/firesheds/fireshed_proj_area.gpkg") |
   #rename sf geom column
     names(fireshed_proj_area)[names(fireshed_proj_area)==tolower(attr(fireshed_proj_area, "sf_column"))] = "geometry"
     sf::st_geometry(fireshed_proj_area) = "geometry"
-# load landscape constraint scenario data
+# load fireshed constraint scenario data
 constrained_by_scnro_ls_pa <-
   list.files("../data/wildfirepriority/fireshed/",pattern = "\\.csv$") %>%
   purrr::keep(stringr::str_starts(.,"wfpriority_fireshed_sc")) %>% 
@@ -245,6 +245,7 @@ constrained_by_scnro_ls_pa <-
   dplyr::arrange(desc(pct_pa_intrsct)) %>%
   dplyr::filter(dplyr::row_number()==1) %>%
   dplyr::ungroup() %>%
+  dplyr::filter(pct_pa_intrsct>=0.25) %>%
   # calculate pct reduction
   dplyr::mutate(
     pct_rdctn1_protected = -1*(1 - pct_rmn1_protected)
@@ -393,12 +394,13 @@ ggplot(
     theme(
       legend.position = "none"
       , axis.text.y = element_text(size=7)
+      , axis.text.x = element_text(size=7.5)
     )
 ```
 
 ### Reduction by Constraint
 
-```{r ls-rdctn}
+```{r ls-rdctn, fig.height=9}
 # reshape
 constrained_by_scnro_ls_long <- constrained_by_scnro_ls |>
   dplyr::select(state, name, area_name, tidyselect::starts_with("scenario_"), tidyselect::starts_with("pct_rdctn")) |> 
@@ -468,7 +470,7 @@ ggplot() +
       , labeller = label_wrap_gen(width = 35, multi_line = TRUE)
     ) +
   scale_fill_viridis_d(option = "plasma", alpha = 0.7) +
-  scale_x_reverse(expand = expansion(mult = c(0, .1)),labels = scales::percent_format()) +
+  scale_x_reverse(expand = expansion(mult = c(0, .12)),labels = scales::percent_format()) +
   labs(
     fill = ""
     , y = ""
@@ -482,6 +484,64 @@ ggplot() +
     , axis.title = element_text(size=9)
     , axis.text.x = element_blank()
     
+  )
+```
+
+## Fireshed-level analysis  
+
+Based on model simulations of how much area generally needs to be treated to influence wildfire behavior, we binned the firesheds into three classes of mechanical constraint: 
+
+* **high** (85–100% [i.e., only 0–15% is available for mechanical treatment]): fuels treatment would principally need to rely on fire
+* **medium** (65– 84%): could use a combination of fire and mechanical thinning
+* **low** (65%): could effectively influence wildfire behavior with mechanical treatment alone
+
+### Distribution of Fireshed Constraint
+
+```{r fs-cnstrnt-dist, fig.height=8}
+constrained_by_scnro_ls_pa |> 
+  dplyr::count(area_name,scenario_desc,cnstrnt_class) |> 
+  dplyr::group_by(area_name,scenario_desc) |> 
+  dplyr::mutate(
+    pct = n/sum(n)
+    , high_pct=max(ifelse(cnstrnt_class=="high constraint",pct,0)) 
+    , tot = sum(n)
+  ) |> 
+ggplot() +
+  geom_col(
+    mapping = aes(x = pct, y = reorder(area_name, high_pct), fill=cnstrnt_class)
+    ,width = 0.7, alpha=0.8
+  ) +
+  geom_text(
+    mapping = aes(x = pct, y = reorder(area_name, high_pct), group=cnstrnt_class
+        ,label = scales::percent(ifelse(pct>=0.05,pct,NA), accuracy = 1)
+      )
+    , position = position_stack(vjust = 0.5)
+    , color = "black", size = 3
+  ) +
+  # geom_text(
+  #     data = constrained_byftr_huc12_wide |>
+  #       dplyr::group_by(area_name) |>
+  #       dplyr::summarise(n=n(), high_n=sum(ifelse(cnstrnt_class=="high constraint",1,0)))
+  #     , mapping = aes(x = -0.05,y=reorder(area_name, -(high_n/n)),label=paste0("n=",scales::comma(n)))
+  #     , size = 3
+  #     , color = "black"
+  #     , hjust = 0.7
+  #   ) +
+  scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
+  facet_grid(cols = vars(scenario_desc)) +
+  scale_x_continuous(labels = scales::percent_format()) +
+  labs(
+    fill = "Level of\nConstraint"
+    , y = ""
+    , x = "% of Fireshed\nProject Areas"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "top"
+    , legend.title = element_text(size=7)
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_text(size=7)
+    , strip.text = element_text(color = "black", face = "bold")
   )
 ```
 

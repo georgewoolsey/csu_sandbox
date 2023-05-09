@@ -720,9 +720,9 @@ ggplot() +
     , strip.placement = "outside"
   )
 
-constrained_byftr_huc12_wide |> 
-        dplyr::group_by(area_name) |> 
-        dplyr::summarise(n=n(), high_n=sum(ifelse(cnstrnt_class=="high constraint",1,0)))
+# constrained_byftr_huc12_wide |> 
+#         dplyr::group_by(area_name) |> 
+#         dplyr::summarise(n=n(), high_n=sum(ifelse(cnstrnt_class=="high constraint",1,0)))
 ```
 
 ```{r wf-cnstrntcl-sum-dta}
@@ -1057,7 +1057,7 @@ total_area_temp <- dplyr::bind_rows(
   dplyr::arrange(area_name,desc(units)) |> 
   dplyr::mutate(units = "") |> 
   dplyr::relocate(c(area_name,units))
-total_area_temp
+
 # table
   kableExtra::kable(
     total_area_temp |> dplyr::select(-c(area_name,units))
@@ -1077,6 +1077,74 @@ total_area_temp
   kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE)
 
 ```
+
+Lightly and Moderately Constrained
+
+```{r lt-mod-cnstrnt-tab, results='asis'}
+## area of low sws
+xx_temp <- constrained_byftr_huc12_wide |> 
+  dplyr::group_by(state,name, cnstrnt_class) |> 
+  dplyr::summarise(
+    dplyr::across(
+      dplyr::ends_with("area_ha")
+      , sum
+    )
+  ) |> 
+  dplyr::group_by(state,name) |>
+  dplyr::mutate(
+    total_covertype_area_ha = sum(covertype_area_ha)
+    , pct_treatable_tot =  rmn5_roads_area_ha/total_covertype_area_ha
+  ) |> 
+  dplyr::select(state,name,cnstrnt_class,rmn5_roads_area_ha,pct_treatable_tot) |>
+  dplyr::filter(cnstrnt_class!="high constraint") |> 
+  dplyr::mutate(cnstrnt_class=substr(cnstrnt_class,1,3)) |> 
+  dplyr::rename(
+        remaining_pct=pct_treatable_tot
+        ,remaining_ha=rmn5_roads_area_ha
+      ) |> 
+      tidyr::pivot_wider(
+        names_from = cnstrnt_class
+        , values_from = c(tidyselect::starts_with("remaining_"))
+        , names_glue = "{cnstrnt_class}_{.value}"
+        , values_fill = 0
+      )  |> 
+  dplyr::mutate(
+    tot_remaining_ha = low_remaining_ha+med_remaining_ha
+    ,tot_remaining_pct = low_remaining_pct+med_remaining_pct
+  ) |> 
+  dplyr::relocate(tot_remaining_ha,.after = med_remaining_ha) |> 
+  dplyr::mutate(
+    dplyr::across(
+      ends_with("_ha")
+      , ~ scales::comma(.x,accuracy=1)
+    )
+    , dplyr::across(
+      ends_with("_pct")
+      , ~ scales::percent(.x,accuracy=.1)
+    )
+  ) |> 
+  dplyr::ungroup()
+  
+  kableExtra::kable(
+    xx_temp |> dplyr::select(-c(state))
+    , caption = "Subwatershed forested area of each Wildfire Crisis Strategy Priority Landscape<br>available for treatment in lightly and moderately constrained subwatersheds"
+    , col.names = c(
+      ""
+      , "Lightly Constrained", "Moderately Constrained"
+      , "Total"
+      , "Lightly Constrained", "Moderately Constrained"
+      , "Total"
+    
+    )
+  ) |>  
+  add_header_above(c(" " = 1, "Treatable Forested Area (ha)"=3, "Percent of Total\nSubwatershed Forested Area" = 3)) |>
+  kable_classic(full_width=T) |> 
+  pack_rows(index = table(forcats::fct_inorder(xx_temp$state))) |>
+  kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE) |>  
+  kableExtra::scroll_box(width = "740px")
+  
+```
+
 
 ```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
 remove(list = ls()[grep("_temp",ls())])
@@ -1172,7 +1240,8 @@ mapview::mapview(
 
 ```
 
-```{r, include=F,eval=F}
+```{r, include=FALSE,eval=FALSE}
+# ggplot map
 plt_temp <- ggplot() + 
   geom_sf(data = constrained_byftr_huc12_wide_sf, aes(fill = cnstrnt_class), lwd = 0.05) +
   geom_sf(
@@ -1217,70 +1286,8 @@ plt_temp <- ggplot() +
   )
 plt_temp
 ggsave("../data/map_sws2.png", plt_temp, height = 6, width = 5, dpi = 500)
-## area of low sws
-xx_temp <- constrained_byftr_huc12_wide |> 
-  dplyr::group_by(state,name, cnstrnt_class) |> 
-  dplyr::summarise(
-    dplyr::across(
-      dplyr::ends_with("area_ha")
-      , sum
-    )
-  ) |> 
-  dplyr::group_by(state,name) |>
-  dplyr::mutate(
-    total_covertype_area_ha = sum(covertype_area_ha)
-    , pct_treatable_tot =  rmn5_roads_area_ha/total_covertype_area_ha
-  ) |> 
-  dplyr::select(state,name,cnstrnt_class,rmn5_roads_area_ha,pct_treatable_tot) |>
-  dplyr::filter(cnstrnt_class!="high constraint") |> 
-  dplyr::mutate(cnstrnt_class=substr(cnstrnt_class,1,3)) |> 
-  dplyr::rename(
-        remaining_pct=pct_treatable_tot
-        ,remaining_ha=rmn5_roads_area_ha
-      ) |> 
-      tidyr::pivot_wider(
-        names_from = cnstrnt_class
-        , values_from = c(tidyselect::starts_with("remaining_"))
-        , names_glue = "{cnstrnt_class}_{.value}"
-        , values_fill = 0
-      )  |> 
-  dplyr::mutate(
-    tot_remaining_ha = low_remaining_ha+med_remaining_ha
-    ,tot_remaining_pct = low_remaining_pct+med_remaining_pct
-  ) |> 
-  dplyr::relocate(tot_remaining_ha,.after = med_remaining_ha) |> 
-  dplyr::mutate(
-    dplyr::across(
-      ends_with("_ha")
-      , ~ scales::comma(.x,accuracy=1)
-    )
-    , dplyr::across(
-      ends_with("_pct")
-      , ~ scales::percent(.x,accuracy=.1)
-    )
-  ) |> 
-  dplyr::ungroup()
-  
-  kableExtra::kable(
-    xx_temp |> dplyr::select(-c(state))
-    , caption = "Subwatershed forested area of each Wildfire Crisis Strategy Priority Landscape<br>available for treatment in lightly and moderately constrained subwatersheds"
-    , col.names = c(
-      ""
-      , "Lightly Constrained", "Moderately Constrained"
-      , "Total"
-      , "Lightly Constrained", "Moderately Constrained"
-      , "Total"
-    
-    )
-  ) |>  
-  add_header_above(c(" " = 1, "Treatable Forested Area (ha)"=3, "Percent of Total\nSubwatershed Forested Area" = 3)) |>
-  kable_classic(full_width=T) |> 
-  pack_rows(index = table(forcats::fct_inorder(xx_temp$state))) |>
-  kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE) |>  
-  kableExtra::scroll_box(width = "740px")
-  
-```
 
+```
 
 ## Example code to split larger polygons
 
