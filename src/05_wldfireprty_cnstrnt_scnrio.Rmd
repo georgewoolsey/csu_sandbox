@@ -910,9 +910,11 @@ remove(list = ls()[grep("_temp",ls())])
 gc()
 ```
 
+
+```{r area-tab-wcs-dta, results='hide', eval=FALSE, include=FALSE}
+####### this was messed up when publishing html
 ### Area Table
 
-```{r area-tab-wcs-dta}
 # area of firesheds that intersect WCS landscapes by priority status
 fireshed_intersects_temp <- fireshed |>
   sf::st_join(
@@ -969,17 +971,9 @@ area_table_temp <- constrained_by_scnro_ls_pa |>
     fireshed_crop_temp
     , by = dplyr::join_by(area_name,crisis_strategy)
   ) 
-  # dplyr::mutate(
-  #   crisis_strategy = crisis_strategy |> 
-  #     stringr::str_replace_all("-"," ") |> 
-  #     stringr::word(1) |> 
-  #     stringr::str_replace("No","none") |> 
-  #     stringr::str_to_lower()
-  # ) |>
 ```
 
-
-```{r area-tab-wcs, results='asis'}
+```{r area-tab-wcs, results='asis', eval=FALSE, include=FALSE}
 # make table 
   kableExtra::kable(
       area_table_temp |> 
@@ -1160,15 +1154,16 @@ kableExtra::kable(
 
 ```
 
+
+```{r trt-rdctn-flw, include=FALSE, eval=FALSE}
 ### Treatable Area Reduction Flow
 
-```{r trt-rdctn-flw}
 # table_temp |> View()
 ```
 
 ### Objective vs. Treatable Plot
 
-```{r obj-vs-trtbl-plt, fig.height=11}
+```{r obj-vs-trtbl-plt, fig.height=11.5}
 # plot
 ggplot(
     data = constrained_by_scnro_ls_cnstrnt_temp |> 
@@ -1252,7 +1247,7 @@ ggplot(
   theme(
     legend.position = "top"
     , legend.direction  = "horizontal"
-    , plot.subtitle = element_text(size = 8, hjust = 0.37,vjust = -24,face="bold",color = "gray70")
+    , plot.subtitle = element_text(size = 8, hjust = 0.37,vjust = -25,face="bold",color = "gray70")
     , legend.title = element_text(size=7)
     , axis.title = element_text(size=9)
     , axis.text.x = element_blank()

@@ -12,6 +12,7 @@ tab:unnamed-chunk-32
 fig:unnamed-chunk-36
 tab:sc-tab
 tab:ls-tab1
+tab:obj-vs-trtbl-tab
 caution
 objective
 data-sources
@@ -76,3 +77,9 @@ distribution-of-fireshed-constraint
 distribution-of-fireshed-area
 map-of-firesheds-by-level-of-constraint
 map-of-high-priority-fireshed-project-areas
+high-priority-project-areas
+project-areas-by-wcs-status
+area-of-high-priority-project-areas
+objective-vs.-treatable
+objective-vs.-treatable-table
+objective-vs.-treatable-plot
