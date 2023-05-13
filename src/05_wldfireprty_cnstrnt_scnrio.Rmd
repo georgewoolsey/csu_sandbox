@@ -1028,11 +1028,16 @@ area_table_temp <- constrained_by_scnro_ls_pa |>
   
 ```
 
-### Objective vs. Treatable
+```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
+remove(list = ls()[grep("_temp",ls())])
+gc()
+```
+
+## Objective vs. Treatable
 
 Models suggest that fuels reduction treatments can effectively reduce fire size and severity when 20-40% of the landscape has been treated (e.g., Finney, 2007) and the Strategy (USFS, 2022a) aims to treat this amount of high-risk fireshed area within the 21 priority landscapes. The total area of the 21 priority landscapes is approximately 47 million acres (19 million ha), of which 23.7 million acres (9.6 million ha) are in high-risk firesheds; an objective of treating 20-40% would indicate the need to treat between 4.7 to 9.5 million acres (1.9 to 3.8 million ha).
 
-*Using the area of fireshed planning areas that have at least 25% of their area within the bounds of the priority landscapes and are in a high-priority fireshed as the treatment area objective (20-40%).*
+*Using the area of fireshed planning areas that have at least 25% of their area within the bounds of the priority landscapes and are in a high-risk fireshed as the treatment area objective (20-40%).*
 
 ```{r obj-vs-trtbl}
 # Area of pa's by level of constraint
@@ -1059,6 +1064,111 @@ constrained_by_scnro_ls_cnstrnt_temp <- constrained_by_scnro_ls_pa |>
   dplyr::ungroup() |> 
   dplyr::arrange(state,name,scenario_id,cnstrnt_class)
 
+```
+
+
+### Objective vs. Treatable Table
+
+```{r obj-vs-trtbl-tab, results='asis'}
+table_temp <-
+  constrained_by_scnro_ls_cnstrnt_temp |> 
+  dplyr::mutate(
+    cnstrnt_class = stringr::word(cnstrnt_class) |> stringr::str_remove_all("\\.")
+  ) |> 
+  dplyr::rename(
+    remaining_pct=pct_treatable
+    , remaining_ha=rmn5_roads_area_ha
+  ) |>
+  dplyr::select(-c(feature_area_ha, covertype_area_ha)) |> 
+  tidyr::pivot_wider(
+    names_from = cnstrnt_class
+    , values_from = c(n, remaining_pct, remaining_ha)
+    , names_glue = "{cnstrnt_class}_{.value}"
+    , values_fill = 0
+  ) |> 
+  dplyr::mutate(
+    tot_remaining_ha = low_remaining_ha+med_remaining_ha
+    ,tot_remaining_pct = low_remaining_pct+med_remaining_pct
+  ) |> 
+  dplyr::relocate(tot_remaining_ha,.after = med_remaining_ha) |> 
+  dplyr::inner_join(
+    wf_landscapes |> 
+      sf::st_drop_geometry() |> 
+      dplyr::select(area_name,hectares) |> 
+      dplyr::rename(landscape_area_ha=hectares)
+    , by = dplyr::join_by(area_name)
+  )
+# make table 
+kableExtra::kable(
+    table_temp |> 
+      dplyr::select(
+        c(
+          scenario_lab
+          , landscape_area_ha
+          , total_area_ha
+          , total_covertype_area_ha
+          # light and mod area
+          , low_remaining_ha, med_remaining_ha, tot_remaining_ha
+          , low_remaining_pct, med_remaining_pct, tot_remaining_pct
+        )
+      ) |> 
+      dplyr::mutate(
+        dplyr::across(
+          tidyselect::ends_with("_ha")
+          , ~ scales::comma(.x, suffix = "k", scale = 1e-3, accuracy = 1)
+        )
+        , dplyr::across(
+          tidyselect::ends_with("_pct")
+          , ~ scales::percent(.x, accuracy = .1)
+        )
+      )
+  , caption = "Wildfire Crisis Strategy High-Risk Fireshed Planning Areas<br>mechanically available for treatment in lightly and moderately constrained planning areas (>25% in landscape)"
+  , col.names = c(
+    ""
+    , "Total\nLandscape"
+    , "High-risk\nFireshed PAs"
+    , "High-risk\nForest+Shrub"
+    , "Lightly Constrained", "Moderately Constrained"
+    , "Total"
+    , "Lightly Constrained", "Moderately Constrained"
+    , "Total"
+  
+  )
+  , escape = F
+) |>  
+    add_header_above(c(" " = 1, "Area (ha)" = 3, "Treatable High-Risk Area (ha)"=3, "Percent of High-Risk Area" = 3)) |>
+    kable_classic(full_width=T) |> 
+    pack_rows(index = table(forcats::fct_inorder(table_temp$area_name))) |> 
+    kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE) |>  
+    kableExtra::column_spec(
+      10
+      , color = "white"
+      , background = 
+          table_temp |> 
+            dplyr::mutate(
+              is_gt20 = dplyr::case_when(
+                low_remaining_pct >= .2 ~ "#008b8b"
+                , tot_remaining_pct >= .2 ~ "#545454"
+                , TRUE ~ "#cd3700"
+              )
+          ) |> 
+          dplyr::pull(is_gt20)
+          
+    ) |> 
+    kableExtra::scroll_box(width = "740px")
+
+
+```
+
+### Treatable Area Reduction Flow
+
+```{r trt-rdctn-flw}
+# table_temp |> View()
+```
+
+### Objective vs. Treatable Plot
+
+```{r obj-vs-trtbl-plt, fig.height=11}
 # plot
 ggplot(
     data = constrained_by_scnro_ls_cnstrnt_temp |> 
@@ -1153,191 +1263,3 @@ ggplot(
     , strip.placement = "outside"
   )
 ```
-
-
-```{r, include=FALSE,eval=FALSE}
-View()
-  dplyr::inner_join(
-    # total obj treat
-    constrained_by_scnro_ls_pa |> 
-      dplyr::filter(
-        fireshed_crisis_strategy %in% c("USFS-Only", "All-Lands")
-        
-      ) |> 
-      dplyr::group_by()
-  )
-  View()
-  
-  
-  dplyr::group_by(state,name) |>
-  dplyr::mutate(
-    total_covertype_area_ha = sum(covertype_area_ha)
-    , pct_treatable_tot =  rmn5_roads_area_ha/total_covertype_area_ha
-  ) |> 
-  dplyr::select(state,name,cnstrnt_class,rmn5_roads_area_ha,pct_treatable_tot) |>
-  dplyr::filter(cnstrnt_class!="high constraint") |> 
-  dplyr::mutate(cnstrnt_class=substr(cnstrnt_class,1,3)) |> 
-  dplyr::rename(
-        remaining_pct=pct_treatable_tot
-        ,remaining_ha=rmn5_roads_area_ha
-      ) |> 
-      tidyr::pivot_wider(
-        names_from = cnstrnt_class
-        , values_from = c(tidyselect::starts_with("remaining_"))
-        , names_glue = "{cnstrnt_class}_{.value}"
-        , values_fill = 0
-      )  |> 
-  dplyr::mutate(
-    tot_remaining_ha = low_remaining_ha+med_remaining_ha
-    ,tot_remaining_pct = low_remaining_pct+med_remaining_pct
-  ) |> 
-  dplyr::relocate(tot_remaining_ha,.after = med_remaining_ha) |> 
-  dplyr::mutate(
-    dplyr::across(
-      ends_with("_ha")
-      , ~ scales::comma(.x,accuracy=1)
-    )
-    , dplyr::across(
-      ends_with("_pct")
-      , ~ scales::percent(.x,accuracy=.1)
-    )
-  ) |> 
-  dplyr::ungroup()
-  
-  
-  
-  
-  
-  
-  
-  dplyr::rename(
-    total_ha=feature_area_ha
-    ,forested_ha=covertype_area_ha
-    ,remaining_ha=rmn5_roads_area_ha
-  ) |> 
-  View()
-
-  tidyr::pivot_wider(
-    names_from = cnstrnt_class
-    , values_from = c(tidyselect::ends_with("_ha"),n)
-    , names_glue = "{cnstrnt_class}_{.value}"
-    , values_fill = 0
-  ) 
-  dplyr::ungroup()
-```
-
-
-
-```{r, include=FALSE, eval=FALSE}
-area_table <- constrained_wide |> 
-  dplyr::left_join(
-    constrained_byftr_huc12_wide |> 
-      dplyr::group_by(area_name,cnstrnt_class) |> 
-      dplyr::summarise(
-        n = n()
-        , dplyr::across(
-          c(feature_area_ha,covertype_area_ha,rmn5_roads_area_ha)
-          , ~ sum(.x,na.rm = T)
-        )
-      ) |> 
-      dplyr::mutate(
-        cnstrnt_class = stringr::word(cnstrnt_class) |> stringr::str_remove_all("\\.")
-      ) |> 
-      dplyr::rename(
-        total_ha=feature_area_ha
-        ,forested_ha=covertype_area_ha
-        ,remaining_ha=rmn5_roads_area_ha
-      ) |> 
-      tidyr::pivot_wider(
-        names_from = cnstrnt_class
-        , values_from = c(tidyselect::ends_with("_ha"),n)
-        , names_glue = "{cnstrnt_class}_{.value}"
-        , values_fill = 0
-      )
-    , by = dplyr::join_by(area_name)
-  ) |> 
-  dplyr::select(area_name, tidyselect::ends_with("_ha")) |> 
-  dplyr::mutate(
-    dplyr::across(
-      tidyselect::ends_with("_ha")
-      , ~ (.x*10000)/4046.85642
-      , .names = "{.col}_acres"
-    )
-  ) |> 
-  dplyr::rename_with(
-    ~ gsub("_ha_acres", "_acres", .x)
-    , tidyselect::ends_with("_ha_acres")
-  ) |>
-  dplyr::select(
-    area_name
-    , feature_area_ha, feature_area_acres
-    , covertype_area_ha, covertype_area_acres
-    , rmn5_roads_area_ha, rmn5_roads_area_acres
-    , low_total_ha, low_total_acres
-    , low_forested_ha, low_forested_acres
-    , low_remaining_ha, low_remaining_acres
-  )
-# stack acres hectares
-area_table_temp <-
-dplyr::bind_rows(
-  area_table |> dplyr::select(area_name, tidyselect::ends_with("_ha")) |> 
-    dplyr::rename_with(
-      ~ gsub("_ha", "", .x)
-      , tidyselect::ends_with("_ha")
-    ) |> 
-    dplyr::mutate(units = "ha")
-  , area_table |> dplyr::select(area_name, tidyselect::ends_with("_acres")) |> 
-    dplyr::rename_with(
-      ~ gsub("_acres", "", .x)
-      , tidyselect::ends_with("_acres")
-    ) |> 
-    dplyr::mutate(units = "ac")
-) |> 
-  dplyr::mutate(
-    dplyr::across(
-      -c(area_name,units)
-      , ~ paste0(scales::comma(.x,accuracy=1)," ",units)
-    )
-  ) |> 
-  dplyr::arrange(area_name,desc(units)) |> 
-  dplyr::mutate(units = "") |> 
-  dplyr::relocate(units,.after="area_name")
-```
-
-
-```{r, include=FALSE, eval=FALSE}
-# tidyr::pivot_wider(
-  #   names_from = crisis_strategy
-  #   , values_from = c(area_ha,n)
-  #   , names_glue = "{crisis_strategy}_{.value}"
-  #   , values_fill = 0
-  # ) |> 
-
-  ggplot() + 
-    geom_sf(
-      data = USAboundaries::us_states(states = c(
-          # usfs region 1-6 states
-          "MT","WY","CO","NM","AZ","UT","ID","WA","OR","CA","NV"
-          # , "KS","NE","SD","ND"
-        )) |> 
-        sf::st_transform(transform_crs)
-      , fill = NA
-      , color = "gray33"
-    ) +
-    geom_sf(aes(fill=crisis_strategy)) +
-    geom_sf(data=wf_landscapes,fill=NA,color="black",lwd=0.6)+
-    scale_fill_manual(values = c("All-Lands"="firebrick","USFS-Only"="orange3","No WCS Status"="gray")) +
-    labs(
-      fill = "Crisis Strategy\nCategory"
-    ) +
-    theme_light() +
-    theme(
-        legend.position = c(0.9,0.9) # "top"
-        # , legend.direction = "horizontal"
-        , legend.title = element_text(size = 8)
-        , legend.text = element_text(size = 7)
-        , axis.text = element_text(size=7)
-      )
-```
-
-
