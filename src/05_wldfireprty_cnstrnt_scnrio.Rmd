@@ -1058,6 +1058,7 @@ constrained_by_scnro_ls_cnstrnt_temp <- constrained_by_scnro_ls_pa |>
   ) |> 
   dplyr::ungroup() |> 
   dplyr::arrange(state,name,scenario_id,cnstrnt_class)
+
 # plot
 ggplot(
     data = constrained_by_scnro_ls_cnstrnt_temp |> 
@@ -1069,15 +1070,15 @@ ggplot(
     )
   ) +
   geom_vline(xintercept = 0.2
-    , color = "gray77"
+    , color = "gray88"
     , alpha = 0.6
   ) +
   geom_vline(xintercept = 0.4
-    , color = "gray77"
+    , color = "gray88"
     , alpha = 0.6
   ) +
   geom_rect(mapping = aes(xmin = 0.2, xmax=0.4, ymin = -Inf, ymax = Inf)
-    , fill = "gray77"
+    , fill = "gray88"
     , alpha = 0.6
   ) +
   geom_col(
@@ -1094,18 +1095,28 @@ ggplot(
       # , fontface = "bold"
     )
     , position = position_stack(vjust = 0.5)
-    , color = "black", size = 2.5
+    , color = "black", size = 2
   ) +
   # total
   geom_text(
     data = constrained_by_scnro_ls_cnstrnt_temp |> 
         dplyr::filter(cnstrnt_class!="high constraint") |> 
         dplyr::group_by(area_name, scenario_lab) |> 
-        dplyr::summarise(pct_treatable=sum(pct_treatable)) |> 
-        dplyr::mutate(is_gt20 = pct_treatable>=.2)
+        dplyr::mutate(low=ifelse(cnstrnt_class=="low constraint",pct_treatable,0)) |> 
+        dplyr::summarise(
+          pct_treatable = sum(pct_treatable)
+          , low = sum(low)
+        ) |> 
+        dplyr::mutate(
+          is_gt20 = dplyr::case_when(
+            low >= .2 ~ "1"
+            , pct_treatable >= .2 ~ "2"
+            , TRUE ~ "3"
+          )
+        )
     , mapping = aes(
       y = scenario_lab, x = pct_treatable
-      , label = scales::percent(pct_treatable, accuracy = 1)
+      , label = scales::percent(pct_treatable, accuracy = 1) 
       , color = is_gt20
       , fontface = "bold"
     )
@@ -1119,17 +1130,19 @@ ggplot(
     , switch = "y"
   ) +
   scale_fill_manual(values = RColorBrewer::brewer.pal(n=3,name="RdYlBu")[2:3]) +
-  scale_color_manual(values = c("orangered3","darkcyan")) +
+  scale_color_manual(values = c("darkcyan", "gray33", "orangered3")) +
   scale_x_continuous(expand = expansion(mult = c(0, .1)),labels = scales::percent_format()) +
   labs(
     fill = "Level of\nConstraint"
     , y = ""
+    , subtitle = "treatment objective"
     , x = "Percent of Total High-Risk Area"
   ) +
   theme_light() +
   theme(
     legend.position = "top"
     , legend.direction  = "horizontal"
+    , plot.subtitle = element_text(size = 8, hjust = 0.37,vjust = -24,face="bold",color = "gray70")
     , legend.title = element_text(size=7)
     , axis.title = element_text(size=9)
     , axis.text.x = element_blank()
