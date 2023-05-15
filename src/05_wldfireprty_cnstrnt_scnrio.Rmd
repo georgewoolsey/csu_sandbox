@@ -20,6 +20,7 @@ library(latex2exp)
 library(kableExtra)
 library(cowplot)
 library(RColorBrewer)
+library(ggtext)
 library(mapview) #Interactive maps
 library(leafpop) #map html popup
 # spatial analysis
@@ -389,7 +390,7 @@ gc()
 
 ### Change in Available by Scenario
 
-```{r ls-chg-avai, fig.height=9}
+```{r ls-chg-avai, fig.height=11}
 ggplot(
     data = constrained_by_scnro_ls
     , mapping = aes(x=scenario_desc,y=pct_rmn5_administrative,group=area_name)
@@ -404,6 +405,7 @@ ggplot(
     facet_wrap(facets = vars(area_name)
       , ncol = 3
       , labeller = label_wrap_gen(width = 35, multi_line = TRUE)
+      , scales = "free_x"
     ) +
     scale_color_viridis_d(option = "turbo", alpha = 0.8) +
     scale_y_continuous(expand = expansion(mult = c(0.1, 0.1)), labels = scales::percent_format(), breaks = scales::extended_breaks(6)) +
@@ -849,7 +851,68 @@ ggplot(data = wcs_status_temp) +
   )
 ```
 
-### Area of high-priority project areas
+### Map of high-risk project areas
+
+*Only including fireshed planning areas that have at least 25% of their area within the bounds of the priority landscapes and are in a high-risk fireshed.*
+
+```{r map-pas-wcs}
+ggplot() + 
+    geom_sf(data = 
+      fireshed_proj_area |> 
+        dplyr::filter(fireshed_crisis_strategy %in% c("USFS-Only", "All-Lands")) |> 
+        dplyr::mutate(pa_id=as.character(pa_id)) |> 
+        dplyr::inner_join(
+          constrained_by_scnro_ls_pa |> 
+            dplyr::select(pa_id)
+          , by = dplyr::join_by(pa_id)
+        )
+      , aes(fill = fireshed_crisis_strategy), lwd = 0.05
+    ) +
+    geom_sf(
+      data = USAboundaries::us_states(states = c(
+          # usfs region 1-6 states
+          "MT","WY","CO","NM","AZ","UT","ID","WA","OR","CA","NV"
+          # , "KS","NE","SD","ND"
+        )) |> 
+        sf::st_transform(transform_crs)
+      , fill = NA
+      , color = "gray55"
+    ) +
+    geom_sf(data = wf_landscapes, fill = NA, color = "gray22", lwd = 0.2) +
+    ggrepel::geom_text_repel(data = wf_landscapes
+      , aes(label = stringr::str_wrap(
+          dplyr::case_when(
+            stringr::str_count(name, "\\w+")<2
+              ~ stringr::word(name,1,stringr::str_count(name, "\\w+"))
+            , stringr::str_starts(name,"Sierra and Elko") ~ stringr::word(name,1,3)
+            , TRUE ~ stringr::word(name,1,2)
+          )
+          , 7)
+          , geometry = geometry
+        )
+      , stat = "sf_coordinates"
+      , size = 2
+      , seed = 11
+      # , min.segment.length = 0
+    ) +
+    scale_fill_manual(values = c("All-Lands"="firebrick","USFS-Only"="orange3")) +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0)) +
+    labs(
+      fill = ""
+      , x = ""
+      , y =""
+    ) +
+    theme_light() +
+    theme(
+      legend.position = c(0.9,0.9) # "top"
+      , legend.text = element_text(size = 7)
+      , axis.text = element_text(size=7)
+    )
+
+```
+
+### Area of high-risk project areas
 
 ```{r area-pas-wcs}
 # data filter
@@ -1066,7 +1129,6 @@ constrained_by_scnro_ls_cnstrnt_temp <- constrained_by_scnro_ls_pa |>
 
 ```
 
-
 ### Objective vs. Treatable Table
 
 ```{r obj-vs-trtbl-tab, results='asis'}
@@ -1160,11 +1222,154 @@ kableExtra::kable(
 
 ```
 
+### Reduction in treatable area flow
 
-```{r trt-rdctn-flw, include=FALSE, eval=FALSE}
-### Treatable Area Reduction Flow
-
-# table_temp |> View()
+```{r trt-rdctn-flw, fig.height=13}
+table_temp |> 
+  dplyr::filter(scenario_id==1) |> 
+  dplyr::select(
+    c(
+      area_name
+      , landscape_area_ha
+      , total_area_ha
+      , total_covertype_area_ha
+      # , tot_remaining_ha
+      # , low_remaining_ha
+    )
+  ) |>
+  tidyr::pivot_longer(
+    !area_name
+    , names_to = "name"
+    , values_to = "hectares"
+  ) |> 
+  dplyr::group_by(area_name) |> 
+  dplyr::mutate(order = dplyr::row_number(),y_val=2) |> 
+  dplyr::ungroup() |> 
+  dplyr::cross_join(data.frame(scenario_id = 1:3)) |> 
+  ####
+  dplyr::bind_rows(
+    table_temp |> 
+      dplyr::select(
+        c(
+          area_name
+          , scenario_id
+          , tot_remaining_ha
+          , low_remaining_ha
+        )
+      ) |>
+      tidyr::pivot_longer(
+        !c(area_name,scenario_id)
+        , names_to = "name"
+        , values_to = "hectares"
+      ) |> 
+      dplyr::group_by(area_name,scenario_id) |> 
+      dplyr::mutate(
+        order = dplyr::row_number()+3
+        , y_val = scenario_id
+      ) |> 
+      dplyr::ungroup() |> 
+      dplyr::relocate(scenario_id,.after = dplyr::last_col())
+  ) |> 
+  dplyr::arrange(area_name,order,y_val ) |> 
+  dplyr::mutate(
+    order_lab = factor(
+      order
+      , levels = 1:5
+      , labels = c(
+        "Total\nLandscape"
+        , "High-risk\nFireshed PAs"
+        , "High-risk\nForest+Shrub"
+        , "Lt.+Md. Constrained"
+        , "Lightly Constrained"
+      )
+      , ordered = T
+    )
+  ) |> 
+  dplyr::inner_join(
+    wf_landscapes |> 
+      sf::st_drop_geometry() |> 
+      dplyr::select(area_name, hectares) |> 
+      dplyr::rename(tot_hectares=hectares)
+    , by = dplyr::join_by(area_name)
+  ) |> 
+  dplyr::inner_join(
+    table_temp |> 
+      dplyr::filter(scenario_id==1) |> 
+      dplyr::select(area_name, objective_lo_treat_area_ha)
+    , by = dplyr::join_by(area_name)
+  ) |> 
+  dplyr::mutate(
+    y_val = -y_val
+    , sizing = ifelse(hectares>tot_hectares,1,hectares/tot_hectares)
+    , coloring = dplyr::case_when(
+        order %in% 4:5
+          & hectares >= objective_lo_treat_area_ha
+          ~ 1
+        , order %in% 4:5
+          & hectares < objective_lo_treat_area_ha
+          ~ 2
+        , T ~ 3
+    )
+  ) |> 
+  # dplyr::filter(stringr::str_starts(area_name,"CA")) |> 
+  # View()
+ggplot() +
+  geom_line(
+    mapping = aes(x = order_lab, y = y_val, group = scenario_id)
+    , color = "gray"
+  ) +
+  geom_point(
+    mapping = aes(x = order_lab, y = y_val, size = sizing*100, color = factor(coloring))
+    , shape = 15
+  ) +
+  geom_text(
+    mapping = aes(
+      x = order_lab, y = y_val, group = scenario_id
+      , label = scales::comma(hectares,suffix = "k", scale = 1e-3, accuracy = 1)
+    )
+    , size = 2.5
+    , color = "black"
+    , vjust = 2.5
+    , angle = 90
+  ) +
+  geom_text(
+    mapping = aes(
+      x = order_lab, y = y_val, group = scenario_id
+      , label = ifelse(
+        order == 4, paste0("Scenario", y_val*-1), NA
+      )
+      , fontface = "italic"
+    )
+    , size = 2.5
+    , color = "black"
+    , hjust = 0.1
+    , vjust = -1.4
+  ) +
+  facet_wrap(facets = vars(area_name)
+    , ncol = 3
+    , labeller = label_wrap_gen(width = 35, multi_line = TRUE)
+    , scales = "free_x"
+  ) +
+  scale_color_manual(values = c("#008b8b", "#cd3700", "#bebebe")) +
+  scale_y_continuous(expand = expansion(c(0.3,0.3))) +
+  scale_x_discrete(labels = scales::label_wrap(10)) +
+  labs(
+    x = ""
+    , y = ""
+    , subtitle = "<span><span style='color:#008b8b;'><b><i>≥20% treatable</i></b></span> | <span style='color:#cd3700;'><b><i><20% treatable</i></b></span></span>"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "none"
+    , legend.direction  = "horizontal"
+    , legend.title = element_text(size=7)
+    , axis.title = element_text(size=9)
+    , axis.text.y = element_blank()
+    , axis.ticks.y = element_blank()
+    , axis.text = element_text(size = 7)
+    , panel.grid = element_blank()
+    , plot.subtitle = ggtext::element_markdown(size = 10)
+  )
 ```
 
 ### Objective vs. Treatable Plot

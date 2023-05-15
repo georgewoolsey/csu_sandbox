@@ -83,3 +83,7 @@ area-of-high-priority-project-areas
 objective-vs.-treatable
 objective-vs.-treatable-table
 objective-vs.-treatable-plot
+reduction-in-treatable-area-flow
+project-areas-map
+map-of-high-risk-project-areas
+area-of-high-risk-project-areas
