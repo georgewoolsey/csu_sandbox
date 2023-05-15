@@ -54,9 +54,9 @@ data.frame(
   , cover = rep("Forest or Shrubland",n_sc_temp)
   , protected = rep("Not Protected",n_sc_temp)
   , slope = c("<35%","<50%","<50%")
-  , admin = c("No Designation","No Designation","Any Designation")
-  , riparian = c(">100ft",">100ft",">50ft")
   , road = c("<1,000ft","<2,000ft","<2,000ft")
+  , riparian = c(">100ft",">100ft",">50ft")
+  , admin = c("No Designation","No Designation","Any Designation")
 ) |> 
   tidyr::pivot_longer(
     cols = -c(scenario)
@@ -73,26 +73,32 @@ data.frame(
         "cover"
         , "protected"
         , "slope"
-        , "admin"
-        , "riparian"
         , "road"
+        , "riparian"
+        , "admin"
       )
       , labels = c(
         "NLCD Cover Type"
         , "Protected or<br>IRA Status"
         , "Slope"
-        , "Administrative<br>Designation"
-        , "Riparian<br>Buffer"
         , "Distance to<br>Nearest Road"
+        , "Riparian<br>Buffer"
+        , "Administrative<br>Designation"
       )
       , ordered = T
     )
   ) |> 
+  dplyr::arrange(name) |> 
+  dplyr::mutate(
+    lvl = paste0("L",dplyr::row_number()-1,":")
+  ) |> 
+  dplyr::relocate(lvl) |> 
 # make table
 kableExtra::kable(
     caption = "Scenarios Considered for Determining Mechanical Treatment Operability<br>Mechanical treatment allowed if:"
     , col.names = c(
       ""
+      , ""
       , "Scenario 1<br>Most Constrained"
       , "Scenario 2<br>Moderate"
       , "Scenario 3<br>Least Constrained"
@@ -119,18 +125,18 @@ wf_landscapes <- sf::st_read("../data/constrained_by_wflndscp_wide_sf.gpkg") |>
 # set crs
 transform_crs <- sf::st_crs(wf_landscapes)
 # load landscape constraint scenario data
-constrained_by_scnro_ls <- list.files("../data/wildfirepriority/all/",pattern = "\\.csv$") %>%
-  purrr::keep(stringr::str_starts(.,"wfpriority_all_sc")) %>% 
+constrained_by_scnro_ls <- list.files("../data/wildfirepriority/all_rd/",pattern = "\\.csv$") %>%
+  purrr::keep(stringr::str_starts(.,"wfpriority_all_rd_sc")) %>% 
   purrr::map(function(x){
     readr::read_csv(
-      paste0("../data/wildfirepriority/all/",x)
+      paste0("../data/wildfirepriority/all_rd/",x)
       , name_repair = "universal"
       , col_types = cols(.default = "c")
     ) %>% 
     dplyr::rename_with(tolower) %>% 
     dplyr::rename_with(make.names) %>% 
     dplyr::select(state,name,tidyselect::ends_with("_m2"),tidyselect::starts_with("pct_")) %>% 
-    dplyr::mutate(scenario_id = stringr::word(x,3,sep="_") %>% readr::parse_number()) %>% 
+    dplyr::mutate(scenario_id = stringr::word(x,4,sep="_") %>% readr::parse_number()) %>% 
     dplyr::relocate(scenario_id)
   }) %>%
   dplyr::bind_rows() %>%
@@ -162,10 +168,10 @@ constrained_by_scnro_ls <- list.files("../data/wildfirepriority/all/",pattern = 
   dplyr::mutate(
     pct_rdctn1_protected = -1*(1 - pct_rmn1_protected)
     , pct_rdctn2_slope = -1*(pct_rmn1_protected - pct_rmn2_slope)
-    , pct_rdctn3_administrative = -1*(pct_rmn2_slope - pct_rmn3_administrative)
-    , pct_rdctn4_riparian = -1*(pct_rmn3_administrative - pct_rmn4_riparian)
-    , pct_rdctn5_roads = -1*(pct_rmn4_riparian - pct_rmn5_roads)
-    , pct_rdctn_total = -1*(1 - pct_rmn5_roads)
+    , pct_rdctn3_roads = -1*(pct_rmn2_slope - pct_rmn3_roads)
+    , pct_rdctn4_riparian = -1*(pct_rmn3_roads - pct_rmn4_riparian)
+    , pct_rdctn5_administrative = -1*(pct_rmn4_riparian - pct_rmn5_administrative)
+    , pct_rdctn_total = -1*(1 - pct_rmn5_administrative)
     , pct_covertype_area = covertype_area_ha/feature_area_ha
     # scenario description
     , scenario_lab = factor(
@@ -221,18 +227,18 @@ fireshed_proj_area <- sf::st_read("../data/firesheds/fireshed_proj_area.gpkg") |
     sf::st_geometry(fireshed_proj_area) = "geometry"
 # load fireshed constraint scenario data
 constrained_by_scnro_ls_pa <-
-  list.files("../data/wildfirepriority/fireshed/",pattern = "\\.csv$") %>%
-  purrr::keep(stringr::str_starts(.,"wfpriority_fireshed_sc")) %>% 
+  list.files("../data/wildfirepriority/fireshed_rd/",pattern = "\\.csv$") %>%
+  purrr::keep(stringr::str_starts(.,"wfpriority_fireshed_rd_sc")) %>% 
   purrr::map(function(x){
     readr::read_csv(
-      paste0("../data/wildfirepriority/fireshed/",x)
+      paste0("../data/wildfirepriority/fireshed_rd/",x)
       , name_repair = "universal"
       , col_types = cols(.default = "c")
     ) %>% 
     dplyr::rename_with(tolower) %>% 
     dplyr::rename_with(make.names) %>% 
     dplyr::select(state,name,pa_id,tidyselect::ends_with("_m2"),tidyselect::starts_with("pct_")) %>% 
-    dplyr::mutate(scenario_id = stringr::word(x,3,sep="_") %>% readr::parse_number()) %>% 
+    dplyr::mutate(scenario_id = stringr::word(x,4,sep="_") %>% readr::parse_number()) %>% 
     dplyr::relocate(scenario_id)
   }) %>%
   dplyr::bind_rows() %>%
@@ -266,10 +272,10 @@ constrained_by_scnro_ls_pa <-
   dplyr::mutate(
     pct_rdctn1_protected = -1*(1 - pct_rmn1_protected)
     , pct_rdctn2_slope = -1*(pct_rmn1_protected - pct_rmn2_slope)
-    , pct_rdctn3_administrative = -1*(pct_rmn2_slope - pct_rmn3_administrative)
-    , pct_rdctn4_riparian = -1*(pct_rmn3_administrative - pct_rmn4_riparian)
-    , pct_rdctn5_roads = -1*(pct_rmn4_riparian - pct_rmn5_roads)
-    , pct_rdctn_total = -1*(1 - pct_rmn5_roads)
+    , pct_rdctn3_roads = -1*(pct_rmn2_slope - pct_rmn3_roads)
+    , pct_rdctn4_riparian = -1*(pct_rmn3_roads - pct_rmn4_riparian)
+    , pct_rdctn5_administrative = -1*(pct_rmn4_riparian - pct_rmn5_administrative)
+    , pct_rdctn_total = -1*(1 - pct_rmn5_administrative)
     , pct_covertype_area = covertype_area_ha/feature_area_ha
     # calculate level of constraint
       , cnstrnt_lvl = dplyr::case_when(
@@ -343,11 +349,11 @@ scnum_temp<-2
       , pct_covertype_area
       , pct_rdctn1_protected
       , pct_rdctn2_slope
-      , pct_rdctn3_administrative
+      , pct_rdctn3_roads
       , pct_rdctn4_riparian
-      , pct_rdctn5_roads
-      , rmn5_roads_area_ha
-      , pct_rmn5_roads
+      , pct_rdctn5_administrative
+      , rmn5_administrative_area_ha
+      , pct_rmn5_administrative
     ) |> 
     dplyr::arrange(state,name)
   # make table 
@@ -359,9 +365,9 @@ scnum_temp<-2
         , "Forest+Shrub\n(ha)", "Forest+Shrub\n%"
         , "Protected"
         , "Slope\nSteepness"
-        , "Administrative"
-        , "Riparian\nBuffer"
         , "Road\nDistance"
+        , "Riparian\nBuffer"
+        , "Administrative"
         , "Remaining (ha)"
         , "Remaining (%)"
       )
@@ -386,11 +392,11 @@ gc()
 ```{r ls-chg-avai, fig.height=9}
 ggplot(
     data = constrained_by_scnro_ls
-    , mapping = aes(x=scenario_desc,y=pct_rmn5_roads,group=area_name)
+    , mapping = aes(x=scenario_desc,y=pct_rmn5_administrative,group=area_name)
     ) +
     geom_line(mapping=aes(color = area_name), linewidth = 1.5) +
     geom_label(
-      mapping=aes(label = scales::percent(pct_rmn5_roads, scale = 100, accuracy = 1))
+      mapping=aes(label = scales::percent(pct_rmn5_administrative, scale = 100, accuracy = 1))
       , color = "black"
       , size = 3
       , label.padding = unit(0.15, "lines")
@@ -436,17 +442,17 @@ constrained_by_scnro_ls_long <- constrained_by_scnro_ls |>
         , levels = c(
           "protected"
           , "slope"
-          , "administrative"
-          , "riparian"
           , "roads"
+          , "riparian"
+          , "administrative"
           , "total"   
         )
         , labels = c(
           "Protected"
           , "Slope\nSteepness"
-          , "Administrative"
-          , "Riparian\nBuffer"
           , "Road\nDistance"
+          , "Riparian\nBuffer"
+          , "Administrative"
           , "Total"
         )
       ) |> forcats::fct_rev()
@@ -524,11 +530,11 @@ constrained_by_scnro_ls_pa |>
   ) |> 
 ggplot() +
   geom_col(
-    mapping = aes(x = pct, y = reorder(area_name, high_pct), fill=cnstrnt_class)
+    mapping = aes(x = pct, y = reorder(area_name, desc(area_name)), fill=cnstrnt_class)
     ,width = 0.7, alpha=0.8
   ) +
   geom_text(
-    mapping = aes(x = pct, y = reorder(area_name, high_pct), group=cnstrnt_class
+    mapping = aes(x = pct, y = reorder(area_name, desc(area_name)), group=cnstrnt_class
         ,label = scales::percent(ifelse(pct>=0.05,pct,NA), accuracy = 1)
       )
     , position = position_stack(vjust = 0.5)
@@ -645,11 +651,11 @@ map_fs_temp <- fireshed_proj_area |>
     , ForestShrub.Area.Hectares = covertype_area_ha
     , Pct.Rdctn.Protected = pct_rdctn1_protected
     , Pct.Rdctn.Slope = pct_rdctn2_slope
-    , Pct.Rdctn.Administrative = pct_rdctn3_administrative
+    , Pct.Rdctn.Roads = pct_rdctn3_roads
     , Pct.Rdctn.Riparian = pct_rdctn4_riparian
-    , Pct.Rdctn.Roads = pct_rdctn5_roads
-    , Treatable.Area.Hectares = rmn5_roads_area_ha
-    , Pct.Treatable.Area = pct_rmn5_roads
+    , Pct.Rdctn.Administrative = pct_rdctn5_administrative
+    , Treatable.Area.Hectares = rmn5_administrative_area_ha
+    , Pct.Treatable.Area = pct_rmn5_administrative
   )
 # filter for mapview
 mapview_fs_temp <- map_fs_temp |> 
@@ -695,9 +701,9 @@ mapview::mapview(
         , "ForestShrub.Area.Hectares"
         , "Pct.Rdctn.Protected"
         , "Pct.Rdctn.Slope"
-        , "Pct.Rdctn.Administrative"
-        , "Pct.Rdctn.Riparian"
         , "Pct.Rdctn.Roads"
+        , "Pct.Rdctn.Riparian"
+        , "Pct.Rdctn.Administrative"
         , "Treatable.Area.Hectares"
         , "Pct.Treatable.Area"
       )
@@ -1041,7 +1047,7 @@ constrained_by_scnro_ls_cnstrnt_temp <- constrained_by_scnro_ls_pa |>
   dplyr::summarise(
     n = n()
     , dplyr::across(
-      c(feature_area_ha,covertype_area_ha,rmn5_roads_area_ha)
+      c(feature_area_ha,covertype_area_ha,rmn5_administrative_area_ha)
       , ~ sum(.x,na.rm = T)
     )
   ) |> 
@@ -1051,7 +1057,7 @@ constrained_by_scnro_ls_cnstrnt_temp <- constrained_by_scnro_ls_pa |>
     total_area_ha = sum(feature_area_ha)
     , total_covertype_area_ha = sum(covertype_area_ha)
     # "the need to treat 20 to 40 percent of the overall fireshed"
-    , pct_treatable =  rmn5_roads_area_ha/total_area_ha
+    , pct_treatable =  rmn5_administrative_area_ha/total_area_ha
     , objective_lo_treat_area_ha = total_area_ha*.2
     , objective_hi_treat_area_ha = total_area_ha*.4
   ) |> 
@@ -1071,7 +1077,7 @@ table_temp <-
   ) |> 
   dplyr::rename(
     remaining_pct=pct_treatable
-    , remaining_ha=rmn5_roads_area_ha
+    , remaining_ha=rmn5_administrative_area_ha
   ) |>
   dplyr::select(-c(feature_area_ha, covertype_area_ha)) |> 
   tidyr::pivot_wider(
