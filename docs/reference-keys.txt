@@ -87,3 +87,10 @@ reduction-in-treatable-area-flow
 project-areas-map
 map-of-high-risk-project-areas
 area-of-high-risk-project-areas
+geographic-delineation-description
+fireshed-risk-to-communities-2021
+wilfire-crisis-strategy-21-priority-landscapes-2022-2023
+wilfire-crisis-strategy-treatment-objective
+fireshed-planning-areas
+fireshed-planning-areas-25-win-landscape
+hi_geo_desc

@@ -8,7 +8,7 @@ knitr::opts_chunk$set(
   , message = FALSE
   , results='hide'
   , fig.width = 10
-  , fig.height = 7
+  , fig.height = 8
 )
 # bread-and-butter
 library(tidyverse)
@@ -339,12 +339,12 @@ gc()
 
 ## Geographic Delineation Description
 
-Timeline of the research utilized to motivate and then support the creation of the WCS:
+Timeline of the research utilized to motivate and support the creation of the WCS:
 
 * **2018 August** - [*Toward share stewardship across the landscapes: an outcome-based investment strategy*](https://www.fs.usda.gov/sites/default/files/toward-shared-stewardship.pdf) created a hotspot map of the source of wildfire risk to communities showing that 80% of community exposure from NFS lands originates on 20% of the NFS area.
 * **2019 February** - [Evers et al.](https://scholar.google.com/scholar?cluster=15805381254365923258&hl=en&as_sdt=0,6) analyzed community wildfire exposure from national forests by associating conditions that affect exposure in the areas where wildfires ignite to conditions where exposure likely occurs
 * **2019 May** - [Ager et al.](https://www.fs.usda.gov/rm/pubs_series/rmrs/gtr/rmrs_gtr392.pdf) mapped community firesheds by creating a continuous smoothed surface of predicted structure exposure from all FSim ignitions (see also [Palaiologou et al. 2019](https://scholar.google.com/scholar?oi=bibs&hl=en&cluster=17379401027996950438) and [Ager et al. 2019](https://scholar.google.com/scholar?oi=bibs&hl=en&cluster=5607899483575298490))
-* **2020** - [Evers et al.](https://www.fs.usda.gov/rds/archive/Catalog/RDS-2020-0054) released Fireshed Registry as a geospatial dashboard and decision tool
+* **2020** - [Evers et al.](https://www.fs.usda.gov/rds/archive/Catalog/RDS-2020-0054) release Fireshed Registry as a geospatial dashboard and decision tool
 * **2021 May** - [Ager et al. 2021](https://scholar.google.com/scholar?cluster=7852635540589253195&hl=en&as_sdt=0,6) official release of the Fireshed Registry as a geospatial information system that organizes landscape risk to developed areas into a planning framework (see figure below)
 * **2022 January** - US Department of Agriculture, Forest Service launches a 10-year [Wildfire Crisis Strategy](https://www.fs.usda.gov/sites/default/files/fs_media/fs_document/Confronting-the-Wildfire-Crisis.pdf)
 * **2022 April** - [10 initial landscapes](https://www.fs.usda.gov/sites/default/files/fs_media/fs_document/WCS-Initial-Landscapes.pdf) selected for WCS prioritization 
@@ -490,7 +490,7 @@ plt_basemap +
     # , color="black" 
     , lwd=0.6
   )+
-  scale_fill_manual(values = c("All-Lands"="firebrick","USFS-Only"="orange3","No WCS Status"="gray77")) +
+  scale_fill_manual(values = c("All-Lands"="firebrick","USFS-Only"="orange3","No WCS Status"="gray88")) +
   scale_color_manual(values = c("black", "gray33")) +
   labs(
     fill = "Crisis Strategy\nCategory"
@@ -508,7 +508,7 @@ plt_fshed
 
 The boundaries of the 21 priority landscapes roughly follow the boundaries of "firesheds" prioritized to reduce wildfire transmission to developed areas (Figure 1). Firesheds are geographic delineations with an average area of approximately 250,000 acres (~100,000 hectares) that were created to organize the landscape into units for managing wildfire risk to communities.
 
-### Wilfire Crisis Strategy Treatment Objective
+### Wilfire Crisis Strategy Treatment Objective{#hi_geo_desc}
 
 ```{r map-wcs-obj}
 plt_basemap_simple + 
@@ -548,7 +548,7 @@ plt_basemap_simple +
     , seed = 11
     # , min.segment.length = 0
   ) +
-  scale_fill_manual(values = c("All-Lands"="firebrick","USFS-Only"="orange3","No WCS Status"="gray77")) +
+  scale_fill_manual(values = c("All-Lands"="firebrick","USFS-Only"="orange3","No WCS Status"="gray88")) +
   scale_color_manual(values = c("black", "gray33")) +
   labs(
     fill = "Crisis Strategy\nCategory"
@@ -577,8 +577,8 @@ ggplot() +
       dplyr::inner_join(
         constrained_by_scnro_ls_pa |> 
           dplyr::filter(
-            fireshed_crisis_strategy %in% c("USFS-Only", "All-Lands")
-            & name == name_temp
+            # fireshed_crisis_strategy %in% c("USFS-Only", "All-Lands")
+            name == name_temp
           ) |> 
           dplyr::select(pa_id)
         , by = dplyr::join_by(pa_id)
@@ -589,7 +589,7 @@ ggplot() +
   ) +
   geom_sf(
     data = fireshed |>
-      dplyr::filter(crisis_strategy %in% c("USFS-Only", "All-Lands")) |> 
+      # dplyr::filter(crisis_strategy %in% c("USFS-Only", "All-Lands")) |> 
       sf::st_filter(
         wf_landscapes |>
           dplyr::filter(name == name_temp) |> 
@@ -604,9 +604,9 @@ ggplot() +
     data = wf_landscapes |> dplyr::filter(name == name_temp)
     , mapping = aes(color = "WCS Landscape\nboundary")
     , fill=NA
-    , lwd = 0.7
+    , lwd = 0.9
   )+
-  scale_fill_manual(values = c("All-Lands"="firebrick","USFS-Only"="orange3","No WCS Status"="gray77")) +
+  scale_fill_manual(values = c("All-Lands"="firebrick","USFS-Only"="orange3","No WCS Status"="gray88")) +
   scale_color_manual(values = c("gray44","slategray3", "black")) +
   labs(
     fill = "Crisis Strategy\nCategory"
@@ -664,12 +664,12 @@ cowplot::ggdraw(plt_fshed_pa) +
   cowplot::draw_plot(
     plt_inset
     # The distance along a (0,1) x-axis to draw the left edge of the plot
-    , x = 0.58
+    , x = 0.66
     # The distance along a (0,1) y-axis to draw the bottom edge of the plot
     , y = 0
     # The width and height of the plot expressed as proportion of the entire ggdraw object
-    , width = 0.46
-    , height = 0.46
+    , width = 0.34
+    , height = 0.34
   )
 ```
 
@@ -686,8 +686,8 @@ ggplot() +
       dplyr::inner_join(
         constrained_by_scnro_ls_pa |> 
           dplyr::filter(
-            fireshed_crisis_strategy %in% c("USFS-Only", "All-Lands")
-            & name == name_temp
+            # fireshed_crisis_strategy %in% c("USFS-Only", "All-Lands")
+            name == name_temp
           ) |>
           dplyr::mutate(
             # is_25in = ifelse(pct_pa_intrsct>=0.25,"≥25%","<25%")
@@ -705,7 +705,7 @@ ggplot() +
   ) +
   geom_sf(
     data = fireshed |>
-      dplyr::filter(crisis_strategy %in% c("USFS-Only", "All-Lands")) |> 
+      # dplyr::filter(crisis_strategy %in% c("USFS-Only", "All-Lands")) |> 
       sf::st_filter(
         wf_landscapes |>
           dplyr::filter(name == name_temp) |> 
@@ -720,10 +720,10 @@ ggplot() +
     data = wf_landscapes |> dplyr::filter(name == name_temp)
     , mapping = aes(color = "WCS Landscape\nboundary")
     , fill=NA
-    , lwd = 0.7
+    , lwd = 0.9
   )+
-  scale_fill_manual(values = viridis::cividis(n=2, direction = -1, alpha = 0.8)) +
-  scale_color_manual(values = c("gray44","slategray3", "black")) +
+  scale_fill_manual(values = viridis::viridis(n=4, direction = -1, alpha = 0.9)[c(1,3)]) +
+  scale_color_manual(values = c("gray33","slategray3", "black")) +
   labs(
     fill = "Included in this analysis?"
     # fill = "Included in this analysis\nif ≥25% area w/in landscape"
@@ -750,7 +750,7 @@ Fireshed planning areas that did not have at least *25%* of area within the boun
 ###################################
 
 
-api_secret <- "AIzaSyBmtsod1swUumFz9AMsR_CC-42DjwkEPcE" #### YOUR API KEY
+api_secret <- "" #### YOUR API KEY
 ggmap::register_google(key = api_secret, write = T)
 # bounding box
 plt_crs <- 4326
@@ -803,7 +803,7 @@ ggmap::ggmap(hey_map) +
 
 ```{r}
 # filter fireshed project area
-fireshed_proj_area <- fireshed_proj_area |> 
+constrained_by_scnro_ls_pa <- constrained_by_scnro_ls_pa |> 
   dplyr::filter(pct_pa_intrsct>=0.25)
 ```
 
@@ -1320,68 +1320,11 @@ ggplot(data = wcs_status_temp) +
   )
 ```
 
-### Map of high-risk project areas
+### Area of high-risk project areas
 
 *Only including fireshed planning areas that have at least 25% of their area within the bounds of the priority landscapes and are in a high-risk fireshed.*
 
-```{r map-pas-wcs}
-ggplot() + 
-    geom_sf(data = 
-      fireshed_proj_area |> 
-        dplyr::filter(fireshed_crisis_strategy %in% c("USFS-Only", "All-Lands")) |> 
-        dplyr::mutate(pa_id=as.character(pa_id)) |> 
-        dplyr::inner_join(
-          constrained_by_scnro_ls_pa |> 
-            dplyr::select(pa_id)
-          , by = dplyr::join_by(pa_id)
-        )
-      , aes(fill = fireshed_crisis_strategy), lwd = 0.05
-    ) +
-    geom_sf(
-      data = USAboundaries::us_states(states = c(
-          # usfs region 1-6 states
-          "MT","WY","CO","NM","AZ","UT","ID","WA","OR","CA","NV"
-          # , "KS","NE","SD","ND"
-        )) |> 
-        sf::st_transform(transform_crs)
-      , fill = NA
-      , color = "gray55"
-    ) +
-    geom_sf(data = wf_landscapes, fill = NA, color = "gray22", lwd = 0.2) +
-    ggrepel::geom_text_repel(data = wf_landscapes
-      , aes(label = stringr::str_wrap(
-          dplyr::case_when(
-            stringr::str_count(name, "\\w+")<2
-              ~ stringr::word(name,1,stringr::str_count(name, "\\w+"))
-            , stringr::str_starts(name,"Sierra and Elko") ~ stringr::word(name,1,3)
-            , TRUE ~ stringr::word(name,1,2)
-          )
-          , 7)
-          , geometry = geometry
-        )
-      , stat = "sf_coordinates"
-      , size = 2
-      , seed = 11
-      # , min.segment.length = 0
-    ) +
-    scale_fill_manual(values = c("All-Lands"="firebrick","USFS-Only"="orange3")) +
-    scale_x_continuous(expand = c(0, 0)) +
-    scale_y_continuous(expand = c(0, 0)) +
-    labs(
-      fill = ""
-      , x = ""
-      , y =""
-    ) +
-    theme_light() +
-    theme(
-      legend.position = c(0.9,0.9) # "top"
-      , legend.text = element_text(size = 7)
-      , axis.text = element_text(size=7)
-    )
-
-```
-
-### Area of high-risk project areas
+See [this section](#hi_geo_desc) for discussion of high-risk firesheds and criteria for including fireshed project areas.
 
 ```{r area-pas-wcs}
 # data filter
@@ -1843,7 +1786,7 @@ ggplot() +
 
 ### Objective vs. Treatable Plot
 
-```{r obj-vs-trtbl-plt, fig.height=11.5}
+```{r obj-vs-trtbl-plt, fig.height=13}
 # plot
 ggplot(
     data = constrained_by_scnro_ls_cnstrnt_temp |> 
