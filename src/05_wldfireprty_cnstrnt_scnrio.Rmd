@@ -2092,6 +2092,7 @@ nlcd_area_ls_pa_cl_temp <-
         dplyr::select(
           scenario_id
           , scenario_lab
+          , scenario_desc
           , pa_id
           , area_name
           , pct_rmn5_administrative
@@ -2102,7 +2103,7 @@ nlcd_area_ls_pa_cl_temp <-
       , by = dplyr::join_by(pa_id,area_name)
       , multiple = "all"
     ) |> 
-  dplyr::mutate(scenario_lab = scenario_lab |> forcats::fct_rev())
+  dplyr::mutate(scenario_desc = scenario_desc |> forcats::fct_rev())
 # treatable vs covertype
 ggplot(
     data = nlcd_area_ls_pa_cl_temp
@@ -2111,7 +2112,7 @@ ggplot(
   geom_point(alpha = 0.7, size = 1) +
   # geom_smooth(method = "lm", lwd = 1, color = "gray", linetype = "dashed", se=F) +
   scale_color_manual(values = nlcd_colors[(length(nlcd_colors)-1):length(nlcd_colors)]) +
-  facet_grid(cols = vars(class_label), rows = vars(scenario_lab)) +
+  facet_grid(cols = vars(class_label), rows = vars(scenario_desc)) +
   scale_x_continuous(labels = scales::percent_format()) +
   scale_y_continuous(labels = scales::percent_format()) +
   labs(
@@ -2149,7 +2150,7 @@ ggplot(
   geom_density(alpha = 0.7) +
   scale_fill_manual(values = nlcd_colors[(length(nlcd_colors)-1):length(nlcd_colors)]) +
   scale_color_manual(values = nlcd_colors[(length(nlcd_colors)-1):length(nlcd_colors)]) +
-  facet_grid(cols = vars(class_label), rows = vars(scenario_lab)) +
+  facet_grid(cols = vars(class_label), rows = vars(scenario_desc)) +
   scale_x_continuous(labels = scales::percent_format()) +
   # scale_y_continuous(labels = scales::percent_format()) +
   labs(
@@ -2175,8 +2176,8 @@ In the plot above fireshed project areas are grouped into forest or shrubland ba
 ```{r nlcd-trt-cnstrnt}
 nlcd_area_ls_pa_cl_temp |> 
   dplyr::filter(pct_area > .5) |> 
-  dplyr::count(class_label, scenario_lab, cnstrnt_class) |> 
-  dplyr::group_by(class_label, scenario_lab) |> 
+  dplyr::count(class_label, scenario_desc, cnstrnt_class) |> 
+  dplyr::group_by(class_label, scenario_desc) |> 
   dplyr::mutate(pct = n/sum(n)) |> 
 ggplot() +
   geom_col(
@@ -2191,7 +2192,7 @@ ggplot() +
     , color = "black", size = 3
   ) +
   scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
-  facet_grid(cols = vars(scenario_lab)) +
+  facet_grid(cols = vars(scenario_desc)) +
   scale_x_continuous(labels = scales::percent_format()) +
   labs(
     fill = "Level of\nConstraint"
@@ -2228,8 +2229,8 @@ nlab_temp <- nlcd_area_ls_pa_cl_temp |>
 # plot
 nlcd_area_ls_pa_cl_temp |> 
   dplyr::filter(pct_area > .5 & fireshed_crisis_strategy  %in% c("USFS-Only", "All-Lands")) |> 
-  dplyr::count(class_label, scenario_lab, cnstrnt_class) |> 
-  dplyr::group_by(class_label, scenario_lab) |> 
+  dplyr::count(class_label, scenario_desc, cnstrnt_class) |> 
+  dplyr::group_by(class_label, scenario_desc) |> 
   dplyr::mutate(pct = n/sum(n)) |> 
 ggplot() +
   geom_col(
@@ -2244,7 +2245,7 @@ ggplot() +
     , color = "black", size = 3
   ) +
   scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
-  facet_grid(cols = vars(scenario_lab)) +
+  facet_grid(cols = vars(scenario_desc)) +
   scale_x_continuous(labels = scales::percent_format()) +
   labs(
     fill = "Level of\nConstraint"
