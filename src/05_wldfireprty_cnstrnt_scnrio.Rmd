@@ -2102,8 +2102,8 @@ nlcd_area_ls_pa_cl_temp <-
         )
       , by = dplyr::join_by(pa_id,area_name)
       , multiple = "all"
-    ) |> 
-  dplyr::mutate(scenario_desc = scenario_desc |> forcats::fct_rev())
+    )  
+  # dplyr::mutate(scenario_desc = scenario_desc |> forcats::fct_rev())
 # treatable vs covertype
 ggplot(
     data = nlcd_area_ls_pa_cl_temp
