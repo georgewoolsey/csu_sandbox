@@ -9,7 +9,7 @@ var ex_polygon = ee.FeatureCollection("users/GeorgeWoolsey/unit_bbox");
   // ... https://developers.google.com/earth-engine/guides/table_upload
   //////////////////////////////////////////////////
     var ft_list = ee.List([
-      'Samuel R. McKelvie National Forest'
+      'Enchanted Circle'
     ]);
     var my_feature_collection = 
     ///////////////// usfs forests
@@ -18,7 +18,7 @@ var ex_polygon = ee.FeatureCollection("users/GeorgeWoolsey/unit_bbox");
       //   // .filter(ee.Filter.inList('REGION', ft_list))
     ///////////////// wildfire priority landscapes
       ee.FeatureCollection("projects/forestmgmtconstraint/assets/Wildfire_Crisis_Strategy_Landscapes")
-      // .filter(ee.Filter.inList('STATE', ft_list))
+      // .filter(ee.Filter.inList('NAME', ft_list))
     ;
   print(my_feature_collection.aggregate_array('NAME'), 'FORESTS TO DO' );
   //////////////////////////////////////////////////
@@ -38,7 +38,7 @@ var ex_polygon = ee.FeatureCollection("users/GeorgeWoolsey/unit_bbox");
     .filterBounds(my_feature_collection)
     .first()
   ;
-  print(nlcd,'nlcd');
+  // print(nlcd,'nlcd');
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // FUNCTION TO CALCULATE AREA BY CLASS
@@ -76,8 +76,35 @@ var nlcd_area_fn = function(my_feature){
     });
     var area_dict = ee.Dictionary.fromLists(class_list, area_list);
     // print(area_dict,'area_dict');
+  // ADD MISSING NLCD CLASSES
+    var nlcd_zero_dict = ee.Dictionary({
+      area_m2_nlcd_cl_11: 0
+      ,area_m2_nlcd_cl_12: 0
+      ,area_m2_nlcd_cl_21: 0
+      ,area_m2_nlcd_cl_22: 0
+      ,area_m2_nlcd_cl_23: 0
+      ,area_m2_nlcd_cl_24: 0
+      ,area_m2_nlcd_cl_31: 0
+      ,area_m2_nlcd_cl_41: 0
+      ,area_m2_nlcd_cl_42: 0
+      ,area_m2_nlcd_cl_43: 0
+      ,area_m2_nlcd_cl_51: 0
+      ,area_m2_nlcd_cl_52: 0
+      ,area_m2_nlcd_cl_71: 0
+      ,area_m2_nlcd_cl_72: 0
+      ,area_m2_nlcd_cl_73: 0
+      ,area_m2_nlcd_cl_74: 0
+      ,area_m2_nlcd_cl_81: 0
+      ,area_m2_nlcd_cl_82: 0
+      ,area_m2_nlcd_cl_90: 0
+      ,area_m2_nlcd_cl_95: 0
+    });
+    // Combines two dictionaries. In the case of duplicate names:
+      // the output will contain the value of the second dictionary unless overwrite is false.
+    var full_area_dict = nlcd_zero_dict.combine(area_dict, true);
+    // print(full_area_dict,'full_area_dict');
   // add dictionary to feature data 
-    var this_data = ft_cols.set(area_dict);
+    var this_data = ft_cols.set(full_area_dict);
     // print(this_data);
   // return
   return this_data;

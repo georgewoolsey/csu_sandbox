@@ -748,18 +748,15 @@ Fireshed planning areas that did not have at least *25%* of area within the boun
 # !!!!!!!!!!! SCRAPPING GGMAP
 # https://github.com/dkahle/ggmap/issues/160
 ###################################
-
-
 api_secret <- "" #### YOUR API KEY
 ggmap::register_google(key = api_secret, write = T)
 # bounding box
-plt_crs <- 4326
 bb_temp <- 
   wf_landscapes |> 
     sf::st_union() |> 
     sf::st_transform(crs=5070) |> 
     sf::st_buffer(50000) |> 
-    sf::st_transform(crs=plt_crs) |> 
+    sf::st_transform(crs=4326) |> # same as get_map return
     sf::st_bbox()
 # set bbox for get call
 bbox_temp <- c(
@@ -772,7 +769,7 @@ bbox_temp <- c(
 hey_map <- ggmap::get_stamenmap(
   bbox = bbox_temp
   , zoom = 6
-  , maptype = "toner-hybrid"
+  , maptype = "terrain" #"toner-hybrid" # "terrain"
   , crop = T
 )
 # # google map
@@ -783,32 +780,67 @@ hey_map <- ggmap::get_stamenmap(
 #   , api_key = api_secret
 #   , zoom = 5 #ggmap::calc_zoom(bbox_temp)
 # )
-# plot map
 
+# plot map
+# !!!!!!!!!!!this is mis-aligned :'(
 ggmap::ggmap(hey_map) +
+  geom_sf(
+    data = wf_landscapes |> sf::st_transform(crs=4326)
+    , fill = NA, color = "black", lwd = 0.3
+    , inherit.aes = F
+  ) +
+  coord_sf(expand = FALSE) +
+  theme_void()
+
+##################hack to align plots
+ggmap_bbox_fn <- function(map, my_crs) {
+    if (!inherits(map, "ggmap")) stop("map must be a ggmap object")
+    # Extract the bounding box (in lat/lon) from the ggmap to a numeric vector, 
+    # and set the names to what sf::st_bbox expects:
+    map_bbox <- setNames(unlist(attr(map, "bb")), c("ymin", "xmin", "ymax", "xmax"))
+    # Convert the bbox to an sf polygon, transform it to 3857, 
+    # and convert back to a bbox (convoluted, but it works)
+    bbox_3857 <- st_bbox(st_transform(st_as_sfc(st_bbox(map_bbox, crs = 4326)), my_crs))
+    # Overwrite the bbox of the ggmap object with the transformed coordinates 
+    attr(map, "bb")$ll.lat <- bbox_3857["ymin"]
+    attr(map, "bb")$ll.lon <- bbox_3857["xmin"]
+    attr(map, "bb")$ur.lat <- bbox_3857["ymax"]
+    attr(map, "bb")$ur.lon <- bbox_3857["xmax"]
+    map
+}
+# apply function
+  plt_crs <- 3857
+  hey_map_aligned <- ggmap_bbox_fn(hey_map, plt_crs) # Use the function
+# plot
+ggmap(hey_map_aligned) + 
   geom_sf(
     data = wf_landscapes |> sf::st_transform(crs=plt_crs)
     , fill = NA, color = "black", lwd = 0.3
     , inherit.aes = F
   ) +
-  # geom_sf(
-  #   
-  # ) +
-  coord_sf(expand = FALSE) +
-  # coord_sf(default_crs = sf::st_crs(4326)) +
+  coord_sf(
+    expand = FALSE
+    # , crs = sf::st_crs(plt_crs)
+  ) +
   theme_void()
+
 
 ```
 
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
+remove(list = ls()[grep("_temp",ls())])
+gc()
+```
+
+
+## Landscape-level analysis 
 
 ```{r}
 # filter fireshed project area
 constrained_by_scnro_ls_pa <- constrained_by_scnro_ls_pa |> 
   dplyr::filter(pct_pa_intrsct>=0.25)
 ```
-
-
-## Landscape-level analysis 
 
 ### Reduction Treatable Area Table
 
@@ -1242,8 +1274,6 @@ plt_fn_temp <- function(scnum=1) {
 map_fs_temp |> dplyr::pull(scenario_id) |> unique() |> 
  purrr::map(plt_fn_temp)
 ```
-
-**Only fireshed project areas with a high priority WCS Status shown above.**  Some fireshed project areas are within the bounds of the priority landscapes but are not within a "high priority" fireshed.
 
 ```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
 remove(list = ls()[grep("_temp",ls())])
@@ -1881,3 +1911,283 @@ ggplot(
     , strip.placement = "outside"
   )
 ```
+
+## Landcover Class Area
+
+What is the landcover classification of the fireshed planning area units? This [GEE script](https://code.earthengine.google.com/578bb6ba1f5c534bfd9f1b6a0c7d0541?noload=true) was used to calculate the area by NLCD landcover class.
+
+```{r nlcd-area-dta}
+# nlcd class groups
+nlcd_reclass_df_temp <- data.frame(
+    class_id = c(11,12,21,22,23,24,31,41,42,43,51,52,71,72,73,74,81,82,90,95) |> as.character()
+    , class_label = c(
+      "Water"
+      , "Water"
+      , "Developed"
+      , "Developed"
+      , "Developed"
+      , "Developed"
+      , "Barren"
+      , "Forest"
+      , "Forest"
+      , "Forest"
+      , "Shrubland"
+      , "Shrubland"
+      , "Herbaceous"
+      , "Herbaceous"
+      , "Herbaceous"
+      , "Herbaceous"
+      , "Planted/Cultivated" # double-check name
+      , "Planted/Cultivated"
+      , "Wetlands"
+      , "Wetlands"
+      )
+  ) |> 
+  dplyr::left_join(
+    FedData::nlcd_colors() |> dplyr::rename(class_id=ID) |> dplyr::rename_with(tolower) |> dplyr::mutate_all(as.character)
+    , by = dplyr::join_by(class_id)
+  ) |> 
+  dplyr::mutate(
+    class_label = factor(class_label) |> 
+      forcats::fct_relevel("Forest","Shrubland") |> 
+      forcats::fct_rev()
+  )
+# load nlcd cover data by fireshed planning area
+nlcd_area_ls_pa <- 
+  readr::read_csv("../data/wildfirepriority/wfpriority_fireshed_nlcd_area.csv") |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::select(
+    pa_id
+    , tidyselect::contains("area_m2")
+  ) |> 
+  dplyr::mutate(pa_id = as.character(pa_id)) |> 
+  dplyr::inner_join(
+    constrained_by_scnro_ls_pa |> 
+      dplyr::filter(scenario_id==1) |> 
+      dplyr::select(pa_id,name,state,area_name,fireshed_crisis_strategy)
+    , by = dplyr::join_by(pa_id)
+    , multiple = "all"
+  ) |> 
+  tidyr::pivot_longer(
+    cols = tidyselect::starts_with("area_m2_nlcd_cl")
+    , names_to = "class_id"
+    , values_to = "area_m2"
+    , names_prefix = "area_m2_nlcd_cl_"
+    , values_drop_na = F
+  ) |> 
+  dplyr::left_join(
+    nlcd_reclass_df_temp
+    , by = dplyr::join_by(class_id)
+  )
+# get color palette
+nlcd_colors <- nlcd_area_ls_pa |> 
+  dplyr::group_by(class_id,color,class_label) |> 
+  dplyr::summarise(sum_area = sum(area_m2,na.rm = T)) |> 
+  dplyr::arrange(class_label,desc(sum_area)) |> 
+  dplyr::group_by(class_label) |> 
+  dplyr::filter(dplyr::row_number()==1) |> 
+  dplyr::ungroup() |> 
+  dplyr::pull(color)
+```
+
+### NLCD Cover Type full Landscape
+
+```{r nlcd-area}
+# aggregate and plot
+nlcd_area_ls_pa |> 
+  dplyr::group_by(area_name,class_label) |> 
+  dplyr::summarise(sum_area_ha = sum(area_m2,na.rm = F)/10000) |> 
+  dplyr::mutate(sum_area_ha = ifelse(is.na(sum_area_ha),0,sum_area_ha)) |> 
+  dplyr::group_by(area_name) |> 
+  dplyr::mutate(pct_area = sum_area_ha/sum(sum_area_ha)) |>
+  dplyr::ungroup() |> 
+ggplot(
+    mapping = aes(x = pct_area, y = reorder(area_name, desc(area_name)), fill=class_label)
+  ) +
+  geom_col(width = 0.7, alpha=0.8) +
+  geom_text(
+    mapping = aes(
+      label = scales::percent(ifelse(pct_area>.03,pct_area,NA), accuracy = 1)
+    )
+    , position = position_stack(vjust = 0.5)
+    , color = "black", size = 3
+  ) +
+  scale_fill_manual(values = nlcd_colors) +
+  scale_x_continuous(labels = scales::percent_format()) +
+  labs(
+    fill = "NLCD\nCover\nType"
+    , y = ""
+    , x = "% Landscape Area"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "top" # c(0.9, 0.9)
+    , legend.title = element_text(size=9)
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_text(size=7)
+  )
+```
+
+The plot above shows the NLCD landcover class distribution for *all* fireshed planning areas with at least *25%* of area within the boundary of the Strategy priority landscape.
+
+### NLCD Cover Type high-risk firesheds
+
+```{r nlcd-area-hi}
+# aggregate and plot
+nlcd_area_ls_pa |>
+  dplyr::filter(fireshed_crisis_strategy %in% c("USFS-Only", "All-Lands")) |> 
+  dplyr::group_by(area_name,class_label) |> 
+  dplyr::summarise(sum_area_ha = sum(area_m2,na.rm = F)/10000) |> 
+  dplyr::mutate(sum_area_ha = ifelse(is.na(sum_area_ha),0,sum_area_ha)) |> 
+  dplyr::group_by(area_name) |> 
+  dplyr::mutate(pct_area = sum_area_ha/sum(sum_area_ha)) |>
+  dplyr::ungroup() |> 
+ggplot(
+    mapping = aes(x = pct_area, y = reorder(area_name, desc(area_name)), fill=class_label)
+  ) +
+  geom_col(width = 0.7, alpha=0.8) +
+  geom_text(
+    mapping = aes(
+      label = scales::percent(ifelse(pct_area>.03,pct_area,NA), accuracy = 1)
+    )
+    , position = position_stack(vjust = 0.5)
+    , color = "black", size = 3
+  ) +
+  scale_fill_manual(values = nlcd_colors) +
+  scale_x_continuous(labels = scales::percent_format()) +
+  labs(
+    fill = "NLCD\nCover\nType"
+    , y = ""
+    , x = "% Landscape Area"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "top" # c(0.9, 0.9)
+    , legend.title = element_text(size=9)
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_text(size=7)
+  )
+```
+
+The plot above shows the NLCD landcover class distribution for only *high-risk* fireshed planning areas with at least *25%* of area within the boundary of the Strategy priority landscape.
+
+### NLCD Cover Type vs. Mechanically Available
+
+Is there a relationship between forest and shrubland cover and mechanical availability and is that relationship the same?
+
+```{r nlcd-trt-scttr}
+nlcd_area_ls_pa_cl_temp <-
+  nlcd_area_ls_pa |> 
+    # dplyr::filter(fireshed_crisis_strategy %in% c("USFS-Only", "All-Lands")) |> 
+    dplyr::group_by(pa_id,area_name,class_label) |> 
+    dplyr::summarise(sum_area_ha = sum(area_m2,na.rm = F)/10000) |> 
+    dplyr::group_by(pa_id,area_name) |> 
+    dplyr::mutate(pct_area = sum_area_ha/sum(sum_area_ha)) |>
+    dplyr::ungroup() |> 
+    dplyr::filter(class_label %in% c("Forest","Shrubland")) |> 
+    dplyr::inner_join(
+      constrained_by_scnro_ls_pa |> 
+        dplyr::select(
+          scenario_id
+          , scenario_lab
+          , pa_id
+          , area_name
+          , pct_rmn5_administrative
+          , pct_rdctn_total
+          , cnstrnt_class
+          , fireshed_crisis_strategy
+        )
+      , by = dplyr::join_by(pa_id,area_name)
+      , multiple = "all"
+    ) |> 
+  dplyr::mutate(scenario_lab = scenario_lab |> forcats::fct_rev())
+# treatable vs covertype
+ggplot(
+    data = nlcd_area_ls_pa_cl_temp
+    , mapping = aes(y = pct_rmn5_administrative, x = pct_area, color = class_label)
+  ) +
+  geom_point(alpha = 0.7, size = 1) +
+  scale_color_manual(values = nlcd_colors[(length(nlcd_colors)-1):length(nlcd_colors)]) +
+  facet_grid(cols = vars(class_label), rows = vars(scenario_lab)) +
+  scale_x_continuous(labels = scales::percent_format()) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(
+    x = "Percent Cover Type"
+    , y = "Percent Treatable Area Remaining"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "none"
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_text(size=7)
+    , strip.text = element_text(color = "black", face = "bold")
+  )
+
+```
+
+
+```{r nlcd-trt-hist}
+nlcd_area_ls_pa_cl_temp |> 
+  dplyr::filter(pct_area > .5) |> 
+ggplot(
+    mapping = aes(x = pct_rmn5_administrative, fill = class_label, group = class_label, color = class_label)
+  ) +
+  geom_density(alpha = 0.7) +
+  scale_fill_manual(values = nlcd_colors[(length(nlcd_colors)-1):length(nlcd_colors)]) +
+  scale_color_manual(values = nlcd_colors[(length(nlcd_colors)-1):length(nlcd_colors)]) +
+  facet_grid(cols = vars(class_label), rows = vars(scenario_lab)) +
+  scale_x_continuous(labels = scales::percent_format()) +
+  # scale_y_continuous(labels = scales::percent_format()) +
+  labs(
+    y = "Density"
+    , x = "Percent Treatable Area Remaining"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "none"
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_text(size=7)
+    , strip.text = element_text(color = "black", face = "bold")
+  )
+
+```
+
+In the plot above fireshed planning areas are grouped into forest or shrubland based on the majority cover type (e.g. >50% forest). Fireshed planning areas where the majority covertype is not forest or shrubland are not shown.
+
+```{r nlcd-trt-cnstrnt}
+nlcd_area_ls_pa_cl_temp |> 
+  dplyr::filter(pct_area > .5) |> 
+  dplyr::count(class_label, scenario_lab, cnstrnt_class) |> 
+  dplyr::group_by(class_label, scenario_lab) |> 
+  dplyr::mutate(pct = n/sum(n)) |> 
+ggplot() +
+  geom_col(
+    mapping = aes(x = pct, y = class_label, fill=cnstrnt_class)
+    ,width = 0.7, alpha=0.8
+  ) +
+  geom_text(
+    mapping = aes(x = pct, y = class_label, group=cnstrnt_class
+        ,label = scales::percent(ifelse(pct>=0.05,pct,NA), accuracy = 1)
+      )
+    , position = position_stack(vjust = 0.5)
+    , color = "black", size = 3
+  ) +
+  scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
+  facet_grid(cols = vars(scenario_lab)) +
+  scale_x_continuous(labels = scales::percent_format()) +
+  labs(
+    fill = "Level of\nConstraint"
+    , y = ""
+    , x = "% of Fireshed\nProject Areas"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "top"
+    , legend.title = element_text(size=7)
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_text(size=7)
+    , strip.text = element_text(color = "black", face = "bold")
+  )
+```
+
+In the plot above fireshed planning areas are grouped into forest or shrubland based on the majority cover type (e.g. >50% forest). Fireshed planning areas where the majority covertype is not forest or shrubland are not shown.
