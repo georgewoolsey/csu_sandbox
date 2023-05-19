@@ -98,3 +98,9 @@ landcover-class-area-1
 nlcd-cover-type-full-landscape
 nlcd-cover-type-high-risk-firesheds
 nlcd-cover-type-vs.-mechanically-available
+fireshed-project-areas
+fireshed-project-areas-25-win-landscape
+distribution-of-fireshed-pa-constraint
+distribution-of-mechanically-available-shrb-vs.-frst
+distribution-of-fireshed-pa-constraint-shrb-vs.-frst
+high-risk-distribution-of-fireshed-pa-constraint-shrb-vs.-frst

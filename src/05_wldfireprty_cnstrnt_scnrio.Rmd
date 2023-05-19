@@ -55,7 +55,7 @@ data.frame(
   scenario = 1:3
   , cover = rep("Forest or Shrubland",n_sc_temp)
   , protected = rep("Not Protected",n_sc_temp)
-  , slope = c("<35%","<50%","<50%")
+  , slope = c("<40%","<60%","<60%")
   , road = c("<1,000ft","<2,000ft","<2,000ft")
   , riparian = c(">100ft",">100ft",">50ft")
   , admin = c("No Designation","No Designation","Any Designation")
@@ -127,11 +127,11 @@ wf_landscapes <- sf::st_read("../data/constrained_by_wflndscp_wide_sf.gpkg") |>
 # set crs
 transform_crs <- sf::st_crs(wf_landscapes)
 # load landscape constraint scenario data
-constrained_by_scnro_ls <- list.files("../data/wildfirepriority/all_rd/",pattern = "\\.csv$") %>%
-  purrr::keep(stringr::str_starts(.,"wfpriority_all_rd_sc")) %>% 
+constrained_by_scnro_ls <- list.files("../data/wildfirepriority/all_slp/",pattern = "\\.csv$") %>%
+  purrr::keep(stringr::str_starts(.,"wfpriority_all_slp_sc")) %>% 
   purrr::map(function(x){
     readr::read_csv(
-      paste0("../data/wildfirepriority/all_rd/",x)
+      paste0("../data/wildfirepriority/all_slp/",x)
       , name_repair = "universal"
       , col_types = cols(.default = "c")
     ) %>% 
@@ -240,11 +240,11 @@ fireshed_proj_area <- sf::st_read("../data/firesheds/fireshed_proj_area.gpkg") |
     sf::st_geometry(fireshed_proj_area) = "geometry"
 # load fireshed constraint scenario data
 constrained_by_scnro_ls_pa <-
-  list.files("../data/wildfirepriority/fireshed_rd/",pattern = "\\.csv$") %>%
-  purrr::keep(stringr::str_starts(.,"wfpriority_fireshed_rd_sc")) %>% 
+  list.files("../data/wildfirepriority/fireshed_slp/",pattern = "\\.csv$") %>%
+  purrr::keep(stringr::str_starts(.,"wfpriority_fireshed_slp_sc")) %>% 
   purrr::map(function(x){
     readr::read_csv(
-      paste0("../data/wildfirepriority/fireshed_rd/",x)
+      paste0("../data/wildfirepriority/fireshed_slp/",x)
       , name_repair = "universal"
       , col_types = cols(.default = "c")
     ) %>% 
@@ -564,7 +564,7 @@ plt_basemap_simple +
 
 Models suggest that fuels reduction treatments can effectively reduce fire size and severity when 20-40% of the landscape has been treated (e.g., Finney, 2007) and the Strategy (USFS, 2022a) aims to treat this amount of high-risk fireshed area within the 21 priority landscapes. The total area of the 21 priority landscapes is approximately 47 million acres (19 million ha), of which 23.7 million acres (9.6 million ha) are in high-risk firesheds; an objective of treating 20-40% would indicate the need to treat between 4.7 to 9.5 million acres (1.9 to 3.8 million ha).
 
-### Fireshed Planning Areas
+### Fireshed Project Areas
 
 ```{r map-fs-pa}
 name_temp <- "Enchanted Circle"
@@ -675,7 +675,7 @@ cowplot::ggdraw(plt_fshed_pa) +
 
 Nested within firesheds are project areas of approximately 10,000 ha in size which represent the geographic unit at which vegetation and fuel management projects are planned ([Ager et al. 2021](https://scholar.google.com/scholar?cluster=7852635540589253195&hl=en&as_sdt=0,6)).
 
-### Fireshed Planning Areas >25% w/in Landscape
+### Fireshed Project Areas >25% w/in Landscape
 
 ```{r}
 # pa map
@@ -741,7 +741,7 @@ ggplot() +
     )
 ```
 
-Fireshed planning areas that did not have at least *25%* of area within the boundary of the Strategy priority landscape were excluded from this analysis. This cutoff was implemented under the assumption that with less than 25% of area available, treatment alone would not substantially affect wildfire behavior across the fireshed ([North et al. 2015](https://scholar.google.com/scholar?cluster=10713464278686805098&hl=en&as_sdt=0,6)). For each fireshed planning area included in this analysis, the entire area within the planning area boundary was used to calculate the percent of mechanically available acreage including area outside of the priority landscape boundary.
+Fireshed project areas that did not have at least *25%* of area within the boundary of the Strategy priority landscape were excluded from this analysis. This cutoff was implemented under the assumption that with less than 25% of area available, treatment alone would not substantially affect wildfire behavior across the fireshed ([North et al. 2015](https://scholar.google.com/scholar?cluster=10713464278686805098&hl=en&as_sdt=0,6)). For each fireshed project area included in this analysis, the entire area within the project area boundary was used to calculate the percent of mechanically available acreage including area outside of the priority landscape boundary.
 
 ```{r, include=FALSE,eval=FALSE}
 ###################################
@@ -1034,7 +1034,7 @@ Based on model simulations of how much area generally needs to be treated to inf
 * **medium** (65– 84%): could use a combination of fire and mechanical thinning
 * **low** (65%): could effectively influence wildfire behavior with mechanical treatment alone
 
-### Distribution of Fireshed Constraint
+### Distribution of Fireshed PA Constraint
 
 ```{r fs-cnstrnt-dist, fig.height=8}
 constrained_by_scnro_ls_pa |> 
@@ -1352,7 +1352,7 @@ ggplot(data = wcs_status_temp) +
 
 ### Area of high-risk project areas
 
-*Only including fireshed planning areas that have at least 25% of their area within the bounds of the priority landscapes and are in a high-risk fireshed.*
+*Only including fireshed project areas that have at least 25% of their area within the bounds of the priority landscapes and are in a high-risk fireshed.*
 
 See [this section](#hi_geo_desc) for discussion of high-risk firesheds and criteria for including fireshed project areas.
 
@@ -1517,7 +1517,7 @@ area_table_temp <- constrained_by_scnro_ls_pa |>
         , "# Intersect\nLandscape"
         , "Area Intersect\nLandscape (ha)"
         , "Area Within\nLandscape (ha)"
-        # planning areas
+        # project areas
         , "# Intersect\nLandscape"
         , "Area Intersect\nLandscape (ha)"
         , "Forest+Shrub Intersect\nLandscape (ha)"
@@ -1525,7 +1525,7 @@ area_table_temp <- constrained_by_scnro_ls_pa |>
       )
       , escape = F
     ) |>  
-    add_header_above(c(" " = 1, "Firesheds\n(~100k ha)"=3, "Planning Areas ≥25% in Landscape\n(~10k ha)" = 3)) |>
+    add_header_above(c(" " = 1, "Firesheds\n(~100k ha)"=3, "Project Areas ≥25% in Landscape\n(~10k ha)" = 3)) |>
     kable_classic(full_width=T) |> 
     pack_rows(index = table(forcats::fct_inorder(area_table_temp$area_name))) |> 
     kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE) |>  
@@ -1542,7 +1542,7 @@ gc()
 
 Models suggest that fuels reduction treatments can effectively reduce fire size and severity when 20-40% of the landscape has been treated (e.g., Finney, 2007) and the Strategy (USFS, 2022a) aims to treat this amount of high-risk fireshed area within the 21 priority landscapes. The total area of the 21 priority landscapes is approximately 47 million acres (19 million ha), of which 23.7 million acres (9.6 million ha) are in high-risk firesheds; an objective of treating 20-40% would indicate the need to treat between 4.7 to 9.5 million acres (1.9 to 3.8 million ha).
 
-*Using the area of fireshed planning areas that have at least 25% of their area within the bounds of the priority landscapes and are in a high-risk fireshed as the treatment area objective (20-40%).*
+*Using the area of fireshed project areas that have at least 25% of their area within the bounds of the priority landscapes and are in a high-risk fireshed as the treatment area objective (20-40%).*
 
 ```{r obj-vs-trtbl}
 # Area of pa's by level of constraint
@@ -1626,7 +1626,7 @@ kableExtra::kable(
           , ~ scales::percent(.x, accuracy = .1)
         )
       )
-  , caption = "Wildfire Crisis Strategy High-Risk Fireshed Planning Areas<br>mechanically available for treatment in lightly and moderately constrained planning areas (≥25% in landscape)"
+  , caption = "Wildfire Crisis Strategy High-Risk Fireshed Project Areas<br>mechanically available for treatment in lightly and moderately constrained project areas (≥25% in landscape)"
   , col.names = c(
     ""
     , "Total\nLandscape"
@@ -1914,7 +1914,7 @@ ggplot(
 
 ## Landcover Class Area
 
-What is the landcover classification of the fireshed planning area units? This [GEE script](https://code.earthengine.google.com/578bb6ba1f5c534bfd9f1b6a0c7d0541?noload=true) was used to calculate the area by NLCD landcover class.
+What is the landcover classification of the fireshed project area units? This [GEE script](https://code.earthengine.google.com/578bb6ba1f5c534bfd9f1b6a0c7d0541?noload=true) was used to calculate the area by NLCD landcover class.
 
 ```{r nlcd-area-dta}
 # nlcd class groups
@@ -1952,7 +1952,7 @@ nlcd_reclass_df_temp <- data.frame(
       forcats::fct_relevel("Forest","Shrubland") |> 
       forcats::fct_rev()
   )
-# load nlcd cover data by fireshed planning area
+# load nlcd cover data by fireshed project area
 nlcd_area_ls_pa <- 
   readr::read_csv("../data/wildfirepriority/wfpriority_fireshed_nlcd_area.csv") |> 
   dplyr::rename_with(tolower) |> 
@@ -2018,6 +2018,7 @@ ggplot(
     fill = "NLCD\nCover\nType"
     , y = ""
     , x = "% Landscape Area"
+    , subtitle = "All Fireshed Project Areas"
   ) +
   theme_light() +
   theme(
@@ -2028,7 +2029,7 @@ ggplot(
   )
 ```
 
-The plot above shows the NLCD landcover class distribution for *all* fireshed planning areas with at least *25%* of area within the boundary of the Strategy priority landscape.
+The figure above shows the NLCD landcover class distribution for *all* fireshed project areas with at least *25%* of area within the boundary of the Strategy priority landscape.
 
 ### NLCD Cover Type high-risk firesheds
 
@@ -2059,6 +2060,7 @@ ggplot(
     fill = "NLCD\nCover\nType"
     , y = ""
     , x = "% Landscape Area"
+    , subtitle = "High-Risk Fireshed Project Areas"
   ) +
   theme_light() +
   theme(
@@ -2069,7 +2071,7 @@ ggplot(
   )
 ```
 
-The plot above shows the NLCD landcover class distribution for only *high-risk* fireshed planning areas with at least *25%* of area within the boundary of the Strategy priority landscape.
+The figure above shows the NLCD landcover class distribution for only *high-risk* fireshed project areas with at least *25%* of area within the boundary of the Strategy priority landscape.
 
 ### NLCD Cover Type vs. Mechanically Available
 
@@ -2107,6 +2109,7 @@ ggplot(
     , mapping = aes(y = pct_rmn5_administrative, x = pct_area, color = class_label)
   ) +
   geom_point(alpha = 0.7, size = 1) +
+  # geom_smooth(method = "lm", lwd = 1, color = "gray", linetype = "dashed", se=F) +
   scale_color_manual(values = nlcd_colors[(length(nlcd_colors)-1):length(nlcd_colors)]) +
   facet_grid(cols = vars(class_label), rows = vars(scenario_lab)) +
   scale_x_continuous(labels = scales::percent_format()) +
@@ -2119,14 +2122,25 @@ ggplot(
   theme(
     legend.position = "none"
     , axis.title = element_text(size=9)
-    , axis.text.x = element_text(size=7)
+    , axis.text = element_text(size=7)
     , strip.text = element_text(color = "black", face = "bold")
   )
 
 ```
 
+All fireshed project areas with at least *25%* of area within the boundary of the Strategy priority landscape shown in figure above.
+
+### Distribution of Mechanically Available (Shrb vs. Frst)
 
 ```{r nlcd-trt-hist}
+# n for notation
+nlab_temp <- nlcd_area_ls_pa_cl_temp |> 
+  dplyr::filter(pct_area > .5 & scenario_id==1) |> 
+  dplyr::count(class_label) |> 
+  dplyr::mutate(l = paste0(class_label, " n = ", scales::comma(n))) |> 
+  dplyr::pull(l) |> 
+  paste(collapse = " | ")
+# plot
 nlcd_area_ls_pa_cl_temp |> 
   dplyr::filter(pct_area > .5) |> 
 ggplot(
@@ -2141,18 +2155,22 @@ ggplot(
   labs(
     y = "Density"
     , x = "Percent Treatable Area Remaining"
+    , caption = nlab_temp
   ) +
   theme_light() +
   theme(
     legend.position = "none"
     , axis.title = element_text(size=9)
-    , axis.text.x = element_text(size=7)
+    , axis.text = element_text(size=7)
     , strip.text = element_text(color = "black", face = "bold")
+    , plot.caption = element_text(size = 8)
   )
 
 ```
 
-In the plot above fireshed planning areas are grouped into forest or shrubland based on the majority cover type (e.g. >50% forest). Fireshed planning areas where the majority covertype is not forest or shrubland are not shown.
+In the plot above fireshed project areas are grouped into forest or shrubland based on the majority cover type (e.g. >50% forest). Fireshed project areas where the majority covertype is not forest or shrubland are not shown. All fireshed project areas with at least *25%* of area within the boundary of the Strategy priority landscape shown in figure above.
+
+### Distribution of Fireshed PA Constraint (Shrb vs. Frst)
 
 ```{r nlcd-trt-cnstrnt}
 nlcd_area_ls_pa_cl_temp |> 
@@ -2179,6 +2197,8 @@ ggplot() +
     fill = "Level of\nConstraint"
     , y = ""
     , x = "% of Fireshed\nProject Areas"
+    , caption = nlab_temp
+    , subtitle = "All Fireshed Project Areas"
   ) +
   theme_light() +
   theme(
@@ -2187,7 +2207,66 @@ ggplot() +
     , axis.title = element_text(size=9)
     , axis.text.x = element_text(size=7)
     , strip.text = element_text(color = "black", face = "bold")
+    , plot.caption = element_text(size = 8)
   )
 ```
 
-In the plot above fireshed planning areas are grouped into forest or shrubland based on the majority cover type (e.g. >50% forest). Fireshed planning areas where the majority covertype is not forest or shrubland are not shown.
+In the plot above fireshed project areas are grouped into forest or shrubland based on the majority cover type (e.g. >50% forest). Fireshed project areas where the majority covertype is not forest or shrubland are not shown. All fireshed project areas with at least *25%* of area within the boundary of the Strategy priority landscape shown in figure above.
+
+### High-Risk Distribution of Fireshed PA Constraint (Shrb vs. Frst)
+
+```{r nlcd-trt-cnstrnt-hi}
+# n for notation
+nlab_temp <- nlcd_area_ls_pa_cl_temp |> 
+  dplyr::filter(pct_area > .5 
+                & fireshed_crisis_strategy  %in% c("USFS-Only", "All-Lands") 
+                & scenario_id==1) |> 
+  dplyr::count(class_label) |> 
+  dplyr::mutate(l = paste0(class_label, " n = ", scales::comma(n))) |> 
+  dplyr::pull(l) |> 
+  paste(collapse = " | ")
+# plot
+nlcd_area_ls_pa_cl_temp |> 
+  dplyr::filter(pct_area > .5 & fireshed_crisis_strategy  %in% c("USFS-Only", "All-Lands")) |> 
+  dplyr::count(class_label, scenario_lab, cnstrnt_class) |> 
+  dplyr::group_by(class_label, scenario_lab) |> 
+  dplyr::mutate(pct = n/sum(n)) |> 
+ggplot() +
+  geom_col(
+    mapping = aes(x = pct, y = class_label, fill=cnstrnt_class)
+    ,width = 0.7, alpha=0.8
+  ) +
+  geom_text(
+    mapping = aes(x = pct, y = class_label, group=cnstrnt_class
+        ,label = scales::percent(ifelse(pct>=0.05,pct,NA), accuracy = 1)
+      )
+    , position = position_stack(vjust = 0.5)
+    , color = "black", size = 3
+  ) +
+  scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
+  facet_grid(cols = vars(scenario_lab)) +
+  scale_x_continuous(labels = scales::percent_format()) +
+  labs(
+    fill = "Level of\nConstraint"
+    , y = ""
+    , x = "% of Fireshed\nProject Areas"
+    , caption = nlab_temp
+    , subtitle = "High-Risk Fireshed Project Areas"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "top"
+    , legend.title = element_text(size=7)
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_text(size=7)
+    , strip.text = element_text(color = "black", face = "bold")
+    , plot.caption = element_text(size = 8)
+  )
+```
+
+In the plot above fireshed project areas are grouped into forest or shrubland based on the majority cover type (e.g. >50% forest). Fireshed project areas where the majority covertype is not forest or shrubland are not shown. Only *high-risk* fireshed project areas with at least *25%* of area within the boundary of the Strategy priority landscape shown in figure above.
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
+remove(list = ls()[grep("_temp",ls())])
+gc()
+```
