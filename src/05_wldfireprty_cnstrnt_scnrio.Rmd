@@ -1580,7 +1580,7 @@ The figure above shows the reduction by constraint for only *high-risk* fireshed
 
 ### Reduction by Constraint high-risk vs. total
 
-```{r hi-tot-pa-rdctn-cnstrnt, fig.height=13}
+```{r hi-tot-pa-rdctn-cnstrnt, fig.height=14}
 # combine data and plot
 pct_rdctn_temp <- 
 constrained_by_scnro_ls_hionly_long |> 
@@ -1854,7 +1854,7 @@ kableExtra::kable(
       dplyr::select(
         c(
           scenario_lab
-          , landscape_area_ha
+          # , landscape_area_ha
           , total_area_ha
           , total_covertype_area_ha
           # light and mod area
@@ -1875,9 +1875,9 @@ kableExtra::kable(
   , caption = "Wildfire Crisis Strategy High-Risk Fireshed Project Areas<br>mechanically available for treatment in lightly and moderately constrained project areas (≥25% in landscape)"
   , col.names = c(
     ""
-    , "Total\nLandscape"
-    , "High-risk\nFireshed PAs"
-    , "High-risk\nForest+Shrub"
+    # , "Total\nLandscape"
+    , "Total Area (ha)"
+    , "Forest+Shrub Area (ha)"
     , "Lightly Constrained", "Moderately Constrained"
     , "Total"
     , "Lightly Constrained", "Moderately Constrained"
@@ -1886,12 +1886,12 @@ kableExtra::kable(
   )
   , escape = F
 ) |>  
-    add_header_above(c(" " = 1, "Area (ha)" = 3, "Treatable High-Risk Area (ha)"=3, "Percent of High-Risk Area" = 3)) |>
+    add_header_above(c(" " = 1, "High-Risk Fireshed\nProject Areas" = 2, "Treatable High-Risk\nArea (ha)"=3, "Treatable High-Risk\nPercent (%)" = 3)) |>
     kable_classic(full_width=T) |> 
     pack_rows(index = table(forcats::fct_inorder(table_temp$area_name))) |> 
     kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE) |>  
     kableExtra::column_spec(
-      10
+      9 # 10
       , color = "white"
       , background = 
           table_temp |> 
@@ -2166,6 +2166,9 @@ gc()
 ## Totals
 
 ```{r tot-ls-pa-dta}
+##################
+# Data Prep
+##################
 # union landscape and pa level data
 # aggregate by scenario for hi-risk pa's
 pct_rdctn_pas_temp <- 
@@ -2241,27 +2244,28 @@ pct_rdctn_ls_temp <-
   dplyr::ungroup()
 # combine
 pct_rdctn_all_temp <- 
-pct_rdctn_pas_temp |> 
-dplyr::mutate(dta_src = "High-Risk Project Areas") |> 
-  dplyr::bind_rows(
-    pct_rdctn_ls_temp |> 
-      dplyr::mutate(dta_src = "Overall Landscape Area")
-  ) |> 
-  dplyr::mutate(
-    constraint_lab = factor(
-        constraint_lvl
-        , ordered = TRUE
-        , 1:5
-        , labels = c(
-          "Protected"
-          , "Slope\nSteepness"
-          , "Road\nDistance"
-          , "Riparian\nBuffer"
-          , "Administrative"
-        )
-      ) |> forcats::fct_rev()
-  ) |> 
-  dplyr::relocate(dta_src)
+  pct_rdctn_pas_temp |> 
+  dplyr::mutate(dta_src = "High-Risk Project Areas") |> 
+    dplyr::bind_rows(
+      pct_rdctn_ls_temp |> 
+        dplyr::mutate(dta_src = "Overall Landscape Area")
+    ) |> 
+    dplyr::mutate(
+      constraint_lab = factor(
+          constraint_lvl
+          , ordered = TRUE
+          , 1:5
+          , labels = c(
+            "Protected"
+            , "Slope\nSteepness"
+            , "Road\nDistance"
+            , "Riparian\nBuffer"
+            , "Administrative"
+          )
+        ) |> forcats::fct_rev()
+    ) |> 
+    dplyr::relocate(dta_src)
+
 ```
 
 ### Reduction Treatable Area Table
@@ -2334,12 +2338,12 @@ tot_table_temp <- pct_rdctn_all_temp |>
 # plot
 ggplot(data = pct_rdctn_all_temp) +
   geom_col(
-    mapping = aes(y = dta_src, x = pct_rdctn, fill = constraint_lab)
+    mapping = aes(y = scenario_lab, x = pct_rdctn, fill = constraint_lab)
     , color = NA, width = 0.6
   ) +
   geom_text(
     mapping = aes(
-      y = dta_src, x = pct_rdctn
+      y = scenario_lab, x = pct_rdctn
       , label = scales::percent(ifelse(pct_rdctn<.06*-1,pct_rdctn,NA), accuracy = 1)
       , fontface = "bold"
     )
@@ -2349,14 +2353,14 @@ ggplot(data = pct_rdctn_all_temp) +
   geom_text(
     data = pct_rdctn_all_temp |> dplyr::filter(constraint_lvl==5)
     , mapping = aes(
-      y = dta_src, x = pct_rdctn_total
+      y = scenario_lab, x = pct_rdctn_total
       , label = scales::percent(pct_rdctn_total, accuracy = 1)
     )
     , color = "black", size = 3.5
     , hjust = -0.1
   ) +
   facet_grid(
-      cols = vars(scenario_desc)
+      cols = vars(dta_src |> forcats::fct_rev())
       , labeller = label_wrap_gen(width = 35, multi_line = TRUE)
     ) +
   scale_fill_viridis_d(option = "plasma", alpha = 0.7) +
@@ -2380,6 +2384,76 @@ ggplot(data = pct_rdctn_all_temp) +
 ```
 
 ### Distribution of Fireshed PA Constraint
+
+```{r tot-ls-pa-cnstrnt}
+cnstrnt_dta_temp <- constrained_by_scnro_ls_pa |> 
+  dplyr::group_by(pa_id,scenario_id) |> 
+  dplyr::filter(dplyr::row_number()==1) |> 
+  dplyr::ungroup() |> 
+  dplyr::filter(fireshed_crisis_strategy  %in% c("USFS-Only", "All-Lands")) |> 
+  dplyr::count(scenario_id, scenario_desc, scenario_lab, cnstrnt_class) |> 
+  dplyr::group_by(scenario_desc, scenario_lab) |> 
+  dplyr::mutate(
+    pct = n/sum(n)
+    , dta_src = "High-Risk Project Areas"
+  ) |> 
+  dplyr::bind_rows(
+    constrained_by_scnro_ls_pa |> 
+      dplyr::group_by(pa_id,scenario_id) |> 
+      dplyr::filter(dplyr::row_number()==1) |> 
+      dplyr::ungroup() |> 
+      dplyr::count(scenario_id, scenario_desc, scenario_lab, cnstrnt_class) |> 
+      dplyr::group_by(scenario_desc, scenario_lab) |> 
+      dplyr::mutate(
+        pct = n/sum(n)
+        , dta_src = "Overall Landscape Area"
+      )
+  ) |> 
+  dplyr::mutate(
+    dta_src = dta_src |> forcats::fct_rev()
+  )
+# n for notation
+nlab_temp <- 
+  cnstrnt_dta_temp |> 
+  dplyr::filter(scenario_id==1) |> 
+  dplyr::group_by(dta_src) |> 
+  dplyr::summarise(n = sum(n)) |> 
+  dplyr::mutate(l = paste0(dta_src, " n = ", scales::comma(n))) |> 
+  dplyr::pull(l) |> 
+  paste(collapse = "\n")
+# plot
+ggplot(data=cnstrnt_dta_temp) +
+  geom_col(
+    mapping = aes(x = pct, y = scenario_lab, fill=cnstrnt_class)
+    ,width = 0.7, alpha=0.8
+  ) +
+  geom_text(
+    mapping = aes(x = pct, y = scenario_lab, group=cnstrnt_class
+        ,label = scales::percent(ifelse(pct>=0.05,pct,NA), accuracy = 1)
+      )
+    , position = position_stack(vjust = 0.5)
+    , color = "black", size = 3
+  ) +
+  scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
+  facet_grid(cols = vars(dta_src)) +
+  scale_x_continuous(labels = scales::percent_format()) +
+  labs(
+    fill = "Level of\nConstraint"
+    , y = ""
+    , x = "% of Fireshed\nProject Areas"
+    , caption = nlab_temp
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "top"
+    , legend.title = element_text(size=7)
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_text(size=7)
+    , strip.text = element_text(color = "black", face = "bold")
+    , plot.caption = element_text(size = 8)
+  )
+```
+
 
 
 ```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
@@ -2651,23 +2725,23 @@ In the plot above fireshed project areas are grouped into forest or shrubland ba
 ```{r nlcd-trt-cnstrnt}
 nlcd_area_ls_pa_cl_temp |> 
   dplyr::filter(pct_area > .5) |> 
-  dplyr::count(class_label, scenario_desc, cnstrnt_class) |> 
-  dplyr::group_by(class_label, scenario_desc) |> 
+  dplyr::count(class_label, scenario_desc, scenario_lab, cnstrnt_class) |> 
+  dplyr::group_by(class_label, scenario_desc, scenario_lab) |> 
   dplyr::mutate(pct = n/sum(n)) |> 
 ggplot() +
   geom_col(
-    mapping = aes(x = pct, y = class_label, fill=cnstrnt_class)
+    mapping = aes(x = pct, y = scenario_lab, fill=cnstrnt_class)
     ,width = 0.7, alpha=0.8
   ) +
   geom_text(
-    mapping = aes(x = pct, y = class_label, group=cnstrnt_class
+    mapping = aes(x = pct, y = scenario_lab, group=cnstrnt_class
         ,label = scales::percent(ifelse(pct>=0.05,pct,NA), accuracy = 1)
       )
     , position = position_stack(vjust = 0.5)
     , color = "black", size = 3
   ) +
   scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
-  facet_grid(cols = vars(scenario_desc)) +
+  facet_grid(cols = vars(class_label)) +
   scale_x_continuous(labels = scales::percent_format()) +
   labs(
     fill = "Level of\nConstraint"
@@ -2704,23 +2778,23 @@ nlab_temp <- nlcd_area_ls_pa_cl_temp |>
 # plot
 nlcd_area_ls_pa_cl_temp |> 
   dplyr::filter(pct_area > .5 & fireshed_crisis_strategy  %in% c("USFS-Only", "All-Lands")) |> 
-  dplyr::count(class_label, scenario_desc, cnstrnt_class) |> 
-  dplyr::group_by(class_label, scenario_desc) |> 
+  dplyr::count(class_label, scenario_desc, scenario_lab, cnstrnt_class) |> 
+  dplyr::group_by(class_label, scenario_desc, scenario_lab) |> 
   dplyr::mutate(pct = n/sum(n)) |> 
 ggplot() +
   geom_col(
-    mapping = aes(x = pct, y = class_label, fill=cnstrnt_class)
+    mapping = aes(x = pct, y = scenario_lab, fill=cnstrnt_class)
     ,width = 0.7, alpha=0.8
   ) +
   geom_text(
-    mapping = aes(x = pct, y = class_label, group=cnstrnt_class
+    mapping = aes(x = pct, y = scenario_lab, group=cnstrnt_class
         ,label = scales::percent(ifelse(pct>=0.05,pct,NA), accuracy = 1)
       )
     , position = position_stack(vjust = 0.5)
     , color = "black", size = 3
   ) +
   scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
-  facet_grid(cols = vars(scenario_desc)) +
+  facet_grid(cols = vars(class_label)) +
   scale_x_continuous(labels = scales::percent_format()) +
   labs(
     fill = "Level of\nConstraint"
