@@ -383,24 +383,24 @@ cities_temp <- USAboundaries::us_cities(
   sf::st_transform(transform_crs) |> 
   dplyr::filter(
     toupper(city) %in% c(
-      'DENVER'
-      , 'TUSCON'
-      , 'PHOENIX'
-      , 'SALT LAKE CITY'
-      , 'LAS VEGAS'
-      , 'SAN DIEGO'
-      , 'LOS ANGELES'
-      , 'FRESNO'
-      , 'SAN FRANCISCO'
-      , 'SACRAMENTO'
-      , 'PORTLAND'
-      , 'SEATTLE'
-      , 'ALBUQUERQUE'
-      , 'RENO'
-      , 'BOISE'
-      , 'HELENA'
-      , 'BILLINGS'
+      "DENVER"
+      , "TUSCON"
+      , "SALT LAKE CITY"
+      , "LAS VEGAS"
+      , "SAN DIEGO"
+      , "LOS ANGELES"
+      , "FRESNO"
+      , "SAN FRANCISCO"
+      , "SACRAMENTO"
+      , "PORTLAND"
+      , "SEATTLE"
+      , "ALBUQUERQUE"
+      , "RENO"
+      , "BOISE"
+      , "HELENA"
+      , "BILLINGS"
     )
+    | (toupper(city) == "PHOENIX" & state_abbr == "AZ")
   )
 # plot basemap
 plt_basemap <-
@@ -427,10 +427,13 @@ ggplot() +
     , mapping = aes(label = city)
     , color = "gray44"
     , size = 2
-    , hjust = -0.15
+    # , hjust = -0.15
+    , hjust = 0.5
+    , vjust = -0.25
   ) +
   coord_sf(expand = F) +
   theme_void()
+
 # plot basemap simple
 plt_basemap_simple <-
 ggplot() + 
