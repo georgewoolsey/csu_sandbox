@@ -118,9 +118,14 @@ kableExtra::kable(
 Landscape-level constraint analysis data was created via this [Google Earth Engine script](https://code.earthengine.google.com/2b330779ad5c813bdd40bde765c4b079?noload=true); WCS priority landscape spatial data was created in this [prior section](#wflndscp).
 
 ```{r ls-ld-dta}
+# manual label placement
 # load wcs priority landscapes
 wf_landscapes <- sf::st_read("../data/constrained_by_wflndscp_wide_sf.gpkg") |> 
-  dplyr::select(1:10)
+  dplyr::select(1:10) |> 
+  dplyr::left_join(
+    readr::read_csv("../data/wildfirepriority/area_label_placement.csv")
+    , by = dplyr::join_by(area_name)
+  )
   #rename sf geom column
     names(wf_landscapes)[names(wf_landscapes)==tolower(attr(wf_landscapes, "sf_column"))] = "geometry"
     sf::st_geometry(wf_landscapes) = "geometry"
@@ -355,7 +360,7 @@ Timeline of the research utilized to motivate and support the creation of the WC
 knitr::include_graphics("../data/fireshed_hierarchy.png")
 ```
 
-*Nested spatial framework for firesheds. Each scale has specific functionality in terms of the planning processes. Firesheds are the broad scale unit of prioritization, but planning areas within them are also prioritized as part of implementation of treatments. Planning areas are roughly the size that national forests use for conducting vegetation and fuel management projects. The relative variation among firesheds compared to variation within them controls the relative emphasis on selecting firesheds versus individual planning areas.* [Ager et al. 2021](https://scholar.google.com/scholar?cluster=7852635540589253195&hl=en&as_sdt=0,6)
+*Nested spatial framework for firesheds. Each scale has specific functionality in terms of the planning processes. Firesheds are the broad scale unit of prioritization, but project areas within them are also prioritized as part of implementation of treatments. Project areas are roughly the size that national forests use for conducting vegetation and fuel management projects. The relative variation among firesheds compared to variation within them controls the relative emphasis on selecting firesheds versus individual planning areas.* [Ager et al. 2021](https://scholar.google.com/scholar?cluster=7852635540589253195&hl=en&as_sdt=0,6)
 
 
 ```{r plt-basemap}
@@ -490,18 +495,47 @@ plt_basemap +
     # , color="black" 
     , lwd=0.6
   )+
+  geom_text(
+    data = wf_landscapes |> 
+        sf::st_drop_geometry() |> 
+        sf::st_as_sf(coords = c("lon","lat")) |> 
+        sf::st_set_crs(4326) |> 
+        sf::st_transform(transform_crs)
+    , aes(
+        label = stringr::str_wrap(
+          dplyr::case_when(
+            stringr::str_count(name, "\\w+")<2
+              ~ stringr::word(name,1,stringr::str_count(name, "\\w+"))
+            , stringr::str_starts(name,"Sierra and Elko") ~ stringr::word(name,1,3)
+            , TRUE ~ stringr::word(name,1,2)
+          )
+          , 7)
+        , color = paste0(investment, " investment")
+        , geometry = geometry
+        , fontface = "bold.italic"
+      )
+    , stat = "sf_coordinates"
+    , size = 2.5
+    # , seed = 11
+    # , min.segment.length = 0
+    , show.legend = F
+  ) +
   scale_fill_manual(values = c("All-Lands"="firebrick","USFS-Only"="orange3","No WCS Status"="gray88")) +
   scale_color_manual(values = c("black", "gray33")) +
   labs(
-    fill = "Crisis Strategy\nCategory"
-    , color = ""
+    fill = "Fireshed\nCategory"
+    , color = "Landscapes"
   ) +
   theme(
-      legend.position = c(0.85,0.85) # "top"
+      legend.position = c(0.87,0.87) # "top"
       # , legend.direction = "horizontal"
-      , legend.title = element_text(size = 8)
+      , legend.title = element_text(size = 8, face = "bold")
       , legend.text = element_text(size = 7)
-    )
+    ) +
+  guides(
+    color = guide_legend(order = 1)
+    , fill = guide_legend(order = 2)
+  )
 # plot
 plt_fshed
 ```
@@ -511,7 +545,7 @@ The boundaries of the 21 priority landscapes roughly follow the boundaries of "f
 ### Wilfire Crisis Strategy Treatment Objective{#hi_geo_desc}
 
 ```{r map-wcs-obj}
-plt_basemap_simple + 
+plt_basemap + 
   geom_sf(
     data = fireshed |>
       dplyr::filter(crisis_strategy %in% c("USFS-Only", "All-Lands")) |> 
@@ -529,8 +563,12 @@ plt_basemap_simple +
     # , color="black" 
     , lwd=0.6
   )+
-  ggrepel::geom_text_repel(
-    data = wf_landscapes
+  geom_text(
+    data = wf_landscapes |> 
+        sf::st_drop_geometry() |> 
+        sf::st_as_sf(coords = c("lon","lat")) |> 
+        sf::st_set_crs(4326) |> 
+        sf::st_transform(transform_crs)
     , aes(
         label = stringr::str_wrap(
           dplyr::case_when(
@@ -540,26 +578,32 @@ plt_basemap_simple +
             , TRUE ~ stringr::word(name,1,2)
           )
           , 7)
+        , color = paste0(investment, " investment")
         , geometry = geometry
         , fontface = "bold.italic"
       )
     , stat = "sf_coordinates"
-    , size = 2
-    , seed = 11
+    , size = 2.5
+    # , seed = 11
     # , min.segment.length = 0
+    , show.legend = F
   ) +
   scale_fill_manual(values = c("All-Lands"="firebrick","USFS-Only"="orange3","No WCS Status"="gray88")) +
   scale_color_manual(values = c("black", "gray33")) +
   labs(
-    fill = "Crisis Strategy\nCategory"
-    , color = ""
+    fill = "Fireshed\nCategory"
+    , color = "Landscapes"
   ) +
   theme(
-      legend.position = c(0.85,0.85) # "top"
+      legend.position = c(0.87,0.87) # "top"
       # , legend.direction = "horizontal"
-      , legend.title = element_text(size = 8)
+      , legend.title = element_text(size = 8, face = "bold")
       , legend.text = element_text(size = 7)
-    )
+    ) +
+  guides(
+    color = guide_legend(order = 1)
+    , fill = guide_legend(order = 2)
+  )
 ```
 
 Models suggest that fuels reduction treatments can effectively reduce fire size and severity when 20-40% of the landscape has been treated (e.g., Finney, 2007) and the Strategy (USFS, 2022a) aims to treat this amount of high-risk fireshed area within the 21 priority landscapes. The total area of the 21 priority landscapes is approximately 47 million acres (19 million ha), of which 23.7 million acres (9.6 million ha) are in high-risk firesheds; an objective of treating 20-40% would indicate the need to treat between 4.7 to 9.5 million acres (1.9 to 3.8 million ha).
@@ -599,6 +643,7 @@ ggplot() +
     , aes(color = "Fireshed\nboundary")
     , fill = NA
     , lwd = 1.2
+    , linetype = "dashed"
   ) +
   geom_sf(
     data = wf_landscapes |> dplyr::filter(name == name_temp)
@@ -609,19 +654,23 @@ ggplot() +
   scale_fill_manual(values = c("All-Lands"="firebrick","USFS-Only"="orange3","No WCS Status"="gray88")) +
   scale_color_manual(values = c("gray44","slategray3", "black")) +
   labs(
-    fill = "Crisis Strategy\nCategory"
-    , color = ""
+    fill = "Fireshed\nCategory"
+    , color = "Spatial\nFramework"
     , subtitle = name_temp
   ) +
   coord_sf(expand = F) +
   theme_void() +
   theme(
-      legend.position = c(0.9,0.9) # "top"
+      legend.position = c(0.87,0.87) # "top"
       # , legend.direction = "horizontal"
-      , legend.title = element_text(size = 8)
+      , legend.title = element_text(size = 8, face = "bold")
       , legend.text = element_text(size = 7)
       , plot.subtitle = element_text(face = "bold.italic", size = 8, hjust = 0.5)
-    )
+    ) +
+  guides(
+    color = guide_legend(order = 1)
+    , fill = guide_legend(order = 2)
+  )
 # inset map
 bb_temp <- wf_landscapes |> 
   dplyr::filter(name == name_temp) |> 
@@ -631,25 +680,6 @@ bb_temp <- wf_landscapes |>
   sf::st_bbox()
 plt_inset <-
   plt_fshed +
-    ggrepel::geom_text_repel(
-      data = wf_landscapes |> dplyr::filter(state %in% c("Colorado","New Mexico"))
-      , aes(
-          label = stringr::str_wrap(
-            dplyr::case_when(
-              stringr::str_count(name, "\\w+")<2
-                ~ stringr::word(name,1,stringr::str_count(name, "\\w+"))
-              , stringr::str_starts(name,"Sierra and Elko") ~ stringr::word(name,1,3)
-              , TRUE ~ stringr::word(name,1,2)
-            )
-            , 7)
-          , geometry = geometry
-          , fontface = "bold.italic"
-        )
-      , stat = "sf_coordinates"
-      , size = 2
-      , seed = 11
-      # , min.segment.length = 0
-    ) +
     coord_sf(
       xlim = c(bb_temp[[1]], bb_temp[[3]])
       , ylim = c(bb_temp[[2]], bb_temp[[4]])
@@ -664,12 +694,12 @@ cowplot::ggdraw(plt_fshed_pa) +
   cowplot::draw_plot(
     plt_inset
     # The distance along a (0,1) x-axis to draw the left edge of the plot
-    , x = 0.66
+    , x = 0.71
     # The distance along a (0,1) y-axis to draw the bottom edge of the plot
     , y = 0
     # The width and height of the plot expressed as proportion of the entire ggdraw object
-    , width = 0.34
-    , height = 0.34
+    , width = 0.28
+    , height = 0.28
   )
 ```
 
@@ -677,7 +707,7 @@ Nested within firesheds are project areas of approximately 10,000 ha in size whi
 
 ### Fireshed Project Areas >25% w/in Landscape
 
-```{r}
+```{r map-fs-pa-win}
 # pa map
 ggplot() + 
   geom_sf(data = 
@@ -715,6 +745,7 @@ ggplot() +
     , aes(color = "Fireshed\nboundary")
     , fill = NA
     , lwd = 1.2
+    , linetype = "dashed"
   ) +
   geom_sf(
     data = wf_landscapes |> dplyr::filter(name == name_temp)
@@ -725,20 +756,24 @@ ggplot() +
   scale_fill_manual(values = viridis::viridis(n=4, direction = -1, alpha = 0.9)[c(1,3)]) +
   scale_color_manual(values = c("gray33","slategray3", "black")) +
   labs(
-    fill = "Included in this analysis?"
+    fill = "Project Area\nInclusions"
     # fill = "Included in this analysis\nif ≥25% area w/in landscape"
-    , color = ""
+    , color = "Spatial\nFramework"
     , subtitle = name_temp
   ) +
   coord_sf(expand = F) +
   theme_void() +
   theme(
-      legend.position = c(0.9,0.9) # "top"
+      legend.position = c(0.87,0.87) # "top"
       # , legend.direction = "horizontal"
       , legend.title = element_text(size = 8, face = "bold")
       , legend.text = element_text(size = 7)
       , plot.subtitle = element_text(face = "bold.italic", size = 8, hjust = 0.5)
-    )
+    ) +
+  guides(
+    color = guide_legend(order = 1)
+    , fill = guide_legend(order = 2)
+  )
 ```
 
 Fireshed project areas that did not have at least *25%* of area within the boundary of the Strategy priority landscape were excluded from this analysis. This cutoff was implemented under the assumption that with less than 25% of area available, treatment alone would not substantially affect wildfire behavior across the fireshed ([North et al. 2015](https://scholar.google.com/scholar?cluster=10713464278686805098&hl=en&as_sdt=0,6)). For each fireshed project area included in this analysis, the entire area within the project area boundary was used to calculate the percent of mechanically available acreage including area outside of the priority landscape boundary.
@@ -937,7 +972,7 @@ ggplot(
     )
 ```
 
-### Reduction by Constraint
+### Reduction by Constraint{#ls-rdctn-cnstrnt}
 
 ```{r ls-rdctn, fig.height=9}
 # reshape
@@ -1233,7 +1268,7 @@ mapview::mapview(
 
 **Scenario 2 used for map above**
 
-### Map of High Priority Fireshed Project Areas
+### Map of Fireshed Project Areas by Scenario
 
 ```{r map-hi-pri, fig.height=8, warning=F,results='hide'}
 plt_fn_temp <- function(scnum=1) {
@@ -1241,9 +1276,21 @@ plt_fn_temp <- function(scnum=1) {
     geom_sf(data = map_fs_temp |> dplyr::filter(scenario_id==scnum & !is.na(fireshed_crisis_strategy))
             , aes(fill = cnstrnt_class), lwd = 0.05) +
     
-    geom_sf(data = wf_landscapes, fill = NA, color = "gray22", lwd = 0.2) +
-    ggrepel::geom_text_repel(data = wf_landscapes
-      , aes(label = stringr::str_wrap(
+  geom_sf(
+    data = wf_landscapes
+    , mapping = aes(color = paste0(investment, " investment"))
+    , fill=NA
+    # , color="black" 
+    , lwd=0.2
+  )+
+  geom_text(
+    data = wf_landscapes |> 
+        sf::st_drop_geometry() |> 
+        sf::st_as_sf(coords = c("lon","lat")) |> 
+        sf::st_set_crs(4326) |> 
+        sf::st_transform(transform_crs)
+    , aes(
+        label = stringr::str_wrap(
           dplyr::case_when(
             stringr::str_count(name, "\\w+")<2
               ~ stringr::word(name,1,stringr::str_count(name, "\\w+"))
@@ -1251,24 +1298,29 @@ plt_fn_temp <- function(scnum=1) {
             , TRUE ~ stringr::word(name,1,2)
           )
           , 7)
-          , geometry = geometry
-        )
-      , stat = "sf_coordinates"
-      , size = 2
-      , seed = 11
-      # , min.segment.length = 0
-    ) +
-    scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
-    labs(
-      fill = ""
-      , subtitle = map_fs_temp |> dplyr::filter(scenario_id==scnum) |> 
-        dplyr::pull(scenario_desc) |> unique()
-    ) +
-    theme(
-      legend.position = c(0.9,0.9) # "top"
-      , legend.text = element_text(size = 7)
-      
-    )
+        , color = paste0(investment, " investment")
+        , geometry = geometry
+        , fontface = "bold.italic"
+      )
+    , stat = "sf_coordinates"
+    , size = 2
+    # , seed = 11
+    # , min.segment.length = 0
+    , show.legend = F
+  ) +
+  scale_color_manual(values = c("black", "gray33")) +
+  scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
+  labs(
+    fill = ""
+    , subtitle = map_fs_temp |> dplyr::filter(scenario_id==scnum) |> 
+      dplyr::pull(scenario_desc) |> unique()
+  ) +
+  theme(
+    legend.position = c(0.9,0.9) # "top"
+    , legend.text = element_text(size = 7)
+    
+  ) + 
+  guides(color = "none")
 }
 # plot
 map_fs_temp |> dplyr::pull(scenario_id) |> unique() |> 
@@ -1280,7 +1332,7 @@ remove(list = ls()[grep("_temp",ls())])
 gc()
 ```
 
-## High-priority project areas
+## High-risk fireshed project areas
 
 Models suggest that fuels reduction treatments can effectively reduce fire size and severity when 20-40% of the landscape has been treated (e.g., Finney, 2007) and the plan (USFS, 2022a) aims to treat this amount of high-risk fireshed area within the 21 priority landscapes. The total area of the 21 priority landscapes is approximately 47 million acres (19 million ha), of which 23.7 million acres (9.6 million ha) are in high-risk firesheds; an objective of treating 20-40% would indicate the need to treat between 4.7 to 9.5 million acres (1.9 to 3.8 million ha).
 
@@ -1415,6 +1467,200 @@ ggplot() +
     , strip.text = element_text(color = "black", face = "bold")
   )
 ```
+
+### Reduction by Constraint
+
+See [this section](#ls-rdctn-cnstrnt) for reduction by constraint at the landscape-level.
+
+```{r hi-pa-rdctn-cnstrnt, fig.height=9}
+# aggregate by area_name, scenario for hi-risk pa's
+constrained_by_scnro_ls_hionly_long <-
+  constrained_by_scnro_ls_pa |>
+  dplyr::filter(fireshed_crisis_strategy %in% c("USFS-Only", "All-Lands")) |> 
+  dplyr::select(scenario_id, scenario_desc, scenario_lab
+                , state, name, area_name
+                , (tidyselect::starts_with("rmn") & tidyselect::ends_with("area_ha"))
+                , covertype_area_ha
+  ) |>
+  dplyr::group_by(
+    scenario_id, scenario_desc, scenario_lab
+                , state, name, area_name
+  ) |> 
+  dplyr::summarise(
+    dplyr::across(
+      tidyselect::ends_with("area_ha")
+      , sum
+    )
+  ) |> 
+  tidyr::pivot_longer(
+    cols = tidyselect::starts_with("rmn")
+    , names_to = "constraint"
+    , values_to = "rmn_area_ha"
+    , names_prefix = "rmn"
+    , values_drop_na = F
+  ) |>
+  dplyr::mutate(constraint = stringr::str_remove(constraint,"_area_ha")) |> 
+  tidyr::separate_wider_delim(constraint, "_", names = c("constraint_lvl", "constraint")) |> 
+  dplyr::mutate(
+    constraint_lvl = as.numeric(constraint_lvl)
+    , constraint = factor(
+        constraint
+        , ordered = TRUE
+        , levels = c(
+          "protected"
+          , "slope"
+          , "roads"
+          , "riparian"
+          , "administrative"
+        )
+        , labels = c(
+          "Protected"
+          , "Slope\nSteepness"
+          , "Road\nDistance"
+          , "Riparian\nBuffer"
+          , "Administrative"
+        )
+      ) |> forcats::fct_rev()
+    , pct_rmn = rmn_area_ha/covertype_area_ha
+    , pct_rdctn = dplyr::case_when(
+      constraint_lvl == 1 ~ -1*(1-pct_rmn)
+      , TRUE ~ -1*(dplyr::lag(pct_rmn)-pct_rmn)
+    )
+    , pct_rdctn_total = max(-1*(1 - ifelse(constraint_lvl == 5, pct_rmn,0)))
+  )
+  
+# plot
+ggplot(data = constrained_by_scnro_ls_hionly_long) +
+  geom_col(
+    mapping = aes(y = scenario_lab, x = pct_rdctn, fill = constraint)
+    , color = NA, width = 0.7
+  ) +
+  geom_text(
+    mapping = aes(
+      y = scenario_lab, x = pct_rdctn
+      , label = scales::percent(ifelse(pct_rdctn<.06*-1,pct_rdctn,NA), accuracy = 1)
+      , fontface = "bold"
+    )
+    , position = position_stack(vjust = 0.5)
+    , color = "black", size = 3
+  ) +
+  geom_text(
+    data = constrained_by_scnro_ls_hionly_long |> dplyr::filter(constraint_lvl==5)
+    , mapping = aes(
+      y = scenario_lab, x = -1*(1 - pct_rmn)
+      , label = scales::percent(-1*(1 - pct_rmn), accuracy = 1)
+    )
+    , color = "black", size = 3.5
+    , hjust = -0.1
+  ) +
+  facet_wrap(facets = vars(area_name)
+      , ncol = 3
+      , labeller = label_wrap_gen(width = 35, multi_line = TRUE)
+    ) +
+  scale_fill_viridis_d(option = "plasma", alpha = 0.7) +
+  scale_x_reverse(expand = expansion(mult = c(0, .12)),labels = scales::percent_format()) +
+  labs(
+    fill = ""
+    , y = ""
+    , x = "Constraint Reduction in Treatable Area (%)"
+    , subtitle = "High-Risk Fireshed Project Areas"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "top"
+    , legend.direction  = "horizontal"
+    , legend.title = element_text(size=7)
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_blank()
+    
+  )
+```
+
+The figure above shows the reduction by constraint for only *high-risk* fireshed project areas with at least *25%* of area within the boundary of the Strategy priority landscape.
+
+### Reduction by Constraint high-risk vs. total
+
+```{r hi-tot-pa-rdctn-cnstrnt, fig.height=13}
+# combine data and plot
+pct_rdctn_temp <- 
+constrained_by_scnro_ls_hionly_long |> 
+  dplyr::ungroup() |> 
+  dplyr::select(scenario_desc, area_name, pct_rdctn, constraint_lvl) |> 
+  dplyr::mutate(dta_src = "High-Risk Project Areas") |> 
+  dplyr::bind_rows(
+    constrained_by_scnro_ls_long |> 
+      dplyr::ungroup() |> 
+      dplyr::select(scenario_desc, area_name, pct_rdctn, constraint_lvl) |> 
+      dplyr::filter(!is.na(constraint_lvl)) |> 
+      dplyr::mutate(dta_src = "Overall Landscape Area")
+  ) |> 
+  dplyr::group_by(scenario_desc, area_name, dta_src) |> 
+  dplyr::mutate(
+    pct_rdctn_total = sum(pct_rdctn)
+    , constraint = factor(
+        constraint_lvl
+        , ordered = TRUE
+        , levels = 1:5
+        , labels = c(
+          "Protected"
+          , "Slope\nSteepness"
+          , "Road\nDistance"
+          , "Riparian\nBuffer"
+          , "Administrative"
+        )
+      ) |> forcats::fct_rev()
+  )
+# plot
+ggplot(data = pct_rdctn_temp) +
+  geom_col(
+    mapping = aes(y = dta_src, x = pct_rdctn, fill = constraint)
+    , color = NA, width = 0.7
+  ) +
+  geom_text(
+    mapping = aes(
+      y = dta_src, x = pct_rdctn
+      , label = scales::percent(ifelse(pct_rdctn<.06*-1,pct_rdctn,NA), accuracy = 1)
+      , fontface = "bold"
+    )
+    , position = position_stack(vjust = 0.5)
+    , color = "black", size = 3
+  ) +
+  geom_text(
+    data = pct_rdctn_temp |> dplyr::filter(constraint_lvl==5)
+    , mapping = aes(
+      y = dta_src, x = pct_rdctn_total
+      , label = scales::percent(pct_rdctn_total, accuracy = 1)
+    )
+    , color = "black", size = 3.5
+    , hjust = -0.1
+  ) +
+  facet_grid(
+      cols = vars(scenario_desc)
+      , rows = vars(area_name)
+      , labeller = label_wrap_gen(width = 35, multi_line = TRUE)
+      , switch = "y"
+    ) +
+  scale_fill_viridis_d(option = "plasma", alpha = 0.7) +
+  scale_x_reverse(expand = expansion(mult = c(0, .12)),labels = scales::percent_format()) +
+  labs(
+    fill = ""
+    , y = ""
+    , x = "Constraint Reduction in Treatable Area (%)"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "top"
+    , legend.direction  = "horizontal"
+    , legend.title = element_text(size=7)
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_blank()
+    , strip.text.x = element_text(color = "black", face = "bold")
+    , strip.text.y.left = element_text(angle = 0)
+    , strip.placement = "outside"
+    
+  )
+```
+
 
 ```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
 remove(list = ls()[grep("_temp",ls())])
@@ -1910,6 +2156,235 @@ ggplot(
     , strip.text.y.left = element_text(angle = 0)
     , strip.placement = "outside"
   )
+```
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
+remove(list = ls()[grep("_temp",ls())])
+gc()
+```
+
+## Totals
+
+```{r tot-ls-pa-dta}
+# union landscape and pa level data
+# aggregate by scenario for hi-risk pa's
+pct_rdctn_pas_temp <- 
+  constrained_by_scnro_ls_pa |>
+  dplyr::group_by(pa_id,scenario_id) |> 
+  dplyr::filter(dplyr::row_number()==1) |> 
+  dplyr::ungroup() |> 
+  dplyr::filter(fireshed_crisis_strategy %in% c("USFS-Only", "All-Lands")) |> 
+  dplyr::select(scenario_id, scenario_desc, scenario_lab
+                , state, name, area_name
+                , (tidyselect::starts_with("rmn") & tidyselect::ends_with("area_ha"))
+                , covertype_area_ha, feature_area_ha
+  ) |>
+  dplyr::group_by(scenario_id, scenario_desc, scenario_lab) |> 
+  dplyr::summarise(
+    dplyr::across(
+      tidyselect::ends_with("area_ha")
+      , sum
+    )
+  ) |> 
+  tidyr::pivot_longer(
+    cols = tidyselect::starts_with("rmn")
+    , names_to = "constraint"
+    , values_to = "rmn_area_ha"
+    , names_prefix = "rmn"
+    , values_drop_na = F
+  ) |>
+  dplyr::mutate(constraint = stringr::str_remove(constraint,"_area_ha")) |> 
+  tidyr::separate_wider_delim(constraint, "_", names = c("constraint_lvl", "constraint")) |> 
+  dplyr::mutate(
+    constraint_lvl = as.numeric(constraint_lvl)
+    , pct_rmn = rmn_area_ha/covertype_area_ha
+    , pct_rdctn = dplyr::case_when(
+      constraint_lvl == 1 ~ -1*(1-pct_rmn)
+      , TRUE ~ -1*(dplyr::lag(pct_rmn)-pct_rmn)
+    )
+    , pct_rdctn_total = max(-1*(1 - ifelse(constraint_lvl == 5, pct_rmn,0)))
+  ) |> 
+  dplyr::ungroup()
+# overall
+pct_rdctn_ls_temp <- 
+  constrained_by_scnro_ls |>
+  dplyr::select(scenario_id, scenario_desc, scenario_lab
+                , state, name, area_name
+                , (tidyselect::starts_with("rmn") & tidyselect::ends_with("area_ha"))
+                , covertype_area_ha, feature_area_ha
+  ) |>
+  dplyr::group_by(scenario_id, scenario_desc, scenario_lab) |> 
+  dplyr::summarise(
+    dplyr::across(
+      tidyselect::ends_with("area_ha")
+      , sum
+    )
+  ) |> 
+  tidyr::pivot_longer(
+    cols = tidyselect::starts_with("rmn")
+    , names_to = "constraint"
+    , values_to = "rmn_area_ha"
+    , names_prefix = "rmn"
+    , values_drop_na = F
+  ) |>
+  dplyr::mutate(constraint = stringr::str_remove(constraint,"_area_ha")) |> 
+  tidyr::separate_wider_delim(constraint, "_", names = c("constraint_lvl", "constraint")) |> 
+  dplyr::mutate(
+    constraint_lvl = as.numeric(constraint_lvl)
+    , pct_rmn = rmn_area_ha/covertype_area_ha
+    , pct_rdctn = dplyr::case_when(
+      constraint_lvl == 1 ~ -1*(1-pct_rmn)
+      , TRUE ~ -1*(dplyr::lag(pct_rmn)-pct_rmn)
+    )
+    , pct_rdctn_total = max(-1*(1 - ifelse(constraint_lvl == 5, pct_rmn,0)))
+  ) |> 
+  dplyr::ungroup()
+# combine
+pct_rdctn_all_temp <- 
+pct_rdctn_pas_temp |> 
+dplyr::mutate(dta_src = "High-Risk Project Areas") |> 
+  dplyr::bind_rows(
+    pct_rdctn_ls_temp |> 
+      dplyr::mutate(dta_src = "Overall Landscape Area")
+  ) |> 
+  dplyr::mutate(
+    constraint_lab = factor(
+        constraint_lvl
+        , ordered = TRUE
+        , 1:5
+        , labels = c(
+          "Protected"
+          , "Slope\nSteepness"
+          , "Road\nDistance"
+          , "Riparian\nBuffer"
+          , "Administrative"
+        )
+      ) |> forcats::fct_rev()
+  ) |> 
+  dplyr::relocate(dta_src)
+```
+
+### Reduction Treatable Area Table
+
+```{r tot-ls-pa-tab, results='asis'}
+tot_table_temp <- pct_rdctn_all_temp |> 
+  dplyr::mutate(constraint_nm = paste0(constraint_lvl,constraint)) |> 
+  dplyr::select(-c(constraint_lvl,constraint,constraint_lab)) |> 
+  tidyr::pivot_wider(
+    names_from = constraint_nm
+    , values_from = c(rmn_area_ha, pct_rmn, pct_rdctn)
+  ) |> 
+  dplyr::mutate(
+    pct_covertype_area = covertype_area_ha/feature_area_ha
+  ) |> 
+  dplyr::mutate(
+    dplyr::across(
+      tidyselect::contains("area_ha")
+      , ~ scales::comma(.x,suffix = " M", scale = 1e-6, accuracy = 0.1)
+    )
+    , dplyr::across(
+      tidyselect::starts_with("pct_")
+      , ~ scales::percent(.x, accuracy = 0.1)
+    )
+  ) |> 
+  dplyr::arrange(
+    desc(dta_src)
+    , scenario_id
+  )
+# make table 
+  kableExtra::kable(
+      tot_table_temp |> 
+        dplyr::select(
+          scenario_lab
+          , covertype_area_ha
+          , pct_covertype_area
+          , pct_rdctn_1protected
+          , pct_rdctn_2slope
+          , pct_rdctn_3roads
+          , pct_rdctn_4riparian
+          , pct_rdctn_5administrative
+          , rmn_area_ha_5administrative
+          , pct_rmn_5administrative
+        )
+      , caption = paste0("<b>Wildfire Crisis Strategy Priority Landscapes and High-Risk Fireshed Project Areas</b><br>percent reduction of different types of constraints on mechanical treatment")
+      , col.names = c(
+        ""
+        , "Forest+Shrub\n(ha)", "Forest+Shrub\n%"
+        , "Protected"
+        , "Slope\nSteepness"
+        , "Road\nDistance"
+        , "Riparian\nBuffer"
+        , "Administrative"
+        , "Remaining (ha)"
+        , "Remaining (%)"
+      )
+      , escape = F
+    ) |>  
+    add_header_above(c(" " = 1, "Strategy Priority\nArea"=2, "Constraints on\nMechanical Treatment" = 5, " " = 2)) |>
+    kable_classic(full_width=T) |> 
+    pack_rows(index = table(forcats::fct_inorder(tot_table_temp$dta_src))) |> 
+    kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE) |>  
+    kableExtra::scroll_box(width = "740px")
+```
+
+### Reduction by Constraint
+
+```{r tot-ls-pa-rdctn}
+# plot
+# plot
+ggplot(data = pct_rdctn_all_temp) +
+  geom_col(
+    mapping = aes(y = dta_src, x = pct_rdctn, fill = constraint_lab)
+    , color = NA, width = 0.6
+  ) +
+  geom_text(
+    mapping = aes(
+      y = dta_src, x = pct_rdctn
+      , label = scales::percent(ifelse(pct_rdctn<.06*-1,pct_rdctn,NA), accuracy = 1)
+      , fontface = "bold"
+    )
+    , position = position_stack(vjust = 0.5)
+    , color = "black", size = 3
+  ) +
+  geom_text(
+    data = pct_rdctn_all_temp |> dplyr::filter(constraint_lvl==5)
+    , mapping = aes(
+      y = dta_src, x = pct_rdctn_total
+      , label = scales::percent(pct_rdctn_total, accuracy = 1)
+    )
+    , color = "black", size = 3.5
+    , hjust = -0.1
+  ) +
+  facet_grid(
+      cols = vars(scenario_desc)
+      , labeller = label_wrap_gen(width = 35, multi_line = TRUE)
+    ) +
+  scale_fill_viridis_d(option = "plasma", alpha = 0.7) +
+  scale_x_reverse(expand = expansion(mult = c(0, .12)),labels = scales::percent_format()) +
+  labs(
+    fill = ""
+    , y = ""
+    , x = "Constraint Reduction in Treatable Area (%)"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "top"
+    , legend.direction  = "horizontal"
+    , legend.title = element_text(size=7)
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_blank()
+    , strip.text.x = element_text(color = "black", face = "bold")
+    , strip.placement = "outside"
+    
+  )
+```
+
+### Distribution of Fireshed PA Constraint
+
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
+remove(list = ls()[grep("_temp",ls())])
+gc()
 ```
 
 ## Landcover Class Area

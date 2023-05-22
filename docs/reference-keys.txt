@@ -104,3 +104,12 @@ distribution-of-fireshed-pa-constraint
 distribution-of-mechanically-available-shrb-vs.-frst
 distribution-of-fireshed-pa-constraint-shrb-vs.-frst
 high-risk-distribution-of-fireshed-pa-constraint-shrb-vs.-frst
+ls-rdctn-cnstrnt
+map-of-fireshed-project-areas-by-scenario
+high-risk-fireshed-project-areas
+reduction-by-constraint-high-risk-vs.-total
+totals
+reduction-treatable-area-table-3
+reduction-by-constraint-1
+tab:tot-ls-pa-tab
+distribution-of-fireshed-pa-constraint-1
