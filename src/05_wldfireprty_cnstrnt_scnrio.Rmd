@@ -490,6 +490,7 @@ plt_basemap +
         , .predicate=st_intersects
       )
     , aes(fill=crisis_strategy)
+    , alpha = 0.8
   ) +
   geom_sf(
     data = wf_landscapes
@@ -558,6 +559,7 @@ plt_basemap +
         , .predicate=st_intersects
       )
     , aes(fill=crisis_strategy)
+    , alpha = 0.8
   ) +
   geom_sf(
     data = wf_landscapes
@@ -632,6 +634,7 @@ ggplot() +
         , multiple = "all"
       )
     , aes(fill = fireshed_crisis_strategy, color = "Project Area\nboundary")
+    , alpha = 0.8
     , lwd = 1.2
   ) +
   geom_sf(
@@ -734,6 +737,7 @@ ggplot() +
         , multiple = "all"
       )
     , aes(fill = is_25in, color = "Project Area\nboundary")
+    , alpha = 0.9
     , lwd = 1.2
   ) +
   geom_sf(
