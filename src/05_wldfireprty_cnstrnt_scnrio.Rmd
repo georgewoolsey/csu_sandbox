@@ -537,7 +537,7 @@ plt_basemap +
       , legend.text = element_text(size = 8)
     ) +
   guides(
-    color = guide_legend(order = 1, override.aes = list(lwd = 3))
+    color = guide_legend(order = 1, override.aes = list(lwd = 3, fill = NA)) #, linetype = c(5,1,1)
     , fill = guide_legend(order = 2, override.aes = list(lwd = 0))
   )
 # plot
@@ -606,7 +606,7 @@ plt_basemap +
       , legend.text = element_text(size = 8)
     ) +
   guides(
-    color = guide_legend(order = 1, override.aes = list(lwd = 3))
+    color = guide_legend(order = 1, override.aes = list(lwd = 3, fill = NA)) #, linetype = c(5,1,1)
     , fill = guide_legend(order = 2, override.aes = list(lwd = 0))
   )
 ```
@@ -674,7 +674,7 @@ ggplot() +
       , plot.subtitle = element_text(face = "bold.italic", size = 8, hjust = 0.5)
     ) +
   guides(
-    color = guide_legend(order = 1, override.aes = list(lwd = 3))
+    color = guide_legend(order = 1, override.aes = list(lwd = 3, fill = NA)) #, linetype = c(5,1,1)
     , fill = guide_legend(order = 2, override.aes = list(lwd = 0))
   )
 # inset map
@@ -778,7 +778,7 @@ ggplot() +
       , plot.subtitle = element_text(face = "bold.italic", size = 8, hjust = 0.5)
     ) +
   guides(
-    color = guide_legend(order = 1, override.aes = list(lwd = 3))
+    color = guide_legend(order = 1, override.aes = list(lwd = 3, fill = NA)) #, linetype = c(5,1,1)
     , fill = guide_legend(order = 2, override.aes = list(lwd = 0))
   )
 ```
