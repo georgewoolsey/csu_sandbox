@@ -534,11 +534,11 @@ plt_basemap +
       legend.position = c(0.87,0.87) # "top"
       # , legend.direction = "horizontal"
       , legend.title = element_text(size = 8, face = "bold")
-      , legend.text = element_text(size = 7)
+      , legend.text = element_text(size = 8)
     ) +
   guides(
-    color = guide_legend(order = 1)
-    , fill = guide_legend(order = 2)
+    color = guide_legend(order = 1, override.aes = list(lwd = 3))
+    , fill = guide_legend(order = 2, override.aes = list(lwd = 0))
   )
 # plot
 plt_fshed
@@ -603,11 +603,11 @@ plt_basemap +
       legend.position = c(0.87,0.87) # "top"
       # , legend.direction = "horizontal"
       , legend.title = element_text(size = 8, face = "bold")
-      , legend.text = element_text(size = 7)
+      , legend.text = element_text(size = 8)
     ) +
   guides(
-    color = guide_legend(order = 1)
-    , fill = guide_legend(order = 2)
+    color = guide_legend(order = 1, override.aes = list(lwd = 3))
+    , fill = guide_legend(order = 2, override.aes = list(lwd = 0))
   )
 ```
 
@@ -670,12 +670,12 @@ ggplot() +
       legend.position = c(0.87,0.87) # "top"
       # , legend.direction = "horizontal"
       , legend.title = element_text(size = 8, face = "bold")
-      , legend.text = element_text(size = 7)
+      , legend.text = element_text(size = 8)
       , plot.subtitle = element_text(face = "bold.italic", size = 8, hjust = 0.5)
     ) +
   guides(
-    color = guide_legend(order = 1)
-    , fill = guide_legend(order = 2)
+    color = guide_legend(order = 1, override.aes = list(lwd = 3))
+    , fill = guide_legend(order = 2, override.aes = list(lwd = 0))
   )
 # inset map
 bb_temp <- wf_landscapes |> 
@@ -774,12 +774,12 @@ ggplot() +
       legend.position = c(0.87,0.87) # "top"
       # , legend.direction = "horizontal"
       , legend.title = element_text(size = 8, face = "bold")
-      , legend.text = element_text(size = 7)
+      , legend.text = element_text(size = 8)
       , plot.subtitle = element_text(face = "bold.italic", size = 8, hjust = 0.5)
     ) +
   guides(
-    color = guide_legend(order = 1)
-    , fill = guide_legend(order = 2)
+    color = guide_legend(order = 1, override.aes = list(lwd = 3))
+    , fill = guide_legend(order = 2, override.aes = list(lwd = 0))
   )
 ```
 
