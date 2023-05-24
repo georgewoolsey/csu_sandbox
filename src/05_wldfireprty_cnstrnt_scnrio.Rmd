@@ -357,7 +357,8 @@ Timeline of the research utilized to motivate and support the creation of the WC
 
 
 ```{r, echo=FALSE, out.width="90%", out.height="90%", fig.align='center', fig.show='hold',results='asis'}
-knitr::include_graphics("../data/fireshed_hierarchy.png")
+# knitr::include_graphics("../data/fireshed_hierarchy.png")
+knitr::include_graphics("https://i.ibb.co/jv6gHXP/fireshed-hierarchy.png")
 ```
 
 *Nested spatial framework for firesheds. Each scale has specific functionality in terms of the planning processes. Firesheds are the broad scale unit of prioritization, but project areas within them are also prioritized as part of implementation of treatments. Project areas are roughly the size that national forests use for conducting vegetation and fuel management projects. The relative variation among firesheds compared to variation within them controls the relative emphasis on selecting firesheds versus individual planning areas.* [Ager et al. 2021](https://scholar.google.com/scholar?cluster=7852635540589253195&hl=en&as_sdt=0,6)
@@ -986,7 +987,7 @@ ggplot(
 
 ### Reduction by Constraint{#ls-rdctn-cnstrnt}
 
-```{r ls-rdctn, fig.height=9}
+```{r ls-rdctn, fig.height=8}
 # reshape
 constrained_by_scnro_ls_long <- constrained_by_scnro_ls |>
   dplyr::select(state, name, area_name, tidyselect::starts_with("scenario_"), tidyselect::starts_with("pct_rdctn")) |> 
@@ -1025,6 +1026,73 @@ constrained_by_scnro_ls_long <- constrained_by_scnro_ls |>
     constrained_by_scnro_ls |> dplyr::select(state,name,scenario_id,pct_rdctn_total)
     , by = join_by(state,name,scenario_id)
   )
+```
+
+
+```{r ls-rdctn-plt2, fig.height=8, include=T, eval=T}
+# plot
+ggplot(
+  data = constrained_by_scnro_ls_long |> 
+      dplyr::filter(constraint!="Total") |> 
+      dplyr::mutate(
+        dplyr::across(
+          c(scenario_lab, area_name)
+          , ~ forcats::fct_rev(.x)
+        )
+      )
+  , mapping = aes(y = area_name, x = pct_rdctn)
+) +
+  geom_col(
+    mapping = aes(fill = constraint)
+    , color = NA, width = 0.7
+    , alpha = 0.7
+  ) +
+  geom_text(
+    mapping = aes(
+      label = scales::percent(ifelse(pct_rdctn<.075*-1,pct_rdctn,NA), accuracy = 1)
+      , group = constraint
+      , fontface = "bold"
+    )
+    , position = position_stack(vjust = 0.5)
+    , color = "black", size = 2.8
+  ) +
+  geom_text(
+    data = constrained_by_scnro_ls_long |> 
+      dplyr::filter(constraint=="Total") |> 
+      dplyr::mutate(
+        dplyr::across(
+          c(scenario_lab, area_name)
+          , ~ forcats::fct_rev(.x)
+        )
+      )
+    , mapping = aes(
+      y = area_name, x = pct_rdctn_total
+      , label = scales::percent(pct_rdctn_total, accuracy = 1)
+    )
+    , color = "black", size = 3.5
+    , hjust = -0.1
+  ) +
+  facet_grid(cols = vars(scenario_lab)) +
+  scale_fill_viridis_d(option = "plasma") +
+  scale_x_reverse(expand = expansion(mult = c(0.02, .21)),labels = scales::percent_format()) +
+  labs(
+    fill = ""
+    , y = ""
+    , x = "Constraint Reduction in Treatable Area (%)"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "top"
+    , legend.title = element_text(size=7)
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_text(size=7) # element_blank() #
+    , strip.text = element_text(color = "black", face = "bold")
+  ) +
+  guides(
+    fill = guide_legend(reverse = T, override.aes = list(alpha = 0.9))
+  )
+```
+```{r ls-rdctn-plt1, fig.height=9, include=FALSE, eval=FALSE}
 # plot
 ggplot() +
   geom_col(
@@ -1100,10 +1168,11 @@ ggplot() +
   ) +
   geom_text(
     mapping = aes(x = pct, y = reorder(area_name, desc(area_name)), group=cnstrnt_class
-        ,label = scales::percent(ifelse(pct>=0.05,pct,NA), accuracy = 1)
+        ,label = scales::percent(ifelse(pct>=0.055,pct,NA), accuracy = 1)
+        , fontface = "bold"
       )
     , position = position_stack(vjust = 0.5)
-    , color = "black", size = 3
+    , color = "black", size = 2.8
   ) +
   # geom_text(
   #     data = constrained_byftr_huc12_wide |>
@@ -1129,6 +1198,9 @@ ggplot() +
     , axis.title = element_text(size=9)
     , axis.text.x = element_text(size=7)
     , strip.text = element_text(color = "black", face = "bold")
+  ) +
+  guides(
+    fill = guide_legend(reverse = T, override.aes = list(alpha = 0.9))
   )
 ```
 
