@@ -887,9 +887,9 @@ constrained_by_scnro_ls_pa <- constrained_by_scnro_ls_pa |>
 ### Reduction Treatable Area Table
 
 ```{r ls-tab1, results='asis'}
-scnum_temp<-2
+# scnum_temp<-2
   tbl_temp <- constrained_by_scnro_ls |> 
-    dplyr::filter(scenario_id==scnum_temp) |> 
+    # dplyr::filter(scenario_id==scnum_temp) |> 
     dplyr::mutate(
       dplyr::across(
         tidyselect::ends_with("_ha")
@@ -901,8 +901,8 @@ scnum_temp<-2
       )
     ) |> 
     dplyr::select(
-      state
-      , name
+      area_name
+      , scenario_lab
       , covertype_area_ha
       , pct_covertype_area
       , pct_rdctn1_protected
@@ -913,11 +913,15 @@ scnum_temp<-2
       , rmn5_administrative_area_ha
       , pct_rmn5_administrative
     ) |> 
-    dplyr::arrange(state,name)
+    dplyr::arrange(area_name,desc(scenario_lab))
   # make table 
   kableExtra::kable(
-      tbl_temp |> dplyr::select(-c(state))
-      , caption = paste0("<b><font color=navy>Scenario ",scnum_temp,"</font></b><br>percent reduction of different types of constraints on mechanical treatment")
+      tbl_temp |> dplyr::select(-c(area_name))
+      # , caption = paste0("<b><font color=navy>Scenario "
+      #                    ,scnum_temp
+      #                    ,"</font></b><br>percent reduction of different types of constraints on mechanical treatment"
+      #         )
+      , caption = "<b>Wildfire Crisis Strategy 21 Priority Landscapes</b><br>percent reduction of different types of constraints on mechanical treatment"
       , col.names = c(
         ""
         , "Forest+Shrub\n(ha)", "Forest+Shrub\n%"
@@ -933,7 +937,7 @@ scnum_temp<-2
     ) |>  
     add_header_above(c(" " = 1, "Area of\nPriority Landscape"=2, "Constraint\nLeast Flexible to Most Flexible" = 5, " " = 2)) |>
     kable_classic(full_width=T) |> 
-    pack_rows(index = table(forcats::fct_inorder(tbl_temp$state))) |> 
+    pack_rows(index = table(forcats::fct_inorder(tbl_temp$area_name))) |> 
     kableExtra::kable_styling(font_size = 11,fixed_thead = TRUE) |>  
     kableExtra::scroll_box(width = "740px")
   
@@ -948,9 +952,10 @@ gc()
 ### Change in Available by Scenario
 
 ```{r ls-chg-avai, fig.height=11}
+constrained_by_scnro_ls |> 
+  dplyr::mutate(scenario_lab = scenario_lab |> forcats::fct_rev()) |> 
 ggplot(
-    data = constrained_by_scnro_ls
-    , mapping = aes(x=scenario_desc,y=pct_rmn5_administrative,group=area_name)
+    mapping = aes(x=scenario_lab,y=pct_rmn5_administrative,group=area_name)
     ) +
     geom_line(mapping=aes(color = area_name), linewidth = 1.5) +
     geom_label(
@@ -1080,12 +1085,13 @@ Based on model simulations of how much area generally needs to be treated to inf
 
 ```{r fs-cnstrnt-dist, fig.height=8}
 constrained_by_scnro_ls_pa |> 
-  dplyr::count(area_name,scenario_desc,cnstrnt_class) |> 
-  dplyr::group_by(area_name,scenario_desc) |> 
+  dplyr::count(area_name,scenario_lab,cnstrnt_class) |> 
+  dplyr::group_by(area_name,scenario_lab) |> 
   dplyr::mutate(
     pct = n/sum(n)
     , high_pct=max(ifelse(cnstrnt_class=="high constraint",pct,0)) 
     , tot = sum(n)
+    , scenario_lab = scenario_lab |> forcats::fct_rev()
   ) |> 
 ggplot() +
   geom_col(
@@ -1109,7 +1115,7 @@ ggplot() +
   #     , hjust = 0.7
   #   ) +
   scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
-  facet_grid(cols = vars(scenario_desc)) +
+  facet_grid(cols = vars(scenario_lab)) +
   scale_x_continuous(labels = scales::percent_format()) +
   labs(
     fill = "Level of\nConstraint"
