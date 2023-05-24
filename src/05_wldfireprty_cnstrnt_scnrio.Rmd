@@ -1619,6 +1619,7 @@ ggplot(data = constrained_by_scnro_ls_hionly_long) +
   geom_col(
     mapping = aes(y = scenario_lab, x = pct_rdctn, fill = constraint)
     , color = NA, width = 0.7
+    , alpha = 0.7
   ) +
   geom_text(
     mapping = aes(
@@ -1642,8 +1643,8 @@ ggplot(data = constrained_by_scnro_ls_hionly_long) +
       , ncol = 3
       , labeller = label_wrap_gen(width = 35, multi_line = TRUE)
     ) +
-  scale_fill_viridis_d(option = "plasma", alpha = 0.7) +
-  scale_x_reverse(expand = expansion(mult = c(0, .12)),labels = scales::percent_format()) +
+  scale_fill_viridis_d(option = "plasma") +
+  scale_x_reverse(expand = expansion(mult = c(0.02, .21)),labels = scales::percent_format()) +
   labs(
     fill = ""
     , y = ""
@@ -1670,16 +1671,16 @@ The figure above shows the reduction by constraint for only *high-risk* fireshed
 pct_rdctn_temp <- 
 constrained_by_scnro_ls_hionly_long |> 
   dplyr::ungroup() |> 
-  dplyr::select(scenario_desc, area_name, pct_rdctn, constraint_lvl) |> 
+  dplyr::select(scenario_lab, area_name, pct_rdctn, constraint_lvl) |> 
   dplyr::mutate(dta_src = "High-Risk Project Areas") |> 
   dplyr::bind_rows(
     constrained_by_scnro_ls_long |> 
       dplyr::ungroup() |> 
-      dplyr::select(scenario_desc, area_name, pct_rdctn, constraint_lvl) |> 
+      dplyr::select(scenario_lab, area_name, pct_rdctn, constraint_lvl) |> 
       dplyr::filter(!is.na(constraint_lvl)) |> 
       dplyr::mutate(dta_src = "Overall Landscape Area")
   ) |> 
-  dplyr::group_by(scenario_desc, area_name, dta_src) |> 
+  dplyr::group_by(scenario_lab, area_name, dta_src) |> 
   dplyr::mutate(
     pct_rdctn_total = sum(pct_rdctn)
     , constraint = factor(
@@ -1694,21 +1695,23 @@ constrained_by_scnro_ls_hionly_long |>
           , "Administrative"
         )
       ) |> forcats::fct_rev()
+    , scenario_lab = scenario_lab |> forcats::fct_rev()
   )
 # plot
 ggplot(data = pct_rdctn_temp) +
   geom_col(
     mapping = aes(y = dta_src, x = pct_rdctn, fill = constraint)
     , color = NA, width = 0.7
+    , alpha = 0.7
   ) +
   geom_text(
     mapping = aes(
       y = dta_src, x = pct_rdctn
-      , label = scales::percent(ifelse(pct_rdctn<.06*-1,pct_rdctn,NA), accuracy = 1)
+      , label = scales::percent(ifelse(pct_rdctn<.075*-1,pct_rdctn,NA), accuracy = 1)
       , fontface = "bold"
     )
     , position = position_stack(vjust = 0.5)
-    , color = "black", size = 3
+    , color = "black", size = 2.8
   ) +
   geom_text(
     data = pct_rdctn_temp |> dplyr::filter(constraint_lvl==5)
@@ -1720,13 +1723,13 @@ ggplot(data = pct_rdctn_temp) +
     , hjust = -0.1
   ) +
   facet_grid(
-      cols = vars(scenario_desc)
+      cols = vars(scenario_lab)
       , rows = vars(area_name)
       , labeller = label_wrap_gen(width = 35, multi_line = TRUE)
       , switch = "y"
     ) +
-  scale_fill_viridis_d(option = "plasma", alpha = 0.7) +
-  scale_x_reverse(expand = expansion(mult = c(0, .12)),labels = scales::percent_format()) +
+  scale_fill_viridis_d(option = "plasma") +
+  scale_x_reverse(expand = expansion(mult = c(0.02, .21)),labels = scales::percent_format()) +
   labs(
     fill = ""
     , y = ""
@@ -1743,6 +1746,9 @@ ggplot(data = pct_rdctn_temp) +
     , strip.text.y.left = element_text(angle = 0)
     , strip.placement = "outside"
     
+  ) +
+  guides(
+    fill = guide_legend(reverse = T, override.aes = list(alpha = 0.9))
   )
 ```
 
@@ -2425,6 +2431,7 @@ ggplot(data = pct_rdctn_all_temp) +
   geom_col(
     mapping = aes(y = scenario_lab, x = pct_rdctn, fill = constraint_lab)
     , color = NA, width = 0.6
+    , alpha = 0.7
   ) +
   geom_text(
     mapping = aes(
@@ -2448,7 +2455,7 @@ ggplot(data = pct_rdctn_all_temp) +
       cols = vars(dta_src |> forcats::fct_rev())
       , labeller = label_wrap_gen(width = 35, multi_line = TRUE)
     ) +
-  scale_fill_viridis_d(option = "plasma", alpha = 0.7) +
+  scale_fill_viridis_d(option = "plasma") +
   scale_x_reverse(expand = expansion(mult = c(0, .12)),labels = scales::percent_format()) +
   labs(
     fill = ""
@@ -2465,6 +2472,9 @@ ggplot(data = pct_rdctn_all_temp) +
     , strip.text.x = element_text(color = "black", face = "bold")
     , strip.placement = "outside"
     
+  ) +
+  guides(
+    fill = guide_legend(reverse = T, override.aes = list(alpha = 0.9))
   )
 ```
 
