@@ -1417,12 +1417,14 @@ map_fs_temp |> dplyr::pull(scenario_id) |> unique() |>
  purrr::map(plt_fn_temp)
 ```
 
+### Map Fireshed Project Areas by Scenario and Landscape
+
 How do small multiple maps of scenarios look?
 
 *the answer is: bad*
 see [this post](https://jayrobwilliams.com/posts/2021/05/geom-sf-facet) about small multiple maps
 
-```{r scenario-maps, fig.height=5, include=F, eval=F}
+```{r scenario-maps, fig.height=7, include=T, eval=T}
 area_nm_list <- sort(unique(constrained_by_scnro_ls$area_name))
 facet_map_fn <- function(row_n=1) {
   plt <- ggplot() +
@@ -1453,7 +1455,7 @@ facet_map_fn <- function(row_n=1) {
     scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
     labs(
       fill = ""
-      , tag = area_nm_list[row_n]
+      , tag = stringr::str_wrap(area_nm_list[row_n], 35)
         # scales::label_wrap(area_nm_list[row_n], 10)
     ) +
     theme_void() +
@@ -1463,15 +1465,17 @@ facet_map_fn <- function(row_n=1) {
       # , legend.text = element_text(size = 7)
       , plot.subtitle = element_text(face = "bold", size = 9, hjust = 0.5, vjust = -5)
       # attempting to fix facet labels not aligning
-      , strip.text.x = element_text(size = 7, vjust = 1)
+      , strip.text.x = element_text(size = 8, vjust = 1)
       , strip.text.y = element_blank()
-      , plot.tag.position = c(.5, 0.95)
+      , plot.tag.position = c(.5, 0.98)
       , plot.tag = element_text(size = 8, face = "bold")
-      , plot.background = element_rect(color = "gray88", fill=NA, size=0.5)
+      # , plot.background = element_rect(color = "gray88", fill=NA, size=0.5)
+      , plot.margin = unit(c(0,0,0,0),"cm")
       # facet labels not alinging in plot_grid
       # , strip.text.x = element_text(color = "black", face = "bold")
       # , strip.text.y.left = element_text(angle = 0)
       # , strip.placement = "outside"
+      
     ) + 
     guides(color = "none")
   return(plt)
@@ -1482,16 +1486,135 @@ plt_list <- 1:length(area_nm_list) |>
 # combine
 scenario_maps <- cowplot::plot_grid(
   plotlist = plt_list #[1:4]
-  , ncol = 1
+  , ncol = 3
   , align = "hv"
 )
 # scenario_maps
 # plot_grid didn't work ;(
-plt_list
+plt_list[16]
+# plt_list
+```
+
+Make each plot individually by landscape
+
+```{r scenario-maps2}
+#########################################################################
+#########################################################################
+#########################################################################
+##################hack to align plots for ggmap
+ggmap_bbox_fn <- function(map, my_crs=3857) {
+    if (!inherits(map, "ggmap")) stop("map must be a ggmap object")
+    # Extract the bounding box (in lat/lon) from the ggmap to a numeric vector, 
+    # and set the names to what sf::st_bbox expects:
+    map_bbox <- setNames(unlist(attr(map, "bb")), c("ymin", "xmin", "ymax", "xmax"))
+    # Convert the bbox to an sf polygon, transform it to 3857, 
+    # and convert back to a bbox (convoluted, but it works)
+    bbox_3857 <- st_bbox(st_transform(st_as_sfc(st_bbox(map_bbox, crs = 4326)), my_crs))
+    # Overwrite the bbox of the ggmap object with the transformed coordinates 
+    attr(map, "bb")$ll.lat <- bbox_3857["ymin"]
+    attr(map, "bb")$ll.lon <- bbox_3857["xmin"]
+    attr(map, "bb")$ur.lat <- bbox_3857["ymax"]
+    attr(map, "bb")$ur.lon <- bbox_3857["xmax"]
+    map
+}
+plt_crs <- 3857
+#########################################################################
+#########################################################################
+#########################################################################
+
+area_nm_list <- sort(unique(constrained_by_scnro_ls$area_name))
+scenario_cnstrnt_map_fn <- function(row_n=1) {
+  # bounding box
+  bb_temp <- 
+    map_fs_temp |> 
+    dplyr::filter(
+      area_name == area_nm_list[row_n]
+    ) |> 
+    sf::st_union() |> 
+    sf::st_transform(crs=5070) |> 
+    sf::st_buffer(3000) |> 
+    sf::st_transform(crs=4326) |> # same as get_map return
+    sf::st_bbox()
+  # set bbox for get call
+  bbox_temp <- c(
+    bottom = bb_temp[[2]]
+    , top = bb_temp[[4]]
+    , right = bb_temp[[3]]
+    , left = bb_temp[[1]]
+  )
+  # get map
+  hey_ggmap <- ggmap::get_stamenmap(
+    bbox = bbox_temp
+    , zoom = 9
+    , maptype = "terrain" #"toner-hybrid" # "terrain"
+    , crop = T
+  )
+  ggmap(hey_ggmap)
+  # apply align function
+    hey_ggmap_aligned <- ggmap_bbox_fn(hey_ggmap, plt_crs) # Use the function
+  # plot
+  plt <- ggmap(hey_ggmap_aligned) + 
+    geom_sf(
+      data = map_fs_temp |>
+        dplyr::filter(
+          area_name == area_nm_list[row_n]
+        ) |>
+        sf::st_transform(crs=plt_crs)
+      , aes(fill = cnstrnt_class), lwd = 0.05
+      , inherit.aes = F
+      , alpha = 0.6
+    ) +
+    geom_sf(
+      data = wf_landscapes |> 
+        dplyr::filter(
+            area_name == area_nm_list[row_n]
+          ) |> 
+        sf::st_transform(crs=plt_crs)
+      , fill = NA, color = "black", lwd = 0.3
+      , inherit.aes = F
+    ) +
+    coord_sf(
+      expand = FALSE
+    ) +
+    facet_grid(
+      cols = vars(scenario_lab)
+      , labeller = label_wrap_gen(width = 35, multi_line = TRUE)
+      # , switch = "both"
+    ) +
+    scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
+    labs(
+      fill = "Level of\nConstraint"
+      , title = area_nm_list[row_n]
+    ) +
+    theme_light() +
+    theme(
+      legend.position = "bottom"
+      , legend.direction  = "horizontal"
+      , legend.title = element_text(size=7)
+      , legend.margin = margin(c(-10,0,0,0))
+      , plot.title = element_text(size = 11)
+      , strip.text = element_text(color = "black", face = "bold")
+      , axis.title = element_blank()
+      , axis.text = element_blank()
+      , axis.ticks = element_blank()
+    ) +
+    guides(
+      fill = guide_legend(reverse = T, override.aes = list(alpha = 0.9))
+    )
+  # return
+  return(plt)
+}
+# go through list of areas
+plt_list <- 1:length(area_nm_list) |> 
+  purrr::map(scenario_cnstrnt_map_fn)
+# scenario_maps
+plt_list[]
 ```
 
 
 ```{r, include=FALSE, eval=FALSE}
+# use tmap for small multiple maps????
+# !!!!!!!!!!!!!!!!!!!!!!!!NOPE! didn't figure out legend and facet label controls 
 library(tmap)
 tmap::tm_shape(map_fs_temp) +
   tmap::tm_polygons(

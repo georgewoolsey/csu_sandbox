@@ -113,3 +113,4 @@ reduction-treatable-area-table-3
 reduction-by-constraint-1
 tab:tot-ls-pa-tab
 distribution-of-fireshed-pa-constraint-1
+map-fireshed-project-areas-by-scenario-and-landscape
