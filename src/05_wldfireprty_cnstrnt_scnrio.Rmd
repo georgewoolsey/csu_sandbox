@@ -1521,9 +1521,45 @@ plt_crs <- 3857
 #########################################################################
 #########################################################################
 #########################################################################
-
 area_nm_list <- sort(unique(constrained_by_scnro_ls$area_name))
+# buffer for smaller areas
+if_smaller_ha_temp <- wf_landscapes |> 
+  dplyr::pull(hectares) |> 
+  quantile(0.45) |> 
+  purrr::pluck(1)
+
+# function to plot
 scenario_cnstrnt_map_fn <- function(row_n=1) {
+  # should zoom in?
+  zoom_level <- ifelse(
+    (wf_landscapes |> 
+      dplyr::filter(
+          area_name == area_nm_list[row_n]
+      ) |> 
+      dplyr::pull(hectares) |> 
+      purrr::pluck(1)
+      <= if_smaller_ha_temp
+    & area_nm_list[row_n]!="UT: Wasatch"
+    ) 
+    # | area_nm_list[row_n] %in% c("WA: Colville Northeast Washington Vision")
+    , 10
+    , 8
+  )
+  # should buffer extend?
+  buffer_box <- ifelse(
+    (wf_landscapes |> 
+      dplyr::filter(
+          area_name == area_nm_list[row_n]
+      ) |> 
+      dplyr::pull(hectares) |> 
+      purrr::pluck(1)
+      <= if_smaller_ha_temp
+    & area_nm_list[row_n]!="UT: Wasatch"
+    ) | area_nm_list[row_n] %in% c("WA: Colville Northeast Washington Vision")
+    , 15000
+    , 5000
+  )
+  
   # bounding box
   bb_temp <- 
     map_fs_temp |> 
@@ -1532,7 +1568,7 @@ scenario_cnstrnt_map_fn <- function(row_n=1) {
     ) |> 
     sf::st_union() |> 
     sf::st_transform(crs=5070) |> 
-    sf::st_buffer(3000) |> 
+    sf::st_buffer(buffer_box) |> 
     sf::st_transform(crs=4326) |> # same as get_map return
     sf::st_bbox()
   # set bbox for get call
@@ -1545,7 +1581,7 @@ scenario_cnstrnt_map_fn <- function(row_n=1) {
   # get map
   hey_ggmap <- ggmap::get_stamenmap(
     bbox = bbox_temp
-    , zoom = 9
+    , zoom = zoom_level
     , maptype = "terrain" #"toner-hybrid" # "terrain"
     , crop = T
   )
@@ -1597,6 +1633,7 @@ scenario_cnstrnt_map_fn <- function(row_n=1) {
       , axis.title = element_blank()
       , axis.text = element_blank()
       , axis.ticks = element_blank()
+      , plot.margin = unit(c(0,0,0,0),"cm")
     ) +
     guides(
       fill = guide_legend(reverse = T, override.aes = list(alpha = 0.9))
@@ -1609,6 +1646,10 @@ plt_list <- 1:length(area_nm_list) |>
   purrr::map(scenario_cnstrnt_map_fn)
 # scenario_maps
 plt_list[]
+
+####
+# area_nm_list
+# scenario_cnstrnt_map_fn(18)
 ```
 
 
@@ -3312,5 +3353,28 @@ constrained_by_scnro_ls_pa |>
   ) |> 
   dplyr::arrange(comp_13) |> 
   View()
+#####
+long_txt <- "priority landscape divided into fireshed project areas. Shadings indicate percentages of the total combined forest and shrubland acres that are available for mechanical treatment: high (85–100% constrained; 0 –15% available for mechanical treatment), medium (65–84% constrained; 16–35% available), and low (0–64% constrained; 36–100% available)."
+
+text_this_fn <- function(row_num) {
+  paste0(
+    "Figure A"
+    , row_num+1
+    , ". "
+    , wf_landscapes |> 
+      dplyr::arrange(area_name) |> 
+      dplyr::filter(dplyr::row_number()==row_num) |> 
+      dplyr::pull(name)
+    , " ("
+    , wf_landscapes |> 
+      dplyr::arrange(area_name) |> 
+      dplyr::filter(dplyr::row_number()==row_num) |> 
+      dplyr::pull(state)
+    , ") "
+    , long_txt
+  )
+}
+1:nrow(wf_landscapes) |> 
+  purrr::map(text_this_fn)
 ```
 
