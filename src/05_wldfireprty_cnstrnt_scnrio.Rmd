@@ -23,6 +23,7 @@ library(RColorBrewer)
 library(ggtext)
 library(mapview) #Interactive maps
 library(leafpop) #map html popup
+library(tidytext) # reorder within facets
 # spatial analysis
 library(sf)
 library(USAboundaries)
@@ -1527,7 +1528,12 @@ if_smaller_ha_temp <- wf_landscapes |>
   dplyr::pull(hectares) |> 
   quantile(0.45) |> 
   purrr::pluck(1)
-
+# create color palette
+cols_temp <- c(
+  "low constraint" = rev(RColorBrewer::brewer.pal(n=3,name="RdYlBu"))[1]
+  , "med. constraint" = rev(RColorBrewer::brewer.pal(n=3,name="RdYlBu"))[2]
+  , "high constraint" = rev(RColorBrewer::brewer.pal(n=3,name="RdYlBu"))[3]
+)
 # function to plot
 scenario_cnstrnt_map_fn <- function(row_n=1) {
   # should zoom in?
@@ -1617,7 +1623,7 @@ scenario_cnstrnt_map_fn <- function(row_n=1) {
       , labeller = label_wrap_gen(width = 35, multi_line = TRUE)
       # , switch = "both"
     ) +
-    scale_fill_brewer(type = "div", palette = "RdYlBu", direction = -1) +
+    scale_fill_manual(values = cols_temp) +
     labs(
       fill = "Level of\nConstraint"
       , title = area_nm_list[row_n]
@@ -1646,7 +1652,6 @@ plt_list <- 1:length(area_nm_list) |>
   purrr::map(scenario_cnstrnt_map_fn)
 # scenario_maps
 plt_list[]
-
 ####
 # area_nm_list
 # scenario_cnstrnt_map_fn(18)
@@ -2533,7 +2538,7 @@ ggplot(
   )
 ```
 
-```{r obj-vs-trtbl-plt2, fig.height=9, include=T, eval=T}
+```{r obj-vs-trtbl-plt2, fig.height=9, include=F, eval=F}
 # plot
 ggplot(
     data = constrained_by_scnro_ls_cnstrnt_temp |> 
@@ -2622,6 +2627,163 @@ ggplot(
   guides(
     fill = guide_legend(reverse = T, override.aes = list(alpha = 0.9))
   )
+```
+
+
+```{r obj-vs-trtbl-plt3, fig.height=9, include=T, eval=T}
+obj_trtbl_temp <-
+  constrained_by_scnro_ls_cnstrnt_temp |> 
+  dplyr::filter(cnstrnt_class!="high constraint") |> 
+  dplyr::left_join(
+    # aggregate by area_name, scenario_lab
+    constrained_by_scnro_ls_cnstrnt_temp |> 
+        dplyr::filter(cnstrnt_class!="high constraint") |> 
+        dplyr::group_by(area_name, scenario_id) |> 
+        dplyr::mutate(low=ifelse(cnstrnt_class=="low constraint",pct_treatable,0)) |> 
+        dplyr::summarise(
+          pct_treatable_lowmed = sum(pct_treatable)
+          , pct_treatable_low = sum(low)
+        ) |> 
+        dplyr::mutate(
+          treatment_objective = dplyr::case_when(
+              pct_treatable_low >= .2 ~ 1
+              , pct_treatable_lowmed >= .2 ~ 2
+              , TRUE ~ 3
+            ) |> 
+            factor(
+              levels = 1:3
+              , labels = c("mechanical alone","mechanical+fire","fire")
+              , ordered = T
+            )
+        ) |> 
+        dplyr::group_by(scenario_id) |> 
+        dplyr::arrange(scenario_id, treatment_objective
+                       , desc(pct_treatable_low), desc(pct_treatable_lowmed)
+        ) |> 
+        dplyr::mutate(sorting_rank = dplyr::row_number()) |> 
+        dplyr::ungroup()
+      , by = dplyr::join_by(area_name, scenario_id)
+  ) |> 
+  dplyr::ungroup() |> 
+  dplyr::mutate(
+    dplyr::across(
+      c(cnstrnt_class, scenario_lab)
+      , ~ forcats::fct_rev(.x)
+    )
+  ) 
+# plot
+obj_plt_fn <- function(scnum){
+plt <- ggplot(
+    data = obj_trtbl_temp |> dplyr::filter(scenario_id==scnum)
+    , mapping = aes(
+        x = pct_treatable
+        , y = reorder(area_name, desc(sorting_rank))
+      )
+  ) +
+  geom_rect(mapping = aes(xmin = 0.2, xmax=0.4, ymin = -Inf, ymax = Inf)
+    , fill = "gray77"
+    , alpha = 0.6
+  ) +
+  annotate("text"
+     , x = 0.42
+     , y = obj_trtbl_temp |> 
+          dplyr::filter(scenario_id == scnum & sorting_rank==max(obj_trtbl_temp$sorting_rank)) |> 
+          dplyr::pull(area_name) |> 
+          unique()
+     , label = "bold(objective)"
+     , size = 3, color = "gray65", parse = T
+    ) +
+  geom_col(
+    mapping = aes(fill = cnstrnt_class)
+    , color = NA, width = 0.7
+  ) +
+  geom_text(
+    mapping = aes(
+      group = cnstrnt_class
+      , label = scales::percent(
+          ifelse(pct_treatable<.06,NA,pct_treatable)
+          , accuracy = 1
+        )
+      # , fontface = "bold"
+    )
+    , position = position_stack(vjust = 0.5)
+    , color = "black", size = 2
+  ) +
+  # total
+  geom_text(
+    data = obj_trtbl_temp |> dplyr::filter(scenario_id==scnum) |> 
+        dplyr::group_by(area_name, scenario_id) |> 
+        dplyr::filter(dplyr::row_number()==1) |> 
+        dplyr::ungroup()
+    , mapping = aes(
+      x = pct_treatable_lowmed
+      , y = reorder(area_name, desc(sorting_rank))
+      , label = scales::percent(pct_treatable_lowmed, accuracy = 1) 
+      , color = treatment_objective
+      , fontface = "bold"
+    )
+    , size = 3
+    , hjust = -0.1
+    , show.legend = F
+  ) +
+  # facet_grid(
+  #   rows = vars(scenario_lab)
+  #   , labeller = label_wrap_gen(width = 35, multi_line = TRUE)
+  #   , scales = "free_y"
+  #   # , switch = "y"
+  # ) +
+  scale_fill_manual(values = RColorBrewer::brewer.pal(n=3,name="RdYlBu")[2:3]) +
+  scale_color_manual(values = c(
+    "mechanical alone"="darkcyan"
+    ,"mechanical+fire"="gray33"
+    , "fire"="orangered3")
+  ) +
+  # scale_x_continuous(expand = expansion(mult = c(0, .15)),labels = scales::percent_format()) +
+  scale_x_continuous(limits = c(0, .80),labels = scales::percent_format()) +
+  labs(
+    fill = "Level of\nConstraint"
+    , y = ""
+    , x = ""
+    , subtitle = obj_trtbl_temp |> dplyr::filter(scenario_id==scnum) |> 
+        dplyr::pull(scenario_lab) |> unique()
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "top"
+    , legend.direction  = "horizontal"
+    , legend.title = element_text(size=7)
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_blank()
+    , axis.ticks.x = element_blank()
+    , axis.text = element_text(size = 7)
+    , panel.grid.major.x = element_blank()
+    , panel.grid.minor.x = element_blank()
+    , strip.text = element_text(color = "black", face = "bold", size = 10)
+    , strip.background = element_rect(fill = "gray88")
+    # , strip.placement = "outside"
+    , plot.margin = unit(c(-.15,0,-5,0),"cm")
+    , plot.subtitle = element_text(vjust = -1,face="bold")
+  ) +
+  guides(
+    fill = guide_legend(reverse = T, override.aes = list(alpha = 0.9))
+  )
+return(plt)
+}
+cowplot::plot_grid(
+  obj_plt_fn(1) +
+    theme(
+      legend.position = c(0.86,0.82)
+      , legend.direction = "vertical"
+    )
+  , obj_plt_fn(2) +
+    theme(legend.position = "none")
+  , obj_plt_fn(3) +
+    labs(x = "Percent of Total High-Risk Area") +
+    theme(legend.position = "none")
+  , ncol = 1
+  , align = 'vh'
+)
+
 ```
 
 ```{r, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
@@ -3338,6 +3500,7 @@ constrained_by_scnro_ls_pa |>
   dplyr::group_by(area_name,scenario_id) |> 
   dplyr::mutate(
     pct = n/sum(n)
+    , tot = sum(n)
   ) |> 
   dplyr::filter(cnstrnt_class=="low constraint") |> 
   dplyr::select(-n) |> 
