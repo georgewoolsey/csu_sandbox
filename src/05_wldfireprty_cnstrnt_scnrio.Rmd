@@ -2685,7 +2685,7 @@ plt <- ggplot(
     , alpha = 0.6
   ) +
   annotate("text"
-     , x = 0.42
+     , x = 0.44
      , y = obj_trtbl_temp |> 
           dplyr::filter(scenario_id == scnum & sorting_rank==max(obj_trtbl_temp$sorting_rank)) |> 
           dplyr::pull(area_name) |> 
@@ -2761,7 +2761,7 @@ plt <- ggplot(
     , strip.text = element_text(color = "black", face = "bold", size = 10)
     , strip.background = element_rect(fill = "gray88")
     # , strip.placement = "outside"
-    , plot.margin = unit(c(-.15,0,-5,0),"cm")
+    , plot.margin = unit(c(-.15,0,-4,0),"cm")
     , plot.subtitle = element_text(vjust = -1,face="bold")
   ) +
   guides(
