@@ -3111,9 +3111,11 @@ gc()
 
 ## Landcover Class Area
 
-What is the landcover classification of the fireshed project area units? This [GEE script](https://code.earthengine.google.com/578bb6ba1f5c534bfd9f1b6a0c7d0541?noload=true) was used to calculate the area by NLCD landcover class.
+### Overall Landscape
 
-```{r nlcd-area-dta}
+What is the landcover classification of the area within the landscape boundary? This [GEE script](https://code.earthengine.google.com/578bb6ba1f5c534bfd9f1b6a0c7d0541?noload=true) was used to calculate the area by NLCD landcover class.
+
+```{r nlcd-area-ls}
 # nlcd class groups
 nlcd_reclass_df_temp <- data.frame(
     class_id = c(11,12,21,22,23,24,31,41,42,43,51,52,71,72,73,74,81,82,90,95) |> as.character()
@@ -3143,12 +3145,79 @@ nlcd_reclass_df_temp <- data.frame(
   dplyr::left_join(
     FedData::nlcd_colors() |> dplyr::rename(class_id=ID) |> dplyr::rename_with(tolower) |> dplyr::mutate_all(as.character)
     , by = dplyr::join_by(class_id)
-  ) |> 
-  dplyr::mutate(
-    class_label = factor(class_label) |> 
-      forcats::fct_relevel("Forest","Shrubland") |> 
-      forcats::fct_rev()
   )
+# load data by wf priority 
+wf_nlcd_area <- readr::read_csv("../data/wildfirepriority/wfpriority_nlcd_area.csv") |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::left_join(
+    wf_landscapes |> 
+      dplyr::select(name,state,area_name)
+    , by = dplyr::join_by(name,state)
+  ) |> 
+  tidyr::pivot_longer(
+    cols = tidyselect::starts_with("area_m2_nlcd_cl")
+    , names_to = "class_id"
+    , values_to = "area_m2"
+    , names_prefix = "area_m2_nlcd_cl_"
+    , values_drop_na = F
+  ) |> 
+  dplyr::left_join(
+    nlcd_reclass_df_temp
+    , by = dplyr::join_by(class_id)
+  )
+# get color palette
+nlcd_colors <- wf_nlcd_area |> 
+  dplyr::group_by(class_id,color,class_label) |> 
+  dplyr::summarise(sum_area = sum(area_m2,na.rm = T)) |> 
+  dplyr::arrange(class_label,desc(sum_area)) |> 
+  dplyr::group_by(class_label) |> 
+  dplyr::filter(dplyr::row_number()==1) |> 
+  dplyr::ungroup() |> 
+  dplyr::pull(color)
+# aggregate and plot
+wf_nlcd_area |> 
+  dplyr::group_by(area_name,class_label) |> 
+  dplyr::summarise(sum_area_ha = sum(area_m2,na.rm = F)/10000) |> 
+  dplyr::mutate(sum_area_ha = ifelse(is.na(sum_area_ha),0,sum_area_ha)) |> 
+  dplyr::group_by(area_name) |> 
+  dplyr::mutate(
+    pct_area = sum_area_ha/sum(sum_area_ha)
+    # , area_name = area_name |> forcats::fct_rev()
+  ) |>
+  dplyr::ungroup() |> 
+ggplot(
+    mapping = aes(x = pct_area, y = reorder(area_name, desc(area_name)), fill=class_label)
+  ) +
+  geom_col(width = 0.7, alpha=0.8) +
+  geom_text(
+    mapping = aes(
+      label = scales::percent(ifelse(pct_area>.03,pct_area,NA), accuracy = 1)
+    )
+    , position = position_stack(vjust = 0.5)
+    , color = "black", size = 3
+  ) +
+  scale_fill_manual(values = nlcd_colors) +
+  scale_x_continuous(labels = scales::percent_format()) +
+  labs(
+    fill = "NLCD\nCover\nType"
+    , y = ""
+    , x = "% Landscape Area"
+  ) +
+  theme_light() +
+  theme(
+    legend.position = "top" # c(0.9, 0.9)
+    , legend.title = element_text(size=9)
+    , axis.title = element_text(size=9)
+    , axis.text.x = element_text(size=7)
+  )
+  
+```
+
+### Fireshed Project Areas
+
+What is the landcover classification of the fireshed project area units? This [GEE script](https://code.earthengine.google.com/578bb6ba1f5c534bfd9f1b6a0c7d0541?noload=true) was used to calculate the area by NLCD landcover class.
+
+```{r nlcd-area-dta}
 # load nlcd cover data by fireshed project area
 nlcd_area_ls_pa <- 
   readr::read_csv("../data/wildfirepriority/wfpriority_fireshed_nlcd_area.csv") |> 
@@ -3176,20 +3245,9 @@ nlcd_area_ls_pa <-
     nlcd_reclass_df_temp
     , by = dplyr::join_by(class_id)
   )
-# get color palette
-nlcd_colors <- nlcd_area_ls_pa |> 
-  dplyr::group_by(class_id,color,class_label) |> 
-  dplyr::summarise(sum_area = sum(area_m2,na.rm = T)) |> 
-  dplyr::arrange(class_label,desc(sum_area)) |> 
-  dplyr::group_by(class_label) |> 
-  dplyr::filter(dplyr::row_number()==1) |> 
-  dplyr::ungroup() |> 
-  dplyr::pull(color)
 ```
 
-### NLCD Cover Type full Landscape
-
-```{r nlcd-area}
+```{r nlcd-area-pa-tot}
 # aggregate and plot
 nlcd_area_ls_pa |> 
   dplyr::group_by(area_name,class_label) |> 

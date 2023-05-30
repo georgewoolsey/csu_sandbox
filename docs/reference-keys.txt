@@ -114,3 +114,5 @@ reduction-by-constraint-1
 tab:tot-ls-pa-tab
 distribution-of-fireshed-pa-constraint-1
 map-fireshed-project-areas-by-scenario-and-landscape
+overall-landscape
+fireshed-project-areas-1
