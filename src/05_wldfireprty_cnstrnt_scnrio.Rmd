@@ -1093,6 +1093,7 @@ ggplot(
     fill = guide_legend(reverse = T, override.aes = list(alpha = 0.9))
   )
 ```
+
 ```{r ls-rdctn-plt1, fig.height=9, include=FALSE, eval=FALSE}
 # plot
 ggplot() +
@@ -3164,6 +3165,9 @@ wf_nlcd_area <- readr::read_csv("../data/wildfirepriority/wfpriority_nlcd_area.c
   dplyr::left_join(
     nlcd_reclass_df_temp
     , by = dplyr::join_by(class_id)
+  ) |> 
+  dplyr::mutate(
+    class_label = forcats::fct_relevel(class_label, c("Forest","Shrubland")) |> forcats::fct_rev()
   )
 # get color palette
 nlcd_colors <- wf_nlcd_area |> 
@@ -3209,6 +3213,9 @@ ggplot(
     , legend.title = element_text(size=9)
     , axis.title = element_text(size=9)
     , axis.text.x = element_text(size=7)
+  ) +
+  guides(
+    fill = guide_legend(reverse = T, override.aes = list(alpha = 0.9))
   )
   
 ```
@@ -3244,6 +3251,9 @@ nlcd_area_ls_pa <-
   dplyr::left_join(
     nlcd_reclass_df_temp
     , by = dplyr::join_by(class_id)
+  ) |> 
+  dplyr::mutate(
+    class_label = forcats::fct_relevel(class_label, c("Forest","Shrubland")) |> forcats::fct_rev()
   )
 ```
 
@@ -3281,6 +3291,9 @@ ggplot(
     , legend.title = element_text(size=9)
     , axis.title = element_text(size=9)
     , axis.text.x = element_text(size=7)
+  ) +
+  guides(
+    fill = guide_legend(reverse = T, override.aes = list(alpha = 0.9))
   )
 ```
 
@@ -3323,6 +3336,9 @@ ggplot(
     , legend.title = element_text(size=9)
     , axis.title = element_text(size=9)
     , axis.text.x = element_text(size=7)
+  ) +
+  guides(
+    fill = guide_legend(reverse = T, override.aes = list(alpha = 0.9))
   )
 ```
 
